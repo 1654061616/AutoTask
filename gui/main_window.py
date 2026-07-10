@@ -12,6 +12,8 @@ import sys
 import os
 import uuid
 
+from .step_editor import StepEditorDialog, STEP_TYPE_MAP
+
 class MainWindow(QMainWindow):
     flow_loaded = Signal(dict)
     step_selected = Signal(dict)
@@ -528,16 +530,25 @@ class MainWindow(QMainWindow):
             try:
                 steps_data = []
                 for row in range(self.step_table.rowCount()):
-                    step_type = self.step_table.item(row, 0).text() if self.step_table.item(row, 0) else ""
+                    type_item = self.step_table.item(row, 0)
+                    step_type = type_item.data(Qt.UserRole) if type_item else ""
+                    step_name = type_item.text() if type_item else ""
+                    
                     description = self.step_table.item(row, 1).text() if self.step_table.item(row, 1) else ""
-                    params = self.step_table.item(row, 2).text() if self.step_table.item(row, 2) else ""
-                    delay = self.step_table.item(row, 3).text() if self.step_table.item(row, 3) else "0"
+                    params_text = self.step_table.item(row, 2).text() if self.step_table.item(row, 2) else ""
+                    delay_text = self.step_table.item(row, 3).text() if self.step_table.item(row, 3) else "0"
+                    
+                    try:
+                        params = eval(params_text) if params_text else {}
+                    except:
+                        params = {}
                     
                     steps_data.append({
                         "type": step_type,
+                        "name": step_name,
                         "description": description,
                         "params": params,
-                        "delay": int(delay)
+                        "delay": int(delay_text)
                     })
                 
                 save_data = {
@@ -623,13 +634,28 @@ class MainWindow(QMainWindow):
             row = self.step_table.rowCount()
             self.step_table.insertRow(row)
             
-            type_item = QTableWidgetItem(step.get("type", ""))
-            desc_item = QTableWidgetItem(step.get("description", ""))
-            params_item = QTableWidgetItem(step.get("params", ""))
-            delay_item = QTableWidgetItem(str(step.get("delay", 0)))
+            step_type = step.get("type", "")
+            step_name = STEP_TYPE_MAP.get(step_type, step_type)
+            
+            description = step.get("description", "")
+            
+            params = step.get("params", {})
+            if isinstance(params, dict):
+                params_str = str(params)
+                delay = params.get("delay", 0)
+            else:
+                params_str = str(params)
+                delay = step.get("delay", 0)
+            
+            type_item = QTableWidgetItem(step_name)
+            desc_item = QTableWidgetItem(description)
+            params_item = QTableWidgetItem(params_str)
+            delay_item = QTableWidgetItem(str(delay))
             
             type_item.setTextAlignment(Qt.AlignCenter)
             delay_item.setTextAlignment(Qt.AlignCenter)
+            
+            type_item.setData(Qt.UserRole, step_type)
             
             self.step_table.setItem(row, 0, type_item)
             self.step_table.setItem(row, 1, desc_item)
@@ -639,19 +665,33 @@ class MainWindow(QMainWindow):
             self.apply_step_row_style(row)
     
     def apply_step_row_style(self, row):
-        step_type = self.step_table.item(row, 0).text() if self.step_table.item(row, 0) else ""
+        type_item = self.step_table.item(row, 0)
+        step_type = type_item.data(Qt.UserRole) if type_item else ""
         
         type_colors = {
-            "键盘热键": "#f8bbd9",
-            "鼠标点击": "#b3e5fc",
-            "文本输入": "#c8e6c9",
-            "等待": "#fff9c4",
-            "图片识别": "#e1bee7",
-            "OCR识别": "#ffcc80",
-            "窗口操作": "#b2dfdb",
-            "条件判断": "#ffcdd2",
-            "循环": "#e0e0e0",
-            "日志": "#f5f5f5"
+            "mouse_click": "#b3e5fc",
+            "mouse_move": "#b3e5fc",
+            "mouse_drag": "#b3e5fc",
+            "mouse_scroll": "#b3e5fc",
+            "keyboard_type": "#c8e6c9",
+            "keyboard_press": "#f8bbd9",
+            "keyboard_hotkey": "#f8bbd9",
+            "image_find": "#e1bee7",
+            "image_click": "#e1bee7",
+            "image_exists": "#e1bee7",
+            "window_find": "#b2dfdb",
+            "window_activate": "#b2dfdb",
+            "window_close": "#b2dfdb",
+            "window_position": "#b2dfdb",
+            "excel_read": "#ffcc80",
+            "wait": "#fff9c4",
+            "if_else": "#ffcdd2",
+            "loop": "#e0e0e0",
+            "log": "#f5f5f5",
+            "label": "#e0e0e0",
+            "goto": "#e0e0e0",
+            "set_variable": "#bbdefb",
+            "get_variable": "#bbdefb",
         }
         
         color = type_colors.get(step_type, "#ffffff")
@@ -662,34 +702,28 @@ class MainWindow(QMainWindow):
     
     @Slot()
     def on_add_step(self):
-        step_types = [
-            ("键盘热键", "键盘操作"),
-            ("鼠标点击", "鼠标操作"),
-            ("鼠标移动", "鼠标操作"),
-            ("文本输入", "文本操作"),
-            ("等待", "控制"),
-            ("图片识别", "图像"),
-            ("OCR识别", "图像"),
-            ("窗口操作", "窗口"),
-            ("条件判断", "控制"),
-            ("循环", "控制"),
-            ("日志", "控制")
-        ]
+        dialog = StepEditorDialog(parent=self)
+        dialog.setWindowTitle("添加步骤")
         
-        type_items = [t[0] for t in step_types]
-        step_type, ok = QInputDialog.getItem(self, "添加步骤", "选择步骤类型:", type_items, 0, False)
-        
-        if ok:
+        def on_step_saved(step_data):
             row = self.step_table.rowCount()
             self.step_table.insertRow(row)
             
-            type_item = QTableWidgetItem(step_type)
-            desc_item = QTableWidgetItem("")
-            params_item = QTableWidgetItem("")
-            delay_item = QTableWidgetItem("0")
+            step_type = step_data.get("type", "")
+            step_name = STEP_TYPE_MAP.get(step_type, step_type)
+            description = step_data.get("description", "")
+            params = step_data.get("params", {})
+            delay = params.get("delay", 0)
+            
+            type_item = QTableWidgetItem(step_name)
+            desc_item = QTableWidgetItem(description)
+            params_item = QTableWidgetItem(str(params))
+            delay_item = QTableWidgetItem(str(delay))
             
             type_item.setTextAlignment(Qt.AlignCenter)
             delay_item.setTextAlignment(Qt.AlignCenter)
+            
+            type_item.setData(Qt.UserRole, step_type)
             
             self.step_table.setItem(row, 0, type_item)
             self.step_table.setItem(row, 1, desc_item)
@@ -697,7 +731,10 @@ class MainWindow(QMainWindow):
             self.step_table.setItem(row, 3, delay_item)
             
             self.apply_step_row_style(row)
-            self.log_panel.append(f"添加步骤: {step_type}")
+            self.log_panel.append(f"添加步骤: {step_name}")
+        
+        dialog.step_saved.connect(on_step_saved)
+        dialog.exec()
     
     @Slot()
     def on_edit_step(self):
@@ -706,41 +743,53 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "编辑失败", "请先选择一个步骤")
             return
         
-        step_type = self.step_table.item(current_row, 0).text()
-        description = self.step_table.item(current_row, 1).text()
-        params = self.step_table.item(current_row, 2).text()
-        delay = self.step_table.item(current_row, 3).text()
+        type_item = self.step_table.item(current_row, 0)
+        step_type = type_item.data(Qt.UserRole) if type_item else ""
+        description = self.step_table.item(current_row, 1).text() if self.step_table.item(current_row, 1) else ""
+        params_text = self.step_table.item(current_row, 2).text() if self.step_table.item(current_row, 2) else ""
+        delay = self.step_table.item(current_row, 3).text() if self.step_table.item(current_row, 3) else "0"
         
-        dialog = QDialog(self)
+        try:
+            params = eval(params_text) if params_text else {}
+        except:
+            params = {}
+        
+        step_data = {
+            "type": step_type,
+            "description": description,
+            "params": params
+        }
+        
+        dialog = StepEditorDialog(step_type=step_type, step_data=step_data, parent=self)
         dialog.setWindowTitle("编辑步骤")
-        dialog.setModal(True)
         
-        layout = QFormLayout(dialog)
+        def on_step_saved(updated_data):
+            updated_type = updated_data.get("type", "")
+            updated_name = STEP_TYPE_MAP.get(updated_type, updated_type)
+            updated_desc = updated_data.get("description", "")
+            updated_params_dict = updated_data.get("params", {})
+            updated_params = str(updated_params_dict)
+            updated_delay = updated_params_dict.get("delay", 0)
+            
+            type_item = QTableWidgetItem(updated_name)
+            type_item.setTextAlignment(Qt.AlignCenter)
+            type_item.setData(Qt.UserRole, updated_type)
+            
+            desc_item = QTableWidgetItem(updated_desc)
+            params_item = QTableWidgetItem(updated_params)
+            delay_item = QTableWidgetItem(str(updated_delay))
+            delay_item.setTextAlignment(Qt.AlignCenter)
+            
+            self.step_table.setItem(current_row, 0, type_item)
+            self.step_table.setItem(current_row, 1, desc_item)
+            self.step_table.setItem(current_row, 2, params_item)
+            self.step_table.setItem(current_row, 3, delay_item)
+            
+            self.apply_step_row_style(current_row)
+            self.log_panel.append(f"编辑步骤: {updated_name}")
         
-        desc_edit = QLineEdit(description)
-        params_edit = QLineEdit(params)
-        delay_spin = QSpinBox()
-        delay_spin.setValue(int(delay))
-        
-        layout.addRow("描述:", desc_edit)
-        layout.addRow("参数:", params_edit)
-        layout.addRow("延时(秒):", delay_spin)
-        
-        btn_layout = QHBoxLayout()
-        ok_btn = QPushButton("确定")
-        cancel_btn = QPushButton("取消")
-        btn_layout.addWidget(ok_btn)
-        btn_layout.addWidget(cancel_btn)
-        layout.addRow(btn_layout)
-        
-        ok_btn.clicked.connect(dialog.accept)
-        cancel_btn.clicked.connect(dialog.reject)
-        
-        if dialog.exec() == QDialog.Accepted:
-            self.step_table.setItem(current_row, 1, QTableWidgetItem(desc_edit.text()))
-            self.step_table.setItem(current_row, 2, QTableWidgetItem(params_edit.text()))
-            self.step_table.setItem(current_row, 3, QTableWidgetItem(str(delay_spin.value())))
-            self.log_panel.append(f"编辑步骤: {step_type}")
+        dialog.step_saved.connect(on_step_saved)
+        dialog.exec()
     
     @Slot()
     def on_copy_step(self):

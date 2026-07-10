@@ -4,6 +4,7 @@ __pycache__/
 .Python
 .env
 .venv/
+.trae/
 venv/
 ENV/
 *.egg-info/
