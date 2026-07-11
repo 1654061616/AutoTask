@@ -1,53 +1,65 @@
 from PySide6.QtWidgets import QGraphicsPathItem
 from PySide6.QtCore import Qt, QPointF
-from PySide6.QtGui import QColor, QPen, QPainterPath
+from PySide6.QtGui import QColor, QPen, QBrush, QPainterPath
 
 class EdgeWidget(QGraphicsPathItem):
-    def __init__(self, source_port, target_port):
-        super().__init__()
+    def __init__(self, source_port, target_port, parent=None):
+        super().__init__(parent)
         self.source_port = source_port
         self.target_port = target_port
-        self.source_node = source_port.node
-        self.target_node = target_port.node
+        self.source_node = source_port.parent_node
+        self.target_node = target_port.parent_node
         
+        self._is_selected = False
         self._init_style()
-        self.update_path()
         
-        source_port.connected = True
-        if target_port:
-            target_port.connected = True
+        source_port.add_edge(self)
+        target_port.add_edge(self)
+        
+        self.update_path()
 
     def _init_style(self):
-        pen = QPen(QColor("#4caf50"), 2)
-        pen.setCapStyle(Qt.RoundCap)
-        pen.setJoinStyle(Qt.RoundJoin)
-        self.setPen(pen)
-        self.setZValue(-1)
+        self.setPen(QPen(QColor("#5a5aff"), 2))
+        self.setBrush(Qt.NoBrush)
+        self.setZValue(0)
 
     def update_path(self):
-        if self.source_port and self.target_port:
-            source_pos = self.source_port.get_global_pos()
-            target_pos = self.target_port.get_global_pos()
-            
-            dx = abs(target_pos.x() - source_pos.x())
-            control_offset = min(dx * 0.5, 100)
-            
-            path = QPainterPath()
-            path.moveTo(source_pos)
-            
-            mid_x = (source_pos.x() + target_pos.x()) / 2
-            path.cubicTo(
-                QPointF(mid_x, source_pos.y()),
-                QPointF(mid_x, target_pos.y()),
-                target_pos
-            )
-            
-            self.setPath(path)
+        start_point = self.source_port.get_global_pos()
+        end_point = self.target_port.get_global_pos()
+        
+        path = QPainterPath()
+        path.moveTo(start_point)
+        
+        dx = abs(end_point.x() - start_point.x())
+        control_offset = min(dx * 0.5, 100)
+        
+        control_point1 = QPointF(start_point.x() + control_offset, start_point.y())
+        control_point2 = QPointF(end_point.x() - control_offset, end_point.y())
+        
+        path.cubicTo(control_point1, control_point2, end_point)
+        self.setPath(path)
+
+    def set_selected(self, selected):
+        self._is_selected = selected
+        if selected:
+            self.setPen(QPen(QColor("#00d4ff"), 3))
+            self.setZValue(10)
+        else:
+            self.setPen(QPen(QColor("#5a5aff"), 2))
+            self.setZValue(0)
+
+    def mousePressEvent(self, event):
+        self.set_selected(True)
+        super().mousePressEvent(event)
 
     def to_json(self):
         return {
             "source_node": self.source_node.node_id,
-            "source_port": self.source_port.index,
+            "source_port": self.source_port.label,
             "target_node": self.target_node.node_id,
-            "target_port": self.target_port.index
+            "target_port": self.target_port.label
         }
+
+    def disconnect(self):
+        self.source_port.remove_edge(self)
+        self.target_port.remove_edge(self)
