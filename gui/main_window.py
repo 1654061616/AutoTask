@@ -6,13 +6,15 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                QSpinBox, QDoubleSpinBox, QCheckBox, 
                                QFileDialog, QMessageBox, QProgressBar,
                                QInputDialog, QHeaderView)
-from PySide6.QtGui import QIcon, QAction, QFont, QColor, QBrush
+from PySide6.QtGui import QIcon, QAction, QFont, QColor, QBrush, QPainter
 from PySide6.QtCore import Qt, QSize, Signal, Slot
 import sys
 import os
 import uuid
+import json
 
 from .step_editor import StepEditorDialog, STEP_TYPE_MAP
+from .node_graph import GraphScene, GraphView, NodeToolbar
 
 class MainWindow(QMainWindow):
     flow_loaded = Signal(dict)
@@ -153,83 +155,17 @@ class MainWindow(QMainWindow):
         
         left_layout.addWidget(self.log_group)
         
+        self.node_toolbar = NodeToolbar()
+        left_layout.addWidget(self.node_toolbar)
+        
         self.splitter.addWidget(left_panel)
         
         right_panel = QWidget()
         right_layout = QVBoxLayout(right_panel)
         
-        self.task_info_group = QGroupBox("任务信息")
-        task_info_layout = QFormLayout(self.task_info_group)
-        
-        self.task_name_edit = QLineEdit()
-        self.task_name_edit.setPlaceholderText("输入任务名称")
-        task_info_layout.addRow("任务名称:", self.task_name_edit)
-        
-        self.task_status_label = QLabel("已停止")
-        self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
-        task_info_layout.addRow("当前状态:", self.task_status_label)
-        
-        right_layout.addWidget(self.task_info_group)
-        
-        self.schedule_group = QGroupBox("定时设置")
-        schedule_layout = QGridLayout(self.schedule_group)
-        
-        self.execute_mode_combo = QComboBox()
-        self.execute_mode_combo.addItems(["定时执行", "循环执行", "手动执行"])
-        
-        self.execute_time_edit = QLineEdit("13:14:00")
-        
-        self.delay_spin = QSpinBox()
-        self.delay_spin.setRange(0, 10000)
-        self.delay_spin.setValue(1440)
-        
-        self.next_execute_label = QLabel("下次执行时间")
-        
-        schedule_layout.addWidget(QLabel("执行方式:"), 0, 0)
-        schedule_layout.addWidget(self.execute_mode_combo, 0, 1)
-        schedule_layout.addWidget(QLabel("执行时间:"), 0, 2)
-        schedule_layout.addWidget(self.execute_time_edit, 0, 3)
-        
-        schedule_layout.addWidget(QLabel("重复间隔:"), 1, 0)
-        schedule_layout.addWidget(self.delay_spin, 1, 1)
-        schedule_layout.addWidget(QLabel("分钟"), 1, 2)
-        
-        schedule_layout.addWidget(self.next_execute_label, 0, 4, 2, 1)
-        
-        right_layout.addWidget(self.schedule_group)
-        
-        self.step_table_group = QGroupBox("操作步骤配置")
-        step_table_layout = QVBoxLayout(self.step_table_group)
-        
-        self.step_table = QTableWidget()
-        self.step_table.setColumnCount(4)
-        self.step_table.setHorizontalHeaderLabels(["类型", "描述", "参数", "延时(秒)"])
-        self.step_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.step_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.step_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        self.step_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        step_table_layout.addWidget(self.step_table)
-        
-        step_btn_layout = QHBoxLayout()
-        self.add_step_btn = QPushButton("添加步骤(A)")
-        self.edit_step_btn = QPushButton("编辑步骤(E)")
-        self.copy_step_btn = QPushButton("复制步骤(C)")
-        self.delete_step_btn = QPushButton("删除步骤(Del)")
-        step_btn_layout.addWidget(self.add_step_btn)
-        step_btn_layout.addWidget(self.edit_step_btn)
-        step_btn_layout.addWidget(self.copy_step_btn)
-        step_btn_layout.addWidget(self.delete_step_btn)
-        
-        step_btn_layout.addStretch()
-        
-        self.move_up_btn = QPushButton("上移(↑)")
-        self.move_down_btn = QPushButton("下移(↓)")
-        step_btn_layout.addWidget(self.move_up_btn)
-        step_btn_layout.addWidget(self.move_down_btn)
-        
-        step_table_layout.addLayout(step_btn_layout)
-        
-        right_layout.addWidget(self.step_table_group)
+        self.graph_scene = GraphScene()
+        self.graph_view = GraphView(self.graph_scene)
+        right_layout.addWidget(self.graph_view)
         
         action_btn_layout = QHBoxLayout()
         action_btn_layout.addStretch()
@@ -251,7 +187,7 @@ class MainWindow(QMainWindow):
         right_layout.addLayout(action_btn_layout)
         
         self.splitter.addWidget(right_panel)
-        self.splitter.setSizes([400, 1000])
+        self.splitter.setSizes([350, 1050])
         
         main_layout.addWidget(self.splitter)
         
@@ -264,12 +200,7 @@ class MainWindow(QMainWindow):
         self.task_tree.itemClicked.connect(self.on_task_selected)
         self.task_tree.itemChanged.connect(self.on_task_name_changed)
         
-        self.add_step_btn.clicked.connect(self.on_add_step)
-        self.edit_step_btn.clicked.connect(self.on_edit_step)
-        self.copy_step_btn.clicked.connect(self.on_copy_step)
-        self.delete_step_btn.clicked.connect(self.on_delete_step)
-        self.move_up_btn.clicked.connect(self.on_move_up)
-        self.move_down_btn.clicked.connect(self.on_move_down)
+        self.node_toolbar.node_drag_started.connect(self.on_node_drag_started)
         
         self.start_task_btn.clicked.connect(self.on_run_flow)
         self.stop_task_btn.clicked.connect(self.on_stop_flow)
@@ -462,10 +393,7 @@ class MainWindow(QMainWindow):
                 self.task_tree.takeTopLevelItem(index)
                 self.status_label.setText(f"已删除任务: {task['name']}")
                 self.log_panel.append(f"删除任务: {task['name']}")
-                self.step_table.setRowCount(0)
-                self.task_name_edit.clear()
-                self.task_status_label.setText("已停止")
-                self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+                self.graph_scene.clear_all()
     
     @Slot(QTreeWidgetItem, int)
     def on_task_name_changed(self, item, column):
@@ -478,9 +406,6 @@ class MainWindow(QMainWindow):
                 item.setData(0, Qt.UserRole, task)
                 
                 self.log_panel.append(f"任务重命名: {old_name} -> {new_name}")
-                
-                if self.task_name_edit.text() == old_name:
-                    self.task_name_edit.setText(new_name)
     
     @Slot()
     def on_open_flow(self):
@@ -488,7 +413,6 @@ class MainWindow(QMainWindow):
             self, "打开任务文件", "", "JSON文件 (*.json)"
         )
         if file_path:
-            import json
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     flow_data = json.load(f)
@@ -498,12 +422,15 @@ class MainWindow(QMainWindow):
                     "id": flow_data.get("id", str(uuid.uuid4())[:8]),
                     "name": flow_name,
                     "status": "已停止",
-                    "steps": flow_data.get("steps", []),
+                    "nodes": flow_data.get("nodes", []),
+                    "edges": flow_data.get("edges", []),
                     "file_path": file_path
                 }
                 
                 self.add_task_to_tree(task)
                 self.task_tree.setCurrentItem(self.task_tree.topLevelItem(self.task_tree.topLevelItemCount() - 1))
+                
+                self.load_nodes_from_flow(flow_data)
                 
                 self.status_label.setText(f"打开任务: {flow_name}")
                 self.log_panel.append(f"打开任务: {flow_name}")
@@ -526,46 +453,25 @@ class MainWindow(QMainWindow):
             )
         
         if file_path:
-            import json
             try:
-                steps_data = []
-                for row in range(self.step_table.rowCount()):
-                    type_item = self.step_table.item(row, 0)
-                    step_type = type_item.data(Qt.UserRole) if type_item else ""
-                    step_name = type_item.text() if type_item else ""
-                    
-                    description = self.step_table.item(row, 1).text() if self.step_table.item(row, 1) else ""
-                    params_text = self.step_table.item(row, 2).text() if self.step_table.item(row, 2) else ""
-                    delay_text = self.step_table.item(row, 3).text() if self.step_table.item(row, 3) else "0"
-                    
-                    try:
-                        params = eval(params_text) if params_text else {}
-                    except:
-                        params = {}
-                    
-                    steps_data.append({
-                        "type": step_type,
-                        "name": step_name,
-                        "description": description,
-                        "params": params,
-                        "delay": int(delay_text)
-                    })
+                graph_data = self.graph_scene.to_json()
                 
                 save_data = {
                     "id": task.get("id", ""),
-                    "name": self.task_name_edit.text() or task.get("name", ""),
+                    "name": task.get("name", ""),
                     "version": "1.0",
                     "status": task.get("status", "已停止"),
-                    "steps": steps_data,
-                    "execute_mode": self.execute_mode_combo.currentText(),
-                    "execute_time": self.execute_time_edit.text(),
-                    "delay": self.delay_spin.value()
+                    "nodes": graph_data.get("nodes", []),
+                    "edges": graph_data.get("edges", []),
+                    "file_path": file_path
                 }
                 
                 with open(file_path, 'w', encoding='utf-8') as f:
                     json.dump(save_data, f, indent=2, ensure_ascii=False)
                 
                 task["file_path"] = file_path
+                task["nodes"] = save_data["nodes"]
+                task["edges"] = save_data["edges"]
                 current_item.setData(0, Qt.UserRole, task)
                 
                 self.status_label.setText(f"已保存: {os.path.basename(file_path)}")
@@ -616,16 +522,14 @@ class MainWindow(QMainWindow):
         task = item.data(0, Qt.UserRole)
         if task:
             self.current_flow = task
-            self.task_name_edit.setText(task.get("name", ""))
-            self.task_status_label.setText(task.get("status", "已停止"))
             
             status = task.get("status", "")
             if "执行中" in status:
-                self.task_status_label.setStyleSheet("color: #27ae60; font-weight: bold;")
+                pass
             else:
-                self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+                pass
             
-            self.load_steps_to_table(task.get("steps", []))
+            self.load_nodes_from_flow(task)
             self.log_panel.append(f"选择任务: {task['name']}")
     
     def load_steps_to_table(self, steps):
@@ -867,6 +771,37 @@ class MainWindow(QMainWindow):
     def on_clear_log(self):
         self.log_panel.clear()
         self.log_panel.append("日志已清空")
+    
+    @Slot(str)
+    def on_node_drag_started(self, node_type):
+        self.graph_scene.add_node(node_type, 100, 100)
+        self.log_panel.append(f"添加节点: {node_type}")
+    
+    def load_nodes_from_flow(self, flow_data):
+        self.graph_scene.clear_all()
+        
+        nodes = flow_data.get("nodes", [])
+        edges = flow_data.get("edges", [])
+        
+        node_map = {}
+        for node_data in nodes:
+            node = self.graph_scene.add_node(
+                node_data.get("type", "wait"),
+                node_data.get("x", 0),
+                node_data.get("y", 0),
+                node_data.get("config", {})
+            )
+            node.set_node_id(node_data.get("id", str(uuid.uuid4())))
+            node_map[node_data.get("id", "")] = node
+        
+        for edge_data in edges:
+            source_node = node_map.get(edge_data["source_node"])
+            target_node = node_map.get(edge_data["target_node"])
+            if source_node and target_node:
+                source_port = source_node.get_output_port(edge_data["source_port"])
+                target_port = target_node.get_input_port(edge_data["target_port"])
+                if source_port and target_port:
+                    self.graph_scene.add_edge(source_port, target_port)
     
     def add_log(self, message):
         self.log_panel.append(message)
