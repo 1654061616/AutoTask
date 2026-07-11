@@ -96,7 +96,10 @@ class NodeEditorDialog(QDialog):
                     self.graph_scene.add_edge(source_port, target_port)
 
     def _on_node_drag_started(self, node_type):
-        self.graph_scene.add_node(node_type, 100, 100)
+        node_count = len(self.graph_scene.nodes)
+        x = 100 + (node_count % 5) * 230
+        y = 100 + (node_count // 5) * 120
+        self.graph_scene.add_node(node_type, x, y)
 
     def get_graph_data(self):
         return self.graph_scene.to_json()
