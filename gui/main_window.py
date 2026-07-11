@@ -1,11 +1,11 @@
-from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                QPushButton, QToolBar, QStatusBar, QSplitter,
                                QTreeWidget, QTreeWidgetItem, QTableWidget,
-                               QTableWidgetItem, QTextEdit, QLabel, QComboBox, 
-                               QLineEdit, QGroupBox, QGridLayout, QFormLayout, 
-                               QSpinBox, QDoubleSpinBox, QCheckBox, 
+                               QTableWidgetItem, QTextEdit, QLabel, QComboBox,
+                               QLineEdit, QGroupBox, QGridLayout, QFormLayout,
+                               QSpinBox, QDoubleSpinBox, QCheckBox,
                                QFileDialog, QMessageBox, QProgressBar,
-                               QInputDialog, QHeaderView)
+                               QInputDialog, QHeaderView, QDialog, QApplication)
 from PySide6.QtGui import QIcon, QAction, QFont, QColor, QBrush, QPainter
 from PySide6.QtCore import Qt, QSize, Signal, Slot
 import sys
@@ -15,6 +15,7 @@ import json
 
 from .step_editor import StepEditorDialog, STEP_TYPE_MAP
 from .node_graph import GraphScene, GraphView, NodeToolbar
+from .node_editor_dialog import NodeEditorDialog
 
 class MainWindow(QMainWindow):
     flow_loaded = Signal(dict)
@@ -154,41 +155,87 @@ class MainWindow(QMainWindow):
         log_layout.addWidget(self.log_panel)
         
         left_layout.addWidget(self.log_group)
-        
-        self.node_toolbar = NodeToolbar()
-        left_layout.addWidget(self.node_toolbar)
-        
+
         self.splitter.addWidget(left_panel)
-        
+
         right_panel = QWidget()
         right_layout = QVBoxLayout(right_panel)
-        
+
+        self.task_info_group = QGroupBox("任务信息")
+        task_info_layout = QFormLayout(self.task_info_group)
+
+        self.task_name_edit = QLineEdit()
+        self.task_name_edit.setPlaceholderText("输入任务名称")
+        task_info_layout.addRow("任务名称:", self.task_name_edit)
+
+        self.task_status_label = QLabel("已停止")
+        self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+        task_info_layout.addRow("当前状态:", self.task_status_label)
+
+        right_layout.addWidget(self.task_info_group)
+
+        self.schedule_group = QGroupBox("定时设置")
+        schedule_layout = QGridLayout(self.schedule_group)
+
+        self.execute_mode_combo = QComboBox()
+        self.execute_mode_combo.addItems(["定时执行", "循环执行", "手动执行"])
+
+        self.execute_time_edit = QLineEdit("13:14:00")
+
+        self.delay_spin = QSpinBox()
+        self.delay_spin.setRange(0, 10000)
+        self.delay_spin.setValue(1440)
+
+        self.next_execute_label = QLabel("下次执行时间")
+
+        schedule_layout.addWidget(QLabel("执行方式:"), 0, 0)
+        schedule_layout.addWidget(self.execute_mode_combo, 0, 1)
+        schedule_layout.addWidget(QLabel("执行时间:"), 0, 2)
+        schedule_layout.addWidget(self.execute_time_edit, 0, 3)
+
+        schedule_layout.addWidget(QLabel("重复间隔:"), 1, 0)
+        schedule_layout.addWidget(self.delay_spin, 1, 1)
+        schedule_layout.addWidget(QLabel("分钟"), 1, 2)
+
+        schedule_layout.addWidget(self.next_execute_label, 0, 4, 2, 1)
+
+        right_layout.addWidget(self.schedule_group)
+
+        self.step_view_group = QGroupBox("执行步骤查看")
+        step_view_layout = QVBoxLayout(self.step_view_group)
+
         self.graph_scene = GraphScene()
         self.graph_view = GraphView(self.graph_scene)
-        right_layout.addWidget(self.graph_view)
-        
+        step_view_layout.addWidget(self.graph_view)
+
+        right_layout.addWidget(self.step_view_group)
+
         action_btn_layout = QHBoxLayout()
         action_btn_layout.addStretch()
-        
+
         self.start_task_btn = QPushButton("开始当前任务")
         self.start_task_btn.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold; padding: 8px 20px;")
-        
+
         self.stop_task_btn = QPushButton("停止当前任务")
         self.stop_task_btn.setStyleSheet("background-color: #e74c3c; color: white; font-weight: bold; padding: 8px 20px;")
-        
+
+        self.edit_steps_btn = QPushButton("编辑执行步骤")
+        self.edit_steps_btn.setStyleSheet("background-color: #3498db; color: white; font-weight: bold; padding: 8px 20px;")
+
         self.save_config_btn = QPushButton("保存配置")
         self.save_config_btn.setStyleSheet("background-color: #3498db; color: white; font-weight: bold; padding: 8px 20px;")
-        
+
         action_btn_layout.addWidget(self.start_task_btn)
         action_btn_layout.addWidget(self.stop_task_btn)
+        action_btn_layout.addWidget(self.edit_steps_btn)
         action_btn_layout.addStretch()
         action_btn_layout.addWidget(self.save_config_btn)
-        
+
         right_layout.addLayout(action_btn_layout)
-        
+
         self.splitter.addWidget(right_panel)
-        self.splitter.setSizes([350, 1050])
-        
+        self.splitter.setSizes([400, 1000])
+
         main_layout.addWidget(self.splitter)
         
         self.new_task_btn.clicked.connect(self.on_new_flow)
@@ -199,13 +246,12 @@ class MainWindow(QMainWindow):
         self.clear_log_btn.clicked.connect(self.on_clear_log)
         self.task_tree.itemClicked.connect(self.on_task_selected)
         self.task_tree.itemChanged.connect(self.on_task_name_changed)
-        
-        self.node_toolbar.node_drag_started.connect(self.on_node_drag_started)
-        
+
         self.start_task_btn.clicked.connect(self.on_run_flow)
         self.stop_task_btn.clicked.connect(self.on_stop_flow)
+        self.edit_steps_btn.clicked.connect(self.on_edit_steps)
         self.save_config_btn.clicked.connect(self.on_save_flow)
-        
+
         self.load_default_tasks()
     
     def load_default_tasks(self):
@@ -394,6 +440,9 @@ class MainWindow(QMainWindow):
                 self.status_label.setText(f"已删除任务: {task['name']}")
                 self.log_panel.append(f"删除任务: {task['name']}")
                 self.graph_scene.clear_all()
+                self.task_name_edit.clear()
+                self.task_status_label.setText("已停止")
+                self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
     
     @Slot(QTreeWidgetItem, int)
     def on_task_name_changed(self, item, column):
@@ -404,8 +453,11 @@ class MainWindow(QMainWindow):
                 new_name = item.text(0)
                 task["name"] = new_name
                 item.setData(0, Qt.UserRole, task)
-                
+
                 self.log_panel.append(f"任务重命名: {old_name} -> {new_name}")
+
+                if self.task_name_edit.text() == old_name:
+                    self.task_name_edit.setText(new_name)
     
     @Slot()
     def on_open_flow(self):
@@ -416,7 +468,7 @@ class MainWindow(QMainWindow):
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     flow_data = json.load(f)
-                
+
                 flow_name = flow_data.get("name", os.path.basename(file_path))
                 task = {
                     "id": flow_data.get("id", str(uuid.uuid4())[:8]),
@@ -424,18 +476,32 @@ class MainWindow(QMainWindow):
                     "status": "已停止",
                     "nodes": flow_data.get("nodes", []),
                     "edges": flow_data.get("edges", []),
+                    "execute_mode": flow_data.get("execute_mode", "手动执行"),
+                    "execute_time": flow_data.get("execute_time", ""),
+                    "delay": flow_data.get("delay", 0),
                     "file_path": file_path
                 }
-                
+
                 self.add_task_to_tree(task)
                 self.task_tree.setCurrentItem(self.task_tree.topLevelItem(self.task_tree.topLevelItemCount() - 1))
-                
+
+                self.task_name_edit.setText(flow_name)
                 self.load_nodes_from_flow(flow_data)
-                
+                self.load_schedule_settings(task)
+
                 self.status_label.setText(f"打开任务: {flow_name}")
                 self.log_panel.append(f"打开任务: {flow_name}")
             except Exception as e:
                 QMessageBox.warning(self, "打开失败", f"无法打开任务文件: {str(e)}")
+
+    def load_schedule_settings(self, task):
+        execute_mode = task.get("execute_mode", "手动执行")
+        index = self.execute_mode_combo.findText(execute_mode)
+        if index >= 0:
+            self.execute_mode_combo.setCurrentIndex(index)
+
+        self.execute_time_edit.setText(task.get("execute_time", "13:14:00"))
+        self.delay_spin.setValue(task.get("delay", 1440))
     
     @Slot()
     def on_save_flow(self):
@@ -443,37 +509,41 @@ class MainWindow(QMainWindow):
         if not current_item:
             QMessageBox.warning(self, "保存失败", "请先选择一个任务")
             return
-        
+
         task = current_item.data(0, Qt.UserRole)
         file_path = task.get("file_path")
-        
+
         if not file_path:
             file_path, _ = QFileDialog.getSaveFileName(
                 self, "保存任务文件", "", "JSON文件 (*.json)"
             )
-        
+
         if file_path:
             try:
                 graph_data = self.graph_scene.to_json()
-                
+
                 save_data = {
                     "id": task.get("id", ""),
-                    "name": task.get("name", ""),
+                    "name": self.task_name_edit.text() or task.get("name", ""),
                     "version": "1.0",
                     "status": task.get("status", "已停止"),
                     "nodes": graph_data.get("nodes", []),
                     "edges": graph_data.get("edges", []),
-                    "file_path": file_path
+                    "execute_mode": self.execute_mode_combo.currentText(),
+                    "execute_time": self.execute_time_edit.text(),
+                    "delay": self.delay_spin.value()
                 }
-                
+
                 with open(file_path, 'w', encoding='utf-8') as f:
                     json.dump(save_data, f, indent=2, ensure_ascii=False)
-                
+
                 task["file_path"] = file_path
+                task["name"] = save_data["name"]
                 task["nodes"] = save_data["nodes"]
                 task["edges"] = save_data["edges"]
+                current_item.setText(0, save_data["name"])
                 current_item.setData(0, Qt.UserRole, task)
-                
+
                 self.status_label.setText(f"已保存: {os.path.basename(file_path)}")
                 self.log_panel.append(f"保存任务: {save_data['name']}")
             except Exception as e:
@@ -522,14 +592,17 @@ class MainWindow(QMainWindow):
         task = item.data(0, Qt.UserRole)
         if task:
             self.current_flow = task
-            
+            self.task_name_edit.setText(task.get("name", ""))
+            self.task_status_label.setText(task.get("status", "已停止"))
+
             status = task.get("status", "")
             if "执行中" in status:
-                pass
+                self.task_status_label.setStyleSheet("color: #27ae60; font-weight: bold;")
             else:
-                pass
-            
+                self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+
             self.load_nodes_from_flow(task)
+            self.load_schedule_settings(task)
             self.log_panel.append(f"选择任务: {task['name']}")
     
     def load_steps_to_table(self, steps):
@@ -772,10 +845,24 @@ class MainWindow(QMainWindow):
         self.log_panel.clear()
         self.log_panel.append("日志已清空")
     
-    @Slot(str)
-    def on_node_drag_started(self, node_type):
-        self.graph_scene.add_node(node_type, 100, 100)
-        self.log_panel.append(f"添加节点: {node_type}")
+    @Slot()
+    def on_edit_steps(self):
+        if not self.current_flow:
+            QMessageBox.warning(self, "编辑失败", "请先选择一个任务")
+            return
+
+        dialog = NodeEditorDialog(self.current_flow, parent=self)
+        if dialog.exec() == QDialog.Accepted:
+            graph_data = dialog.get_graph_data()
+            self.current_flow["nodes"] = graph_data.get("nodes", [])
+            self.current_flow["edges"] = graph_data.get("edges", [])
+
+            current_item = self.task_tree.currentItem()
+            if current_item:
+                current_item.setData(0, Qt.UserRole, self.current_flow)
+
+            self.load_nodes_from_flow(self.current_flow)
+            self.log_panel.append(f"已更新执行步骤: {self.current_flow['name']}")
     
     def load_nodes_from_flow(self, flow_data):
         self.graph_scene.clear_all()
@@ -812,8 +899,6 @@ class MainWindow(QMainWindow):
     def update_progress(self, value):
         self.progress_bar.show()
         self.progress_bar.setValue(value)
-
-from PySide6.QtWidgets import QDialog
 
 def main():
     app = QApplication(sys.argv)
