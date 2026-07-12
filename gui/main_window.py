@@ -461,8 +461,11 @@ class MainWindow(QMainWindow):
     
     @Slot()
     def on_open_flow(self):
+        resources_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources")
+        if not os.path.exists(resources_dir):
+            os.makedirs(resources_dir)
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "打开任务文件", "", "JSON文件 (*.json)"
+            self, "打开任务文件", resources_dir, "JSON文件 (*.json)"
         )
         if file_path:
             try:
@@ -514,8 +517,13 @@ class MainWindow(QMainWindow):
         file_path = task.get("file_path")
 
         if not file_path:
+            resources_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources")
+            if not os.path.exists(resources_dir):
+                os.makedirs(resources_dir)
+            default_name = self.task_name_edit.text() or task.get("name", "未命名任务")
+            default_path = os.path.join(resources_dir, f"{default_name}.json")
             file_path, _ = QFileDialog.getSaveFileName(
-                self, "保存任务文件", "", "JSON文件 (*.json)"
+                self, "保存任务文件", default_path, "JSON文件 (*.json)"
             )
 
         if file_path:

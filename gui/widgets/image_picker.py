@@ -78,8 +78,11 @@ class ImagePicker(QWidget):
         layout.addLayout(info_layout)
 
     def _browse_image(self):
+        image_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "resources", "image")
+        if not os.path.exists(image_dir):
+            os.makedirs(image_dir)
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "选择图片", "", 
+            self, "选择图片", image_dir, 
             "图片文件 (*.png *.jpg *.jpeg *.bmp *.gif);;所有文件 (*)"
         )
         if file_path:
@@ -96,19 +99,17 @@ class ImagePicker(QWidget):
                 monitor = sct.monitors[0]
                 screenshot = sct.grab(monitor)
                 
-                temp_dir = os.path.join(os.path.expanduser("~"), ".autoflow", "temp")
-                os.makedirs(temp_dir, exist_ok=True)
+                image_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "resources", "image")
+                os.makedirs(image_dir, exist_ok=True)
                 
-                import tempfile
-                temp_file = tempfile.NamedTemporaryFile(
-                    suffix=".png", dir=temp_dir, delete=False
-                )
-                temp_path = temp_file.name
+                import time
+                timestamp = int(time.time())
+                screenshot_path = os.path.join(image_dir, f"screenshot_{timestamp}.png")
                 
                 img = PILImage.frombytes("RGB", screenshot.size, screenshot.bgra, "raw", "BGRX")
-                img.save(temp_path, "PNG")
+                img.save(screenshot_path, "PNG")
                 
-                self.set_image_path(temp_path)
+                self.set_image_path(screenshot_path)
                 
         except Exception as e:
             QMessageBox.warning(self, "截图失败", f"无法截取屏幕: {str(e)}")

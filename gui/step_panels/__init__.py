@@ -1,3 +1,4 @@
+import os
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QLineEdit,
                                QTextEdit, QComboBox, QCheckBox, QRadioButton,
@@ -350,7 +351,12 @@ class StepConfigPanel(QWidget):
         """)
 
         def browse_file():
-            file_path, _ = QFileDialog.getOpenFileName(self, "选择文件", "", file_filter)
+            start_dir = ""
+            if "图片" in file_filter or "png" in file_filter.lower() or "jpg" in file_filter.lower():
+                image_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources", "image")
+                if os.path.exists(image_dir):
+                    start_dir = image_dir
+            file_path, _ = QFileDialog.getOpenFileName(self, "选择文件", start_dir, file_filter)
             if file_path:
                 line_edit.setText(file_path)
 
