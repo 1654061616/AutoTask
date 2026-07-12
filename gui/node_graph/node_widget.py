@@ -42,20 +42,24 @@ class NodeWidget(QGraphicsWidget):
         self.body = QGraphicsRectItem(0, 0, self.node_width, self.node_height, self)
         self.body.setBrush(QBrush(QColor("#2a2a4a")))
         self.body.setPen(QPen(QColor("#4a4a6e"), 1))
+        self.body.setZValue(0)
 
         self.header = QGraphicsRectItem(0, 0, self.node_width, 30, self)
         self.header.setBrush(QBrush(QColor(node_info["color"])))
         self.header.setPen(QPen(QColor(node_info["color"]), 1))
+        self.header.setZValue(1)
 
         self.title = QGraphicsTextItem(f"{node_info['icon']} {node_info['name']}", self)
         self.title.setDefaultTextColor(QColor("#ffffff"))
         self.title.setFont(QFont("Arial", 12, QFont.Bold))
         self.title.setPos(10, 5)
+        self.title.setZValue(2)
 
         self.param_text = QGraphicsTextItem(self._format_params(), self)
         self.param_text.setDefaultTextColor(QColor("#aaa"))
         self.param_text.setFont(QFont("Arial", 10))
         self.param_text.setPos(10, 35)
+        self.param_text.setZValue(2)
 
     def _create_ports(self):
         if self.node_type != "start":
@@ -114,10 +118,8 @@ class NodeWidget(QGraphicsWidget):
         self._is_selected = selected
         if selected:
             self.body.setPen(QPen(QColor("#00d4ff"), 2))
-            self.body.setZValue(5)
         else:
             self.body.setPen(QPen(QColor("#4a4a6e"), 1))
-            self.body.setZValue(1)
 
     def boundingRect(self):
         return QRectF(0, 0, self.node_width, self.node_height)
