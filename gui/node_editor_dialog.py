@@ -1,9 +1,11 @@
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
-                               QLabel, QSplitter, QWidget)
+                               QLabel, QSplitter, QWidget, QStackedWidget,
+                               QScrollArea)
 from PySide6.QtCore import Qt, Signal
 import uuid
 
 from .node_graph import GraphScene, GraphView, NodeToolbar
+from .step_panels import PANEL_MAP, get_panel_class
 
 
 class NodeEditorDialog(QDialog):
@@ -12,6 +14,8 @@ class NodeEditorDialog(QDialog):
     def __init__(self, flow_data=None, parent=None):
         super().__init__(parent)
         self.flow_data = flow_data or {}
+        self._selected_node = None
+        self._current_panel = None
         self._init_ui()
         self._load_data()
 
@@ -19,7 +23,7 @@ class NodeEditorDialog(QDialog):
         task_name = self.flow_data.get("name", "未命名任务")
         self.setWindowTitle(f"节点编辑器 - {task_name}")
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.resize(1200, 800)
+        self.resize(1400, 800)
 
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(5, 5, 5, 5)
@@ -28,14 +32,19 @@ class NodeEditorDialog(QDialog):
         splitter = QSplitter(Qt.Horizontal)
 
         self.node_toolbar = NodeToolbar()
-        self.node_toolbar.setFixedWidth(200)
+        self.node_toolbar.setFixedWidth(180)
         splitter.addWidget(self.node_toolbar)
 
         self.graph_scene = GraphScene()
         self.graph_view = GraphView(self.graph_scene)
         splitter.addWidget(self.graph_view)
 
-        splitter.setSizes([200, 1000])
+        self.config_panel = QWidget()
+        self.config_panel.setFixedWidth(320)
+        self._init_config_panel()
+        splitter.addWidget(self.config_panel)
+
+        splitter.setSizes([180, 900, 320])
 
         main_layout.addWidget(splitter)
 
@@ -69,6 +78,143 @@ class NodeEditorDialog(QDialog):
             }
         """)
 
+    def _init_config_panel(self):
+        layout = QVBoxLayout(self.config_panel)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(8)
+
+        self.title_label = QLabel("节点配置")
+        self.title_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #333;
+                padding-bottom: 8px;
+                border-bottom: 2px solid #27ae60;
+            }
+        """)
+        layout.addWidget(self.title_label)
+
+        self.empty_label = QLabel("请点击节点查看配置")
+        self.empty_label.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                color: #999;
+                text-align: center;
+                padding: 40px 20px;
+            }
+        """)
+        layout.addWidget(self.empty_label)
+
+        self.panel_container = QStackedWidget()
+        layout.addWidget(self.panel_container)
+
+        layout.addStretch()
+
+        self.save_btn = QPushButton("保存配置")
+        self.save_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3498db;
+                color: white;
+                font-weight: bold;
+                padding: 6px 20px;
+                border-radius: 4px;
+                border: none;
+            }
+            QPushButton:hover {
+                background-color: #2980b9;
+            }
+            QPushButton:disabled {
+                background-color: #bdc3c7;
+            }
+        """)
+        self.save_btn.clicked.connect(self._on_save_config)
+        self.save_btn.setEnabled(False)
+        layout.addWidget(self.save_btn)
+
+        self._setup_node_selection()
+
+    def _setup_node_selection(self):
+        self.graph_scene.selectionChanged.connect(self._on_selection_changed)
+
+    def _on_selection_changed(self):
+        selected_nodes = self.graph_scene.get_selected_nodes()
+        if selected_nodes:
+            self._selected_node = selected_nodes[0]
+            self._show_node_config(self._selected_node)
+        else:
+            self._selected_node = None
+            self._clear_config()
+
+    def _show_node_config(self, node):
+        self.empty_label.hide()
+
+        panel_class = get_panel_class(node.node_type)
+        if panel_class:
+            if self._current_panel:
+                self.panel_container.removeWidget(self._current_panel)
+                self._current_panel.deleteLater()
+
+            self._current_panel = panel_class()
+            self._current_panel.set_config(node.config)
+
+            scroll_area = QScrollArea()
+            scroll_area.setWidget(self._current_panel)
+            scroll_area.setWidgetResizable(True)
+            scroll_area.setStyleSheet("""
+                QScrollArea {
+                    border: none;
+                }
+            """)
+
+            self.panel_container.addWidget(scroll_area)
+            self.panel_container.setCurrentWidget(scroll_area)
+
+            self.title_label.setText(f"节点配置 - {node.node_type}")
+            self.save_btn.setEnabled(True)
+        else:
+            self._show_unsupported_message(node)
+
+    def _show_unsupported_message(self, node):
+        if self._current_panel:
+            self.panel_container.removeWidget(self._current_panel)
+            self._current_panel.deleteLater()
+
+        msg_label = QLabel(f"节点类型 '{node.node_type}' 暂无配置面板")
+        msg_label.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                color: #e74c3c;
+                text-align: center;
+                padding: 40px 20px;
+            }
+        """)
+        self._current_panel = msg_label
+        self.panel_container.addWidget(msg_label)
+        self.panel_container.setCurrentWidget(msg_label)
+
+        self.title_label.setText(f"节点配置 - {node.node_type}")
+        self.save_btn.setEnabled(False)
+
+    def _clear_config(self):
+        self.empty_label.show()
+
+        if self._current_panel:
+            self.panel_container.removeWidget(self._current_panel)
+            self._current_panel.deleteLater()
+            self._current_panel = None
+
+        self.title_label.setText("节点配置")
+        self.save_btn.setEnabled(False)
+
+    def _on_save_config(self):
+        if self._selected_node and self._current_panel:
+            try:
+                config = self._current_panel.get_config()
+                self._selected_node.update_params(config)
+            except Exception as e:
+                print(f"保存配置失败: {e}")
+
     def _load_data(self):
         self.graph_scene.clear_all()
 
@@ -99,7 +245,9 @@ class NodeEditorDialog(QDialog):
         node_count = len(self.graph_scene.nodes)
         x = 100 + (node_count % 5) * 230
         y = 100 + (node_count // 5) * 120
-        self.graph_scene.add_node(node_type, x, y)
+        node = self.graph_scene.add_node(node_type, x, y)
+        self.graph_scene.clearSelection()
+        node.setSelected(True)
 
     def get_graph_data(self):
         return self.graph_scene.to_json()
