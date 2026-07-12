@@ -48,29 +48,7 @@ class NodeEditorDialog(QDialog):
 
         main_layout.addWidget(splitter)
 
-        btn_layout = QHBoxLayout()
-        btn_layout.addStretch()
-
-        self.ok_btn = QPushButton("确定")
-        self.ok_btn.setStyleSheet(
-            "background-color: #27ae60; color: white; "
-            "font-weight: bold; padding: 8px 30px; border-radius: 4px;"
-        )
-
-        self.cancel_btn = QPushButton("取消")
-        self.cancel_btn.setStyleSheet(
-            "background-color: #e74c3c; color: white; "
-            "font-weight: bold; padding: 8px 30px; border-radius: 4px;"
-        )
-
-        btn_layout.addWidget(self.ok_btn)
-        btn_layout.addWidget(self.cancel_btn)
-
-        main_layout.addLayout(btn_layout)
-
         self.node_toolbar.node_drag_started.connect(self._on_node_drag_started)
-        self.ok_btn.clicked.connect(self.accept)
-        self.cancel_btn.clicked.connect(self.reject)
 
         self.setStyleSheet("""
             QDialog {
@@ -132,7 +110,44 @@ class NodeEditorDialog(QDialog):
         self.save_btn.setEnabled(False)
         layout.addWidget(self.save_btn)
 
+        layout.addStretch()
+
+        self.ok_btn = QPushButton("确定")
+        self.ok_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #27ae60;
+                color: white;
+                font-weight: bold;
+                padding: 8px 30px;
+                border-radius: 4px;
+                border: none;
+            }
+            QPushButton:hover {
+                background-color: #2ecc71;
+            }
+        """)
+        layout.addWidget(self.ok_btn)
+
+        self.cancel_btn = QPushButton("取消")
+        self.cancel_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #e74c3c;
+                color: white;
+                font-weight: bold;
+                padding: 8px 30px;
+                border-radius: 4px;
+                border: none;
+            }
+            QPushButton:hover {
+                background-color: #c0392b;
+            }
+        """)
+        layout.addWidget(self.cancel_btn)
+
         self._setup_node_selection()
+
+        self.ok_btn.clicked.connect(self.accept)
+        self.cancel_btn.clicked.connect(self.reject)
 
     def _setup_node_selection(self):
         self.graph_scene.selectionChanged.connect(self._on_selection_changed)
