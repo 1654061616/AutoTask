@@ -12,8 +12,9 @@ class GraphScene(QGraphicsScene):
         self.grid_size = 20
         self._init_style()
 
-        self._dragging_port = None
-        self._temp_edge = None
+        # 连线状态
+        self._connecting = False
+        self._source_port = None
         self._temp_edge_item = None
 
     def _init_style(self):
@@ -72,20 +73,61 @@ class GraphScene(QGraphicsScene):
 
     def remove_edge(self, edge):
         if edge in self.edges:
+            edge.disconnect()
             self.removeItem(edge)
             self.edges.remove(edge)
 
     def _on_port_clicked(self, port):
-        self._dragging_port = port
+        """端口被点击时的处理"""
+        if not self._connecting:
+            # 开始连线
+            self._start_connection(port)
+        else:
+            # 完成连线
+            self._finish_connection(port)
+
+    def _start_connection(self, port):
+        """开始连线"""
+        self._connecting = True
+        self._source_port = port
         self._temp_edge_item = self.addPath(QPainterPath())
         self._temp_edge_item.setPen(QPen(QColor("#00d4ff"), 2, Qt.DashLine))
-        self._temp_edge_item.setZValue(5)
+        self._temp_edge_item.setZValue(100)
+
+        port.set_highlighted(True)
+
+    def _finish_connection(self, target_port):
+        """完成连线"""
+        if self._source_port and target_port:
+            if self._source_port.can_connect(target_port):
+                if self._source_port.port_type == "out":
+                    self.add_edge(self._source_port, target_port)
+                else:
+                    self.add_edge(target_port, self._source_port)
+
+        self._cancel_connection()
+
+    def _cancel_connection(self):
+        """取消连线"""
+        if self._temp_edge_item:
+            self.removeItem(self._temp_edge_item)
+            self._temp_edge_item = None
+
+        if self._source_port:
+            self._source_port.set_highlighted(False)
+
+        for node in self.nodes:
+            for port in node.input_ports + node.output_ports:
+                port.set_highlighted(False)
+
+        self._connecting = False
+        self._source_port = None
 
     def mouseMoveEvent(self, event):
         super().mouseMoveEvent(event)
 
-        if self._dragging_port:
-            start_point = self._dragging_port.get_global_pos()
+        if self._connecting and self._source_port and self._temp_edge_item:
+            start_point = self._source_port.get_global_pos()
             end_point = event.scenePos()
 
             path = QPainterPath()
@@ -100,47 +142,36 @@ class GraphScene(QGraphicsScene):
             path.cubicTo(control_point1, control_point2, end_point)
             self._temp_edge_item.setPath(path)
 
+            # 高亮可连接的端口
             for node in self.nodes:
                 for port in node.input_ports + node.output_ports:
-                    if port.can_connect(self._dragging_port):
+                    if port is self._source_port:
+                        continue
+                    if port.can_connect(self._source_port):
                         port.set_highlighted(True)
                     else:
                         port.set_highlighted(False)
-        else:
-            for node in self.nodes:
-                for port in node.input_ports + node.output_ports:
-                    port.set_highlighted(False)
 
-    def mouseReleaseEvent(self, event):
-        super().mouseReleaseEvent(event)
+    def mousePressEvent(self, event):
+        """点击空白处取消连线"""
+        super().mousePressEvent(event)
 
-        if self._dragging_port:
+        if self._connecting:
+            # 检测点击位置是否在端口上
             items_at_pos = self.items(event.scenePos())
-
-            target_port = None
+            from .port_widget import PortWidget
+            clicked_port = None
             for item in items_at_pos:
-                from .port_widget import PortWidget
                 if isinstance(item, PortWidget):
-                    target_port = item
+                    clicked_port = item
                     break
 
-            if target_port and self._dragging_port.can_connect(target_port):
-                if self._dragging_port.port_type == "out":
-                    self.add_edge(self._dragging_port, target_port)
-                else:
-                    self.add_edge(target_port, self._dragging_port)
-
-            if self._temp_edge_item:
-                self.removeItem(self._temp_edge_item)
-                self._temp_edge_item = None
-
-            for node in self.nodes:
-                for port in node.input_ports + node.output_ports:
-                    port.set_highlighted(False)
-
-            self._dragging_port = None
+            if clicked_port is None:
+                # 点击空白处，取消连线
+                self._cancel_connection()
 
     def clear_all(self):
+        self._cancel_connection()
         for edge in self.edges[:]:
             self.remove_edge(edge)
         for node in self.nodes[:]:
