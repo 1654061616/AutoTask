@@ -257,7 +257,7 @@ class IfElsePanel(StepConfigPanel):
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setPlaceholderText("选择图片")
         self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         image_path_layout.addWidget(self.image_path_edit)
@@ -613,7 +613,7 @@ class LogPanel(StepConfigPanel):
         self.file_path_edit = QLineEdit()
         self.file_path_edit.setPlaceholderText("日志文件路径")
         self.file_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         file_layout.addWidget(self.file_path_edit)

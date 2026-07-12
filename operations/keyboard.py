@@ -21,8 +21,11 @@ class KeyboardOperations:
             if random.random() < 0.05:
                 time.sleep(random.uniform(0.1, 0.3))
     
-    def press(self, key: str):
-        pyautogui.press(key)
+    def press(self, key: str, presses: int = 1):
+        for _ in range(presses):
+            pyautogui.press(key)
+            if presses > 1:
+                time.sleep(0.1)
     
     def hotkey(self, *keys):
         pyautogui.hotkey(*keys)

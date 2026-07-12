@@ -24,7 +24,7 @@ class ImageFindPanel(StepConfigPanel):
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         browse_btn = QPushButton("浏览")
@@ -52,9 +52,6 @@ class ImageFindPanel(StepConfigPanel):
                 border: 1px dashed #ddd;
                 border-radius: 4px;
                 min-height: 120px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
             }
         """)
         self.preview_label.setAlignment(Qt.AlignCenter)
@@ -175,7 +172,7 @@ class ImageClickPanel(StepConfigPanel):
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         browse_btn = QPushButton("浏览")
@@ -382,7 +379,7 @@ class ImageExistsPanel(StepConfigPanel):
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         browse_btn = QPushButton("浏览")
@@ -436,7 +433,7 @@ class ImageExistsPanel(StepConfigPanel):
         self.jump_mark_edit = QLineEdit()
         self.jump_mark_edit.setPlaceholderText("标记名称")
         self.jump_mark_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         jump_layout.addWidget(self.jump_mark_edit)

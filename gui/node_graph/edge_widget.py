@@ -13,6 +13,8 @@ class EdgeWidget(QGraphicsPathItem):
         self._is_selected = False
         self._init_style()
         
+        self.setFlag(QGraphicsPathItem.ItemIsSelectable, True)
+        
         source_port.add_edge(self)
         target_port.add_edge(self)
         
@@ -24,20 +26,25 @@ class EdgeWidget(QGraphicsPathItem):
         self.setZValue(0)
 
     def update_path(self):
-        start_point = self.source_port.get_global_pos()
-        end_point = self.target_port.get_global_pos()
-        
-        path = QPainterPath()
-        path.moveTo(start_point)
-        
-        dx = abs(end_point.x() - start_point.x())
-        control_offset = min(dx * 0.5, 100)
-        
-        control_point1 = QPointF(start_point.x() + control_offset, start_point.y())
-        control_point2 = QPointF(end_point.x() - control_offset, end_point.y())
-        
-        path.cubicTo(control_point1, control_point2, end_point)
-        self.setPath(path)
+        try:
+            if not hasattr(self, 'source_port') or not hasattr(self, 'target_port'):
+                return
+            start_point = self.source_port.get_global_pos()
+            end_point = self.target_port.get_global_pos()
+            
+            path = QPainterPath()
+            path.moveTo(start_point)
+            
+            dx = abs(end_point.x() - start_point.x())
+            control_offset = min(dx * 0.5, 100)
+            
+            control_point1 = QPointF(start_point.x() + control_offset, start_point.y())
+            control_point2 = QPointF(end_point.x() - control_offset, end_point.y())
+            
+            path.cubicTo(control_point1, control_point2, end_point)
+            self.setPath(path)
+        except Exception:
+            pass
 
     def set_selected(self, selected):
         self._is_selected = selected

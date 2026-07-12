@@ -59,7 +59,7 @@ class MouseClickPanel(StepConfigPanel):
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         browse_btn = QPushButton("浏览")
@@ -319,7 +319,7 @@ class MouseMovePanel(StepConfigPanel):
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         browse_btn = QPushButton("浏览")
@@ -521,7 +521,7 @@ class MouseDragPanel(StepConfigPanel):
         file_layout.addWidget(file_label)
         self.start_image_edit = QLineEdit()
         self.start_image_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         browse_btn = QPushButton("浏览")
@@ -601,7 +601,7 @@ class MouseDragPanel(StepConfigPanel):
         end_file_layout.addWidget(end_file_label)
         self.end_image_edit = QLineEdit()
         self.end_image_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; flex: 1; }
+            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QLineEdit:focus { border-color: #3498db; }
         """)
         end_browse_btn = QPushButton("浏览")

@@ -1,0 +1,11 @@
+{
+  "id": "1",
+  "name": "AI自动回复",
+  "version": "1.0",
+  "status": "已停止",
+  "nodes": [],
+  "edges": [],
+  "execute_mode": "定时执行",
+  "execute_time": "13:14:00",
+  "delay": 1440
+}

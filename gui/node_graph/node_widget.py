@@ -18,6 +18,7 @@ class NodeWidget(QGraphicsObject):
         self.node_id = str(uuid.uuid4())
         self.config = config or {}
         self._is_selected = False
+        self._is_deleted = False
 
         self.input_ports = []
         self.output_ports = []
@@ -137,11 +138,19 @@ class NodeWidget(QGraphicsObject):
         super().mouseDoubleClickEvent(event)
 
     def itemChange(self, change, value):
+        if getattr(self, '_is_deleted', False):
+            return super().itemChange(change, value)
         if change == QGraphicsObject.ItemPositionChange:
-            self.node_moved.emit(self)
-            for port in self.input_ports + self.output_ports:
-                for edge in port.connected_edges:
-                    edge.update_path()
+            try:
+                self.node_moved.emit(self)
+                for port in self.input_ports + self.output_ports:
+                    for edge in port.connected_edges[:]:
+                        try:
+                            edge.update_path()
+                        except Exception:
+                            pass
+            except Exception:
+                pass
         return super().itemChange(change, value)
 
     def to_json(self):

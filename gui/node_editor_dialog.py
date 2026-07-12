@@ -162,35 +162,69 @@ class NodeEditorDialog(QDialog):
 
         self._setup_node_selection()
 
-        self.ok_btn.clicked.connect(self.accept)
+        self.ok_btn.clicked.connect(self._on_ok_clicked)
         self.cancel_btn.clicked.connect(self.reject)
+
+    def _on_ok_clicked(self):
+        self._save_current_node_config()
+        self.accept()
+
+    def closeEvent(self, event):
+        try:
+            if hasattr(self, 'graph_scene') and self.graph_scene:
+                try:
+                    self.graph_scene.selectionChanged.disconnect(self._on_selection_changed)
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"关闭对话框时清理失败: {e}")
+        event.accept()
+
+    def cleanup(self):
+        try:
+            if hasattr(self, 'graph_scene') and self.graph_scene:
+                self.graph_scene.clear_all()
+        except Exception as e:
+            print(f"清理场景失败: {e}")
 
     def _setup_node_selection(self):
         self.graph_scene.selectionChanged.connect(self._on_selection_changed)
 
     def _on_selection_changed(self):
-        selected_nodes = self.graph_scene.get_selected_nodes()
-        if selected_nodes:
-            self._selected_node = selected_nodes[0]
-            self._show_node_config(self._selected_node)
-        else:
-            self._selected_node = None
-            self._clear_config()
+        try:
+            self._save_current_node_config()
+            
+            selected_nodes = self.graph_scene.get_selected_nodes()
+            if selected_nodes:
+                self._selected_node = selected_nodes[0]
+                self._show_node_config(self._selected_node)
+            else:
+                self._selected_node = None
+                self._clear_config()
+        except Exception as e:
+            print(f"选择变化处理失败: {e}")
+
+    def _save_current_node_config(self):
+        if self._selected_node and self._current_panel:
+            try:
+                if hasattr(self._current_panel, 'get_config'):
+                    config = self._current_panel.get_config()
+                    self._selected_node.update_params(config)
+            except Exception as e:
+                print(f"保存节点配置失败: {e}")
 
     def _show_node_config(self, node):
         self.empty_label.hide()
 
         panel_class = get_panel_class(node.node_type)
         if panel_class:
-            if self._current_panel:
-                self.panel_container.removeWidget(self._current_panel)
-                self._current_panel.deleteLater()
+            self._clear_current_panel()
 
-            self._current_panel = panel_class()
-            self._current_panel.set_config(node.config)
+            panel = panel_class()
+            panel.set_config(node.config)
 
             scroll_area = QScrollArea()
-            scroll_area.setWidget(self._current_panel)
+            scroll_area.setWidget(panel)
             scroll_area.setWidgetResizable(True)
             scroll_area.setStyleSheet("""
                 QScrollArea {
@@ -202,15 +236,16 @@ class NodeEditorDialog(QDialog):
             self.panel_container.addWidget(scroll_area)
             self.panel_container.setCurrentWidget(scroll_area)
 
+            self._current_panel = panel
+            self._current_scroll_area = scroll_area
+
             self.title_label.setText(f"节点配置 - {node.node_type}")
             self.save_btn.setEnabled(True)
         else:
             self._show_unsupported_message(node)
 
     def _show_unsupported_message(self, node):
-        if self._current_panel:
-            self.panel_container.removeWidget(self._current_panel)
-            self._current_panel.deleteLater()
+        self._clear_current_panel()
 
         msg_label = QLabel(f"节点类型 '{node.node_type}' 暂无配置面板")
         msg_label.setStyleSheet("""
@@ -228,6 +263,16 @@ class NodeEditorDialog(QDialog):
 
         self.title_label.setText(f"节点配置 - {node.node_type}")
         self.save_btn.setEnabled(False)
+
+    def _clear_current_panel(self):
+        if hasattr(self, '_current_scroll_area') and self._current_scroll_area:
+            self.panel_container.removeWidget(self._current_scroll_area)
+            self._current_scroll_area.deleteLater()
+            self._current_scroll_area = None
+        elif self._current_panel:
+            self.panel_container.removeWidget(self._current_panel)
+            self._current_panel.deleteLater()
+        self._current_panel = None
 
     def _clear_config(self):
         self.empty_label.show()

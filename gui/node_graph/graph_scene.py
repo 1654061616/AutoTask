@@ -53,8 +53,10 @@ class GraphScene(QGraphicsScene):
 
     def remove_node(self, node):
         if node in self.nodes:
-            self.removeItem(node)
-            self.nodes.remove(node)
+            try:
+                node._is_deleted = True
+            except Exception:
+                pass
 
             edges_to_remove = []
             for edge in self.edges:
@@ -63,6 +65,15 @@ class GraphScene(QGraphicsScene):
 
             for edge in edges_to_remove:
                 self.remove_edge(edge)
+
+            for port in node.input_ports + node.output_ports:
+                try:
+                    port.port_clicked.disconnect(self._on_port_clicked)
+                except Exception:
+                    pass
+
+            self.removeItem(node)
+            self.nodes.remove(node)
 
     def add_edge(self, source_port, target_port):
         from .edge_widget import EdgeWidget
@@ -172,16 +183,36 @@ class GraphScene(QGraphicsScene):
 
     def clear_all(self):
         self._cancel_connection()
+
+        for node in self.nodes[:]:
+            for port in node.input_ports + node.output_ports:
+                try:
+                    port.port_clicked.disconnect(self._on_port_clicked)
+                except Exception:
+                    pass
+
         for edge in self.edges[:]:
             self.remove_edge(edge)
+
         for node in self.nodes[:]:
-            self.remove_node(node)
+            self.removeItem(node)
+            self.nodes.remove(node)
 
     def get_selected_nodes(self):
         return [item for item in self.selectedItems() if item in self.nodes]
 
     def get_selected_edges(self):
         return [item for item in self.selectedItems() if item in self.edges]
+
+    def delete_selected(self):
+        selected_nodes = self.get_selected_nodes()
+        selected_edges = self.get_selected_edges()
+
+        for edge in selected_edges[:]:
+            self.remove_edge(edge)
+
+        for node in selected_nodes[:]:
+            self.remove_node(node)
 
     def to_json(self):
         nodes_data = []

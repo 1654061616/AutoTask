@@ -40,6 +40,14 @@ class GraphView(QGraphicsView):
             self.setDragMode(QGraphicsView.RubberBandDrag)
         super().mouseReleaseEvent(event)
 
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
+            self.scene().delete_selected()
+        elif event.key() == Qt.Key_Escape:
+            self.scene().clearSelection()
+        else:
+            super().keyPressEvent(event)
+
     def zoom_in(self):
         self.scale(1.15, 1.15)
 
