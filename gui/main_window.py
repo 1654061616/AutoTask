@@ -285,18 +285,51 @@ class MainWindow(QMainWindow):
     def add_task_to_tree(self, task):
         item = QTreeWidgetItem(self.task_tree)
         item.setText(0, task["name"])
-        item.setText(1, task["status"])
         item.setData(0, Qt.UserRole, task)
         
         item.setFlags(item.flags() | Qt.ItemIsEditable)
         
         status = task["status"]
+        
+        status_widget = QWidget()
+        status_layout = QHBoxLayout(status_widget)
+        status_layout.setContentsMargins(2, 2, 2, 2)
+        status_layout.setSpacing(2)
+        
+        status_btn = QPushButton()
+        status_btn.setFixedSize(20, 20)
+        
         if "执行中" in status:
-            item.setBackground(0, QBrush(QColor("#e8f5e9")))
-            item.setBackground(1, QBrush(QColor("#c8e6c9")))
+            status_btn.setStyleSheet("""
+                QPushButton {
+                    border: none;
+                    background-color: #4caf50;
+                    border-radius: 10px;
+                }
+                QPushButton:hover {
+                    background-color: #45a049;
+                }
+            """)
+            status_btn.setToolTip("点击停止任务")
         else:
-            item.setBackground(0, QBrush(QColor("#ffffff")))
-            item.setBackground(1, QBrush(QColor("#ffebee")))
+            status_btn.setStyleSheet("""
+                QPushButton {
+                    border: none;
+                    background-color: #e74c3c;
+                    border-radius: 10px;
+                }
+                QPushButton:hover {
+                    background-color: #c0392b;
+                }
+            """)
+            status_btn.setToolTip("点击执行任务")
+        
+        status_btn.clicked.connect(lambda checked, t=task: self.on_toggle_task(t))
+        
+        status_layout.addWidget(status_btn)
+        status_layout.addStretch()
+        
+        self.task_tree.setItemWidget(item, 1, status_widget)
         
         widget = QWidget()
         widget_layout = QHBoxLayout(widget)
@@ -639,11 +672,18 @@ class MainWindow(QMainWindow):
             return
         
         task = current_item.data(0, Qt.UserRole)
+        self._start_task(task, current_item)
+    
+    def _start_task(self, task, item=None):
+        if item is None:
+            item = self.task_tree.currentItem()
+            if not item:
+                return
+        
         task["status"] = "执行中"
-        current_item.setText(1, "执行中")
-        current_item.setBackground(0, QBrush(QColor("#e8f5e9")))
-        current_item.setBackground(1, QBrush(QColor("#c8e6c9")))
-        current_item.setData(0, Qt.UserRole, task)
+        item.setData(0, Qt.UserRole, task)
+        
+        self._update_status_widget(item, "执行中")
         
         self.task_status_label.setText("执行中")
         self.task_status_label.setStyleSheet("color: #27ae60; font-weight: bold;")
@@ -656,18 +696,75 @@ class MainWindow(QMainWindow):
         current_item = self.task_tree.currentItem()
         if current_item:
             task = current_item.data(0, Qt.UserRole)
-            task["status"] = "已停止"
-            current_item.setText(1, "已停止")
-            current_item.setBackground(0, QBrush(QColor("#ffffff")))
-            current_item.setBackground(1, QBrush(QColor("#ffebee")))
-            current_item.setData(0, Qt.UserRole, task)
-            
+            self._stop_task(task, current_item)
+    
+    def _stop_task(self, task, item=None):
+        if item is None:
+            item = self.task_tree.currentItem()
+            if not item:
+                return
+        
+        task["status"] = "已停止"
+        item.setData(0, Qt.UserRole, task)
+        
+        self._update_status_widget(item, "已停止")
+        
+        self.task_status_label.setText("已停止")
+        self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+        self.status_label.setText("已停止")
+        self.log_panel.append(f"停止任务: {task['name']}")
+        self.flow_stopped.emit()
+    
+    def _update_status_widget(self, item, status):
+        widget = self.task_tree.itemWidget(item, 1)
+        if widget:
+            btn = widget.findChild(QPushButton)
+            if btn:
+                if "执行中" in status:
+                    btn.setStyleSheet("""
+                        QPushButton {
+                            border: none;
+                            background-color: #4caf50;
+                            border-radius: 10px;
+                        }
+                        QPushButton:hover {
+                            background-color: #45a049;
+                        }
+                    """)
+                    btn.setToolTip("点击停止任务")
+                else:
+                    btn.setStyleSheet("""
+                        QPushButton {
+                            border: none;
+                            background-color: #e74c3c;
+                            border-radius: 10px;
+                        }
+                        QPushButton:hover {
+                            background-color: #c0392b;
+                        }
+                    """)
+                    btn.setToolTip("点击执行任务")
+    
+    @Slot()
+    def on_toggle_task(self, task):
+        item = None
+        for i in range(self.task_tree.topLevelItemCount()):
+            tree_item = self.task_tree.topLevelItem(i)
+            if tree_item.data(0, Qt.UserRole) == task:
+                item = tree_item
+                break
+        
+        if not item:
+            return
+        
+        if "执行中" in task.get("status", ""):
+            self._stop_task(task, item)
             self.task_status_label.setText("已停止")
             self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
             self.status_label.setText("已停止")
-            self.log_panel.append(f"停止任务: {task['name']}")
-        
-        self.flow_stopped.emit()
+            self.log_panel.append(f"停止执行任务: {task['name']}")
+        else:
+            self._start_task(task, item)
     
     @Slot(QTreeWidgetItem, int)
     def on_task_selected(self, item, column):
