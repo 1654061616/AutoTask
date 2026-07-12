@@ -125,16 +125,15 @@ class MainWindow(QMainWindow):
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.new_task_btn)
         btn_layout.addWidget(self.open_task_btn)
-        btn_layout.addWidget(self.save_task_btn)
         btn_layout.addWidget(self.copy_task_btn)
-        btn_layout.addWidget(self.delete_task_btn)
      
         task_list_layout.addLayout(btn_layout)
         
         self.task_tree = QTreeWidget()
-        self.task_tree.setHeaderLabels(["任务名称", "当前状态"])
+        self.task_tree.setHeaderLabels(["任务名称", "当前状态", "操作"])
         self.task_tree.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.task_tree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.task_tree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         task_list_layout.addWidget(self.task_tree)
         
         left_layout.addWidget(self.task_list_group)
@@ -298,6 +297,50 @@ class MainWindow(QMainWindow):
         else:
             item.setBackground(0, QBrush(QColor("#ffffff")))
             item.setBackground(1, QBrush(QColor("#ffebee")))
+        
+        widget = QWidget()
+        widget_layout = QHBoxLayout(widget)
+        widget_layout.setContentsMargins(2, 2, 2, 2)
+        widget_layout.setSpacing(2)
+        
+        save_btn = QPushButton()
+        save_btn.setIcon(QIcon.fromTheme("document-save", QIcon()))
+        save_btn.setStyleSheet("""
+            QPushButton {
+                border: none;
+                padding: 2px;
+                background: transparent;
+                color: #3498db;
+            }
+            QPushButton:hover {
+                background-color: #e8f4fd;
+                border-radius: 3px;
+            }
+        """)
+        save_btn.setToolTip("保存任务")
+        save_btn.clicked.connect(lambda checked, t=task: self.on_save_flow(t))
+        
+        delete_btn = QPushButton()
+        delete_btn.setIcon(QIcon.fromTheme("edit-delete", QIcon()))
+        delete_btn.setStyleSheet("""
+            QPushButton {
+                border: none;
+                padding: 2px;
+                background: transparent;
+                color: #e74c3c;
+            }
+            QPushButton:hover {
+                background-color: #fce4ec;
+                border-radius: 3px;
+            }
+        """)
+        delete_btn.setToolTip("删除任务")
+        delete_btn.clicked.connect(lambda checked, t=task: self.on_delete_task(t))
+        
+        widget_layout.addWidget(save_btn)
+        widget_layout.addWidget(delete_btn)
+        
+        self.task_tree.setItemWidget(item, 2, widget)
     
     def apply_stylesheet(self):
         self.setStyleSheet("""
@@ -432,13 +475,24 @@ class MainWindow(QMainWindow):
         self.log_panel.append(f"复制任务: {new_task['name']}")
     
     @Slot()
-    def on_delete_task(self):
-        current_item = self.task_tree.currentItem()
-        if not current_item:
-            QMessageBox.warning(self, "删除失败", "请先选择一个任务")
-            return
+    def on_delete_task(self, task=None):
+        if task is None:
+            current_item = self.task_tree.currentItem()
+            if not current_item:
+                QMessageBox.warning(self, "删除失败", "请先选择一个任务")
+                return
+            task = current_item.data(0, Qt.UserRole)
+        else:
+            current_item = None
+            for i in range(self.task_tree.topLevelItemCount()):
+                item = self.task_tree.topLevelItem(i)
+                if item.data(0, Qt.UserRole) == task:
+                    current_item = item
+                    break
+            if not current_item:
+                QMessageBox.warning(self, "删除失败", "未找到任务")
+                return
         
-        task = current_item.data(0, Qt.UserRole)
         reply = QMessageBox.question(
             self, "确认删除", f"确定要删除任务 '{task['name']}' 吗？",
             QMessageBox.Yes | QMessageBox.No,
@@ -519,13 +573,21 @@ class MainWindow(QMainWindow):
         self.delay_spin.setValue(task.get("delay", 1440))
     
     @Slot()
-    def on_save_flow(self):
-        current_item = self.task_tree.currentItem()
-        if not current_item:
-            QMessageBox.warning(self, "保存失败", "请先选择一个任务")
-            return
-
-        task = current_item.data(0, Qt.UserRole)
+    def on_save_flow(self, task=None):
+        if task is None:
+            current_item = self.task_tree.currentItem()
+            if not current_item:
+                QMessageBox.warning(self, "保存失败", "请先选择一个任务")
+                return
+            task = current_item.data(0, Qt.UserRole)
+        else:
+            current_item = None
+            for i in range(self.task_tree.topLevelItemCount()):
+                item = self.task_tree.topLevelItem(i)
+                if item.data(0, Qt.UserRole) == task:
+                    current_item = item
+                    break
+        
         file_path = task.get("file_path")
 
         if not file_path:
