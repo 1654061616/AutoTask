@@ -62,22 +62,24 @@ class NodeWidget(QGraphicsWidget):
         self.param_text.setZValue(2)
 
     def _create_ports(self):
+        port_offset = -PortWidget.PORT_SIZE / 2
+
         if self.node_type != "start":
             in_port = PortWidget("in", "输入", self)
-            in_port.setPos(-6, 40)
+            in_port.setPos(port_offset, 40)
             self.input_ports.append(in_port)
 
         if self.node_type == "if_else":
             true_port = PortWidget("out", "True", self)
-            true_port.setPos(self.node_width - 6, 25)
+            true_port.setPos(self.node_width + port_offset, 25)
             self.output_ports.append(true_port)
 
             false_port = PortWidget("out", "False", self)
-            false_port.setPos(self.node_width - 6, 55)
+            false_port.setPos(self.node_width + port_offset, 55)
             self.output_ports.append(false_port)
         elif self.node_type != "end":
             out_port = PortWidget("out", "输出", self)
-            out_port.setPos(self.node_width - 6, 40)
+            out_port.setPos(self.node_width + port_offset, 40)
             self.output_ports.append(out_port)
 
     def _format_params(self):

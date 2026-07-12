@@ -5,8 +5,10 @@ from PySide6.QtGui import QColor, QBrush, QPen, QFont
 class PortWidget(QGraphicsEllipseItem):
     port_clicked = Signal(object)
 
+    PORT_SIZE = 16
+
     def __init__(self, port_type: str, label: str, parent_node, parent=None):
-        super().__init__(0, 0, 12, 12, parent)
+        super().__init__(0, 0, self.PORT_SIZE, self.PORT_SIZE, parent)
         self.port_type = port_type
         self.label = label
         self.parent_node = parent_node
@@ -16,28 +18,35 @@ class PortWidget(QGraphicsEllipseItem):
         self._add_label()
 
     def _init_style(self):
-        self.setBrush(QBrush(QColor("#5a5aff")))
-        self.setPen(QPen(QColor("#5a5aff"), 2))
+        if self.port_type == "in":
+            fill_color = QColor("#ff9800")
+        else:
+            fill_color = QColor("#4caf50")
+        self.setBrush(QBrush(fill_color))
+        self.setPen(QPen(QColor("#ffffff"), 2))
         self.setCursor(Qt.PointingHandCursor)
-        self.setZValue(10)
+        self.setZValue(20)
 
     def _add_label(self):
         self.label_item = QGraphicsTextItem(self.label, self)
-        self.label_item.setDefaultTextColor(QColor("#888"))
-        self.label_item.setFont(QFont("Arial", 10))
+        self.label_item.setDefaultTextColor(QColor("#cccccc"))
+        self.label_item.setFont(QFont("Arial", 9))
         if self.port_type == "in":
-            self.label_item.setPos(16, -5)
+            self.label_item.setPos(self.PORT_SIZE + 2, -2)
         else:
-            self.label_item.setPos(-self.label_item.boundingRect().width() - 8, -5)
+            self.label_item.setPos(-self.label_item.boundingRect().width() - self.PORT_SIZE - 2, -2)
 
     def set_highlighted(self, highlighted):
         self._is_highlighted = highlighted
         if highlighted:
             self.setBrush(QBrush(QColor("#00d4ff")))
-            self.setPen(QPen(QColor("#00d4ff"), 2))
+            self.setPen(QPen(QColor("#ffffff"), 3))
         else:
-            self.setBrush(QBrush(QColor("#5a5aff")))
-            self.setPen(QPen(QColor("#5a5aff"), 2))
+            if self.port_type == "in":
+                self.setBrush(QBrush(QColor("#ff9800")))
+            else:
+                self.setBrush(QBrush(QColor("#4caf50")))
+            self.setPen(QPen(QColor("#ffffff"), 2))
 
     def can_connect(self, other_port):
         if self.port_type == other_port.port_type:
