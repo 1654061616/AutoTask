@@ -26,7 +26,6 @@ Thumbs.db
 .coverage
 htmlcov/
 *.egg-info/
-docs/superpowers/plans/*.md
 *.tmp
 *.temp
 output/
