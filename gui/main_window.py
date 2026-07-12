@@ -130,10 +130,9 @@ class MainWindow(QMainWindow):
         task_list_layout.addLayout(btn_layout)
         
         self.task_tree = QTreeWidget()
-        self.task_tree.setHeaderLabels(["任务名称", "当前状态", "操作"])
+        self.task_tree.setHeaderLabels(["任务名称", "操作"])
         self.task_tree.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.task_tree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.task_tree.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         task_list_layout.addWidget(self.task_tree)
         
         left_layout.addWidget(self.task_list_group)
@@ -291,10 +290,10 @@ class MainWindow(QMainWindow):
         
         status = task["status"]
         
-        status_widget = QWidget()
-        status_layout = QHBoxLayout(status_widget)
-        status_layout.setContentsMargins(2, 2, 2, 2)
-        status_layout.setSpacing(2)
+        widget = QWidget()
+        widget_layout = QHBoxLayout(widget)
+        widget_layout.setContentsMargins(2, 2, 2, 2)
+        widget_layout.setSpacing(2)
         
         status_btn = QPushButton()
         status_btn.setFixedSize(20, 20)
@@ -325,16 +324,6 @@ class MainWindow(QMainWindow):
             status_btn.setToolTip("点击执行任务")
         
         status_btn.clicked.connect(lambda checked, t=task: self.on_toggle_task(t))
-        
-        status_layout.addWidget(status_btn)
-        status_layout.addStretch()
-        
-        self.task_tree.setItemWidget(item, 1, status_widget)
-        
-        widget = QWidget()
-        widget_layout = QHBoxLayout(widget)
-        widget_layout.setContentsMargins(2, 2, 2, 2)
-        widget_layout.setSpacing(2)
         
         save_btn = QPushButton()
         save_btn.setIcon(QIcon.fromTheme("document-save", QIcon()))
@@ -370,10 +359,11 @@ class MainWindow(QMainWindow):
         delete_btn.setToolTip("删除任务")
         delete_btn.clicked.connect(lambda checked, t=task: self.on_delete_task(t))
         
+        widget_layout.addWidget(status_btn)
         widget_layout.addWidget(save_btn)
         widget_layout.addWidget(delete_btn)
         
-        self.task_tree.setItemWidget(item, 2, widget)
+        self.task_tree.setItemWidget(item, 1, widget)
     
     def apply_stylesheet(self):
         self.setStyleSheet("""
