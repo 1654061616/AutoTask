@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
                                QLabel, QSplitter, QWidget, QStackedWidget,
-                               QScrollArea)
+                               QScrollArea, QSizePolicy)
 from PySide6.QtCore import Qt, Signal
 import uuid
 
@@ -25,36 +25,38 @@ class NodeEditorDialog(QDialog):
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.resize(1400, 800)
 
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(5, 5, 5, 5)
-        main_layout.setSpacing(5)
+        self.setLayout(QVBoxLayout())
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.layout().setSpacing(0)
 
         splitter = QSplitter(Qt.Horizontal)
+        splitter.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        splitter.setChildrenCollapsible(False)
 
         self.node_toolbar = NodeToolbar()
         self.node_toolbar.setFixedWidth(180)
+        self.node_toolbar.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         splitter.addWidget(self.node_toolbar)
 
         self.graph_scene = GraphScene()
         self.graph_view = GraphView(self.graph_scene)
+        self.graph_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         splitter.addWidget(self.graph_view)
 
         self.config_panel = QWidget()
         self.config_panel.setFixedWidth(320)
+        self.config_panel.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self._init_config_panel()
         splitter.addWidget(self.config_panel)
 
         splitter.setSizes([180, 900, 320])
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+        splitter.setStretchFactor(2, 0)
 
-        main_layout.addWidget(splitter)
+        self.layout().addWidget(splitter)
 
         self.node_toolbar.node_drag_started.connect(self._on_node_drag_started)
-
-        self.setStyleSheet("""
-            QDialog {
-                background-color: #f5f7fa;
-            }
-        """)
 
     def _init_config_panel(self):
         layout = QVBoxLayout(self.config_panel)
@@ -85,6 +87,7 @@ class NodeEditorDialog(QDialog):
         layout.addWidget(self.empty_label)
 
         self.panel_container = QStackedWidget()
+        self.panel_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         layout.addWidget(self.panel_container)
 
         layout.addStretch()
@@ -109,8 +112,6 @@ class NodeEditorDialog(QDialog):
         self.save_btn.clicked.connect(self._on_save_config)
         self.save_btn.setEnabled(False)
         layout.addWidget(self.save_btn)
-
-        layout.addStretch()
 
         self.ok_btn = QPushButton("确定")
         self.ok_btn.setStyleSheet("""

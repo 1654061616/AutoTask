@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (QToolBar, QPushButton, QLabel, QWidget,
-                               QVBoxLayout, QScrollArea, QGroupBox)
+                               QVBoxLayout, QScrollArea, QGroupBox, QSizePolicy)
 from PySide6.QtGui import QFont, QColor
 from PySide6.QtCore import Qt, Signal
 
@@ -15,16 +15,23 @@ class NodeToolbar(QWidget):
 
     def _init_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(8)
-        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        content_widget = QWidget()
+        content_widget.setStyleSheet("background-color: #1a1a2e;")
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setSpacing(8)
+        content_layout.setContentsMargins(10, 10, 10, 10)
 
         title_label = QLabel("节点工具箱")
         title_label.setStyleSheet("font-weight: bold; font-size: 14px; color: #fff;")
-        layout.addWidget(title_label)
+        content_layout.addWidget(title_label)
 
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setStyleSheet("""
             QScrollArea {
                 border: none;
@@ -40,10 +47,13 @@ class NodeToolbar(QWidget):
                 border-radius: 4px;
             }
         """)
+        scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        content_widget = QWidget()
-        content_layout = QVBoxLayout(content_widget)
-        content_layout.setSpacing(6)
+        groups_widget = QWidget()
+        groups_widget.setStyleSheet("background-color: #1a1a2e;")
+        groups_layout = QVBoxLayout(groups_widget)
+        groups_layout.setSpacing(6)
+        groups_layout.setContentsMargins(0, 0, 0, 0)
 
         for category_key, category_info in NODE_CATEGORIES.items():
             group = QGroupBox(category_info["name"])
@@ -56,6 +66,7 @@ class NodeToolbar(QWidget):
                     border-radius: 6px;
                     margin-top: 8px;
                     padding-top: 8px;
+                    background-color: transparent;
                 }
                 QGroupBox::title {
                     subcontrol-origin: margin;
@@ -66,6 +77,7 @@ class NodeToolbar(QWidget):
 
             group_layout = QVBoxLayout(group)
             group_layout.setSpacing(4)
+            group_layout.setContentsMargins(8, 8, 8, 8)
 
             for node_type in category_info["nodes"]:
                 node_info = get_node_type(node_type)
@@ -88,14 +100,13 @@ class NodeToolbar(QWidget):
                 btn.clicked.connect(lambda checked, nt=node_type: self._on_node_clicked(nt))
                 group_layout.addWidget(btn)
 
-            content_layout.addWidget(group)
+            groups_layout.addWidget(group)
 
-        scroll_area.setWidget(content_widget)
-        layout.addWidget(scroll_area)
+        groups_layout.addStretch()
+        scroll_area.setWidget(groups_widget)
+        content_layout.addWidget(scroll_area)
 
-        layout.addStretch()
-
-        self.setStyleSheet("background-color: #1a1a2e;")
+        layout.addWidget(content_widget)
 
     def _on_node_clicked(self, node_type):
         self.node_drag_started.emit(node_type)
