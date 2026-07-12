@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QGraphicsWidget, QGraphicsRectItem, QGraphicsTextItem, QGraphicsItem
+from PySide6.QtWidgets import QGraphicsObject, QGraphicsRectItem, QGraphicsTextItem
 from PySide6.QtCore import Qt, QRectF, QSizeF, Signal
 from PySide6.QtGui import QColor, QBrush, QPen, QFont
 import uuid
@@ -7,7 +7,7 @@ from .node_types import get_node_type
 from .port_widget import PortWidget
 
 
-class NodeWidget(QGraphicsWidget):
+class NodeWidget(QGraphicsObject):
     node_selected = Signal(object)
     node_double_clicked = Signal(object)
     node_moved = Signal(object)
@@ -25,19 +25,15 @@ class NodeWidget(QGraphicsWidget):
         self._init_structure()
         self._create_ports()
 
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
-        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+        self.setFlag(QGraphicsObject.ItemIsMovable, True)
+        self.setFlag(QGraphicsObject.ItemIsSelectable, True)
+        self.setFlag(QGraphicsObject.ItemSendsGeometryChanges, True)
 
     def _init_structure(self):
         node_info = get_node_type(self.node_type)
 
         self.node_width = 200
         self.node_height = 80
-
-        self.setMinimumSize(QSizeF(self.node_width, self.node_height))
-        self.setMaximumSize(QSizeF(350, 500))
-        self.resize(self.node_width, self.node_height)
 
         self.body = QGraphicsRectItem(0, 0, self.node_width, self.node_height, self)
         self.body.setBrush(QBrush(QColor("#2a2a4a")))
@@ -65,20 +61,20 @@ class NodeWidget(QGraphicsWidget):
         port_offset = -PortWidget.PORT_SIZE / 2
 
         if self.node_type != "start":
-            in_port = PortWidget("in", "输入", self)
+            in_port = PortWidget("in", "输入", self, self)
             in_port.setPos(port_offset, 40)
             self.input_ports.append(in_port)
 
         if self.node_type == "if_else":
-            true_port = PortWidget("out", "True", self)
+            true_port = PortWidget("out", "True", self, self)
             true_port.setPos(self.node_width + port_offset, 25)
             self.output_ports.append(true_port)
 
-            false_port = PortWidget("out", "False", self)
+            false_port = PortWidget("out", "False", self, self)
             false_port.setPos(self.node_width + port_offset, 55)
             self.output_ports.append(false_port)
         elif self.node_type != "end":
-            out_port = PortWidget("out", "输出", self)
+            out_port = PortWidget("out", "输出", self, self)
             out_port.setPos(self.node_width + port_offset, 40)
             self.output_ports.append(out_port)
 
@@ -124,7 +120,9 @@ class NodeWidget(QGraphicsWidget):
             self.body.setPen(QPen(QColor("#4a4a6e"), 1))
 
     def boundingRect(self):
-        return QRectF(0, 0, self.node_width, self.node_height)
+        return QRectF(-PortWidget.PORT_SIZE, 0, 
+                      self.node_width + PortWidget.PORT_SIZE * 2, 
+                      self.node_height)
 
     def paint(self, painter, option, widget=None):
         pass
@@ -139,7 +137,7 @@ class NodeWidget(QGraphicsWidget):
         super().mouseDoubleClickEvent(event)
 
     def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemPositionChange:
+        if change == QGraphicsObject.ItemPositionChange:
             self.node_moved.emit(self)
             for port in self.input_ports + self.output_ports:
                 for edge in port.connected_edges:
