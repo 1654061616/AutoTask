@@ -46,6 +46,11 @@ class NodeEditorDialog(QDialog):
         self.config_panel = QWidget()
         self.config_panel.setFixedWidth(320)
         self.config_panel.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.config_panel.setStyleSheet("""
+            QWidget {
+                background-color: #f8f9fa;
+            }
+        """)
         self._init_config_panel()
         splitter.addWidget(self.config_panel)
 
