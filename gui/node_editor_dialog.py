@@ -22,7 +22,13 @@ class NodeEditorDialog(QDialog):
     def _init_ui(self):
         task_name = self.flow_data.get("name", "未命名任务")
         self.setWindowTitle(f"节点编辑器 - {task_name}")
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setWindowFlags(
+            Qt.WindowTitleHint |
+            Qt.WindowSystemMenuHint |
+            Qt.WindowMinimizeButtonHint |
+            Qt.WindowMaximizeButtonHint |
+            Qt.WindowCloseButtonHint
+        )
         self.resize(1400, 800)
 
         self.setLayout(QVBoxLayout())
