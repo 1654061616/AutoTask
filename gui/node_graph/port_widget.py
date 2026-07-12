@@ -71,6 +71,7 @@ class PortWidget(QGraphicsObject):
 
     def mousePressEvent(self, event):
         self.port_clicked.emit(self)
+        event.accept()
         super().mousePressEvent(event)
 
     def get_global_pos(self):
