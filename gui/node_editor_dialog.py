@@ -75,6 +75,11 @@ class NodeEditorDialog(QDialog):
         """)
         layout.addWidget(self.title_label)
 
+        self.content_widget = QWidget()
+        self.content_layout = QVBoxLayout(self.content_widget)
+        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout.setSpacing(0)
+
         self.empty_label = QLabel("请点击节点查看配置")
         self.empty_label.setStyleSheet("""
             QLabel {
@@ -84,13 +89,14 @@ class NodeEditorDialog(QDialog):
                 padding: 40px 20px;
             }
         """)
-        layout.addWidget(self.empty_label)
+        self.empty_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.content_layout.addWidget(self.empty_label)
 
         self.panel_container = QStackedWidget()
         self.panel_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        layout.addWidget(self.panel_container)
+        self.content_layout.addWidget(self.panel_container)
 
-        layout.addStretch()
+        layout.addWidget(self.content_widget, 1)
 
         self.save_btn = QPushButton("保存配置")
         self.save_btn.setStyleSheet("""
@@ -182,6 +188,7 @@ class NodeEditorDialog(QDialog):
                     border: none;
                 }
             """)
+            scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
             self.panel_container.addWidget(scroll_area)
             self.panel_container.setCurrentWidget(scroll_area)
@@ -205,6 +212,7 @@ class NodeEditorDialog(QDialog):
                 padding: 40px 20px;
             }
         """)
+        msg_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self._current_panel = msg_label
         self.panel_container.addWidget(msg_label)
         self.panel_container.setCurrentWidget(msg_label)
