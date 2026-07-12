@@ -255,21 +255,33 @@ class MainWindow(QMainWindow):
         self.load_default_tasks()
     
     def load_default_tasks(self):
-        default_tasks = [
-            {"id": "1", "name": "AI自动回复", "status": "已停止", "steps": []},
-            {"id": "2", "name": "AI自动回复2", "status": "已停止", "steps": []},
-            {"id": "3", "name": "导入的任务", "status": "已停止", "steps": []},
-            {"id": "4", "name": "微信定时任务1314", "status": "定时执行中", "steps": [
-                {"type": "键盘热键", "description": "CTRL+ALT+W", "params": "键盘热键: CTRL+ALT+W...", "delay": 0},
-                {"type": "鼠标点击", "description": "左键双击", "params": "图片: CTRL+ALT+W...", "delay": 0},
-                {"type": "文本输入", "description": "今天是2025年8月...", "params": "文本: 今天是2025年8月...", "delay": 0},
-                {"type": "键盘热键", "description": "ENTER", "params": "键盘热键: ENTER", "delay": 0},
-                {"type": "键盘热键", "description": "WIN+D", "params": "键盘热键: WIN+D", "delay": 0},
-            ]}
-        ]
+        resources_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources")
+        if not os.path.exists(resources_dir):
+            os.makedirs(resources_dir)
+            return
         
-        for task in default_tasks:
-            self.add_task_to_tree(task)
+        for filename in os.listdir(resources_dir):
+            if filename.endswith(".json"):
+                file_path = os.path.join(resources_dir, filename)
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        flow_data = json.load(f)
+                    
+                    task = {
+                        "id": flow_data.get("id", str(uuid.uuid4())[:8]),
+                        "name": flow_data.get("name", os.path.splitext(filename)[0]),
+                        "status": flow_data.get("status", "已停止"),
+                        "nodes": flow_data.get("nodes", []),
+                        "edges": flow_data.get("edges", []),
+                        "execute_mode": flow_data.get("execute_mode", "手动执行"),
+                        "execute_time": flow_data.get("execute_time", ""),
+                        "delay": flow_data.get("delay", 0),
+                        "file_path": file_path
+                    }
+                    
+                    self.add_task_to_tree(task)
+                except Exception as e:
+                    print(f"加载任务文件失败: {filename} - {str(e)}")
     
     def add_task_to_tree(self, task):
         item = QTreeWidgetItem(self.task_tree)
