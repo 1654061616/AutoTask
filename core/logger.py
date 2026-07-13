@@ -1,17 +1,33 @@
 import logging
 import time
-from typing import List
+from typing import List, Callable
 
 class Logger:
     def __init__(self):
         self.logs: List[str] = []
         self.log_format = "%Y-%m-%d %H:%M:%S"
+        self.callbacks: List[Callable[[str], None]] = []
+    
+    def add_callback(self, callback: Callable[[str], None]):
+        """添加日志回调函数，当有新日志时会调用"""
+        if callback not in self.callbacks:
+            self.callbacks.append(callback)
+    
+    def remove_callback(self, callback: Callable[[str], None]):
+        """移除日志回调函数"""
+        if callback in self.callbacks:
+            self.callbacks.remove(callback)
     
     def _add_log(self, level: str, message: str):
         timestamp = time.strftime(self.log_format)
         log_entry = f"[{timestamp}] [{level}] {message}"
         self.logs.append(log_entry)
         print(log_entry)
+        for callback in self.callbacks:
+            try:
+                callback(log_entry)
+            except Exception:
+                pass
     
     def info(self, message: str):
         self._add_log("INFO", message)

@@ -88,6 +88,7 @@ import json     # JSON数据处理
 from .step_editor import StepEditorDialog, STEP_TYPE_MAP  # 步骤编辑器对话框和步骤类型映射
 from .node_graph import GraphScene, GraphView, NodeToolbar  # 节点图相关类
 from .node_editor_dialog import NodeEditorDialog  # 节点编辑器对话框
+from core.engine import FlowEngine  # 执行引擎
 
 class MainWindow(QMainWindow):
     """
@@ -119,6 +120,7 @@ class MainWindow(QMainWindow):
     step_selected = Signal(dict)  # 步骤选中信号
     flow_started = Signal()       # 流程开始执行信号
     flow_stopped = Signal()       # 流程停止执行信号
+    log_received = Signal(str)    # 日志接收信号，用于从后台线程更新GUI日志
     
     def __init__(self):
         """
@@ -148,6 +150,15 @@ class MainWindow(QMainWindow):
         
         # 当前选中的任务，初始为None（没有选中任何任务）
         self.current_flow = None
+        
+        # 初始化执行引擎
+        self.engine = FlowEngine()
+        
+        # 连接日志信号到GUI日志面板（通过信号机制安全地从后台线程更新GUI）
+        self.log_received.connect(self._on_log_received)
+        
+        # 注册日志回调函数到执行引擎的logger
+        self.engine.logger.add_callback(self._on_engine_log)
         
         # 创建界面的所有控件
         self.init_ui()
@@ -1270,13 +1281,22 @@ class MainWindow(QMainWindow):
             # 没有提供task参数，获取当前选中的任务项
             current_item = self.task_tree.currentItem()
             
-            # 如果没有选中任何任务，弹出警告
+            # 如果没有选中任何任务，尝试使用当前流程
             if not current_item:
-                QMessageBox.warning(self, "保存失败", "请先选择一个任务")
-                return
+                if self.current_flow:
+                    task = self.current_flow
+                    # 尝试在任务树中查找对应的项
+                    for i in range(self.task_tree.topLevelItemCount()):
+                        item = self.task_tree.topLevelItem(i)
+                        if item.data(0, Qt.UserRole) == task:
+                            current_item = item
+                            break
+                else:
+                    QMessageBox.warning(self, "保存失败", "请先选择一个任务")
+                    return
             
             # 获取任务数据
-            task = current_item.data(0, Qt.UserRole)
+            task = current_item.data(0, Qt.UserRole) if current_item else self.current_flow
         else:
             # 提供了task参数，需要在任务树中查找对应的项
             current_item = None
@@ -1287,6 +1307,11 @@ class MainWindow(QMainWindow):
                 if item.data(0, Qt.UserRole) == task:
                     current_item = item
                     break
+        
+        # 如果仍然没有找到任务，弹出警告
+        if not task:
+            QMessageBox.warning(self, "保存失败", "未找到任务数据")
+            return
         
         # 获取任务的文件路径
         file_path = task.get("file_path")
@@ -1314,14 +1339,22 @@ class MainWindow(QMainWindow):
         # 如果用户选择了文件路径
         if file_path:
             try:
-                nodes = task.get("nodes", [])
-                edges = task.get("edges", [])
+                # 始终从 graph_scene 获取最新的节点和连线数据
+                # 这样可以确保保存的是用户通过节点编辑器修改后的最新配置
+                nodes = []
+                edges = []
                 
-                if not nodes and hasattr(self, 'graph_scene') and self.graph_scene:
+                if hasattr(self, 'graph_scene') and self.graph_scene:
                     graph_data = self.graph_scene.to_json()
                     if isinstance(graph_data, dict):
                         nodes = graph_data.get("nodes", [])
                         edges = graph_data.get("edges", [])
+                
+                # 如果 graph_scene 为空，回退到 task 中的数据
+                if not nodes:
+                    nodes = task.get("nodes", [])
+                if not edges:
+                    edges = task.get("edges", [])
                 
                 # 构建保存数据字典
                 save_data = {
@@ -1348,11 +1381,13 @@ class MainWindow(QMainWindow):
                 task["nodes"] = save_data["nodes"]  # 更新节点
                 task["edges"] = save_data["edges"]  # 更新连线
                 
-                # 更新任务树中的任务名称显示
-                current_item.setText(0, save_data["name"])
-                
-                # 将更新后的任务数据重新存储到树形控件项中
-                current_item.setData(0, Qt.UserRole, task)
+                # 如果有对应的任务树项，更新任务树中的显示
+                if current_item:
+                    # 更新任务树中的任务名称显示
+                    current_item.setText(0, save_data["name"])
+                    
+                    # 将更新后的任务数据重新存储到树形控件项中
+                    current_item.setData(0, Qt.UserRole, task)
                 
                 # 更新状态栏显示
                 self.status_label.setText(f"已保存: {os.path.basename(file_path)}")
@@ -1390,7 +1425,7 @@ class MainWindow(QMainWindow):
     
     def _start_task(self, task, item=None):
         """
-        启动任务方法: 内部方法，设置任务为执行状态
+        启动任务方法: 内部方法，设置任务为执行状态并调用执行引擎
         
         参数:
             task: 任务字典
@@ -1402,7 +1437,8 @@ class MainWindow(QMainWindow):
             3. 更新任务树中的状态图标
             4. 更新右侧面板的状态显示
             5. 更新状态栏和日志
-            6. 发出flow_started信号
+            6. 加载任务数据到执行引擎并启动执行
+            7. 发出flow_started信号
         """
         # 如果没有提供item参数，获取当前选中的任务项
         if item is None:
@@ -1429,8 +1465,52 @@ class MainWindow(QMainWindow):
         # 在日志面板中添加记录
         self.log_panel.append(f"开始执行任务: {task['name']}")
         
+        # 构建完整的flow数据（节点图格式）
+        flow_data = {
+            "id": task["id"],
+            "name": task["name"],
+            "version": task.get("version", "1.0"),
+            "nodes": task.get("nodes", []),
+            "edges": task.get("edges", []),
+            "execute_mode": task.get("execute_mode", "手动执行"),
+            "execute_time": task.get("execute_time", ""),
+            "delay": task.get("delay", 0)
+        }
+        
+        # 加载任务数据到执行引擎
+        self.engine.load_flow(flow_data)
+        
+        # 启动执行引擎（在后台线程中执行）
+        self.engine.run()
+        
         # 发出flow_started信号，通知其他组件任务已开始执行
         self.flow_started.emit()
+    
+    def _on_engine_log(self, log_entry: str):
+        """
+        引擎日志回调方法: 当执行引擎产生日志时被调用
+        
+        参数:
+            log_entry: 日志条目字符串
+            
+        注意: 此方法在后台线程中执行，不能直接更新GUI控件
+              需要通过Qt信号机制切换到主线程更新GUI
+        """
+        # 通过信号机制将日志传递到主线程
+        self.log_received.emit(log_entry)
+    
+    @Slot(str)
+    def _on_log_received(self, log_entry: str):
+        """
+        日志接收槽方法: 在主线程中更新GUI日志面板
+        
+        参数:
+            log_entry: 日志条目字符串
+            
+        注意: 此方法通过Qt信号机制在主线程中执行，可以安全地更新GUI控件
+        """
+        # 将日志添加到日志面板
+        self.log_panel.append(log_entry)
     
     @Slot()
     def on_stop_flow(self):
@@ -1455,7 +1535,7 @@ class MainWindow(QMainWindow):
     
     def _stop_task(self, task, item=None):
         """
-        停止任务方法: 内部方法，设置任务为停止状态
+        停止任务方法: 内部方法，设置任务为停止状态并调用执行引擎停止
         
         参数:
             task: 任务字典
@@ -1463,17 +1543,21 @@ class MainWindow(QMainWindow):
         
         执行流程:
             1. 如果没有提供item参数，获取当前选中的任务项
-            2. 更新任务状态为"已停止"
-            3. 更新任务树中的状态图标
-            4. 更新右侧面板的状态显示
-            5. 更新状态栏和日志
-            6. 发出flow_stopped信号
+            2. 调用执行引擎停止执行
+            3. 更新任务状态为"已停止"
+            4. 更新任务树中的状态图标
+            5. 更新右侧面板的状态显示
+            6. 更新状态栏和日志
+            7. 发出flow_stopped信号
         """
         # 如果没有提供item参数，获取当前选中的任务项
         if item is None:
             item = self.task_tree.currentItem()
             if not item:
                 return
+        
+        # 调用执行引擎停止执行
+        self.engine.stop()
         
         # 更新任务状态为"已停止"
         task["status"] = "已停止"
