@@ -1488,6 +1488,9 @@ class MainWindow(QMainWindow):
         # 更新任务状态为"执行中"
         task["status"] = "执行中"
         
+        # 更新当前选中的任务
+        self.current_flow = task
+        
         # 将更新后的任务数据重新存储到树形控件项中
         item.setData(0, Qt.UserRole, task)
         
