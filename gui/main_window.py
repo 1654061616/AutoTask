@@ -564,11 +564,45 @@ class MainWindow(QMainWindow):
         
         # 创建"开始当前任务"按钮（绿色背景）
         self.start_task_btn = QPushButton("开始当前任务")
-        self.start_task_btn.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold; padding: 8px 20px;")
+        self.start_task_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #27ae60;
+                color: white;
+                font-weight: bold;
+                padding: 8px 20px;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #2ecc71;
+            }
+            QPushButton:disabled {
+                background-color: #95a5a6;
+                color: #bdc3c7;
+                font-weight: normal;
+            }
+        """)
         
         # 创建"停止当前任务"按钮（红色背景）
         self.stop_task_btn = QPushButton("停止当前任务")
-        self.stop_task_btn.setStyleSheet("background-color: #e74c3c; color: white; font-weight: bold; padding: 8px 20px;")
+        self.stop_task_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #e74c3c;
+                color: white;
+                font-weight: bold;
+                padding: 8px 20px;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #ec7063;
+            }
+            QPushButton:disabled {
+                background-color: #95a5a6;
+                color: #bdc3c7;
+                font-weight: normal;
+            }
+        """)
         self.stop_task_btn.setEnabled(False)  # 初始状态禁用，任务未执行时不能停止
         
         # 创建"编辑执行步骤"按钮（蓝色背景）
