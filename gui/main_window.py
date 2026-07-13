@@ -121,6 +121,7 @@ class MainWindow(QMainWindow):
     flow_started = Signal()       # 流程开始执行信号
     flow_stopped = Signal()       # 流程停止执行信号
     log_received = Signal(str)    # 日志接收信号，用于从后台线程更新GUI日志
+    task_completed = Signal(bool, str)  # 任务完成信号，参数：success(是否成功), error_message(错误信息)
     
     def __init__(self):
         """
@@ -159,6 +160,9 @@ class MainWindow(QMainWindow):
         
         # 注册日志回调函数到执行引擎的logger
         self.engine.logger.add_callback(self._on_engine_log)
+        
+        # 连接任务完成信号到槽方法
+        self.task_completed.connect(self._on_task_completed_slot)
         
         # 创建界面的所有控件
         self.init_ui()
@@ -391,9 +395,9 @@ class MainWindow(QMainWindow):
         # 创建任务树形控件，用于显示任务列表
         self.task_tree = QTreeWidget()
         
-        # 设置树形控件的列标题为["任务名称", "操作"]
-        # 操作列包含状态图标、保存图标、删除图标
-        self.task_tree.setHeaderLabels(["任务名称", "操作"])
+        # 设置树形控件的列标题为["任务名称", "任务状态"]
+        # 任务状态列包含状态图标、保存图标、删除图标
+        self.task_tree.setHeaderLabels(["任务名称", "任务状态"])
         
         # 设置第0列（任务名称）自动拉伸，填充可用空间
         self.task_tree.header().setSectionResizeMode(0, QHeaderView.Stretch)
@@ -565,6 +569,7 @@ class MainWindow(QMainWindow):
         # 创建"停止当前任务"按钮（红色背景）
         self.stop_task_btn = QPushButton("停止当前任务")
         self.stop_task_btn.setStyleSheet("background-color: #e74c3c; color: white; font-weight: bold; padding: 8px 20px;")
+        self.stop_task_btn.setEnabled(False)  # 初始状态禁用，任务未执行时不能停止
         
         # 创建"编辑执行步骤"按钮（蓝色背景）
         self.edit_steps_btn = QPushButton("编辑执行步骤")
@@ -1465,6 +1470,10 @@ class MainWindow(QMainWindow):
         # 在日志面板中添加记录
         self.log_panel.append(f"开始执行任务: {task['name']}")
         
+        # 禁用开始按钮，启用停止按钮
+        self.start_task_btn.setEnabled(False)
+        self.stop_task_btn.setEnabled(True)
+        
         # 构建完整的flow数据（节点图格式）
         flow_data = {
             "id": task["id"],
@@ -1479,6 +1488,9 @@ class MainWindow(QMainWindow):
         
         # 加载任务数据到执行引擎
         self.engine.load_flow(flow_data)
+        
+        # 注册任务完成回调
+        self.engine.add_completed_callback(self._on_task_completed)
         
         # 启动执行引擎（在后台线程中执行）
         self.engine.run()
@@ -1511,6 +1523,68 @@ class MainWindow(QMainWindow):
         """
         # 将日志添加到日志面板
         self.log_panel.append(log_entry)
+    
+    def _on_task_completed(self, success: bool, error_message: str):
+        """
+        任务完成回调方法: 当执行引擎任务完成时被调用
+        
+        参数:
+            success: 是否执行成功
+            error_message: 错误信息（如果失败）
+            
+        注意: 此方法在后台线程中执行，不能直接更新GUI控件
+              需要通过Qt信号机制切换到主线程更新GUI
+        """
+        # 通过信号机制将任务完成通知传递到主线程
+        self.task_completed.emit(success, error_message)
+    
+    @Slot(bool, str)
+    def _on_task_completed_slot(self, success: bool, error_message: str):
+        """
+        任务完成槽方法: 在主线程中处理任务完成逻辑
+        
+        参数:
+            success: 是否执行成功
+            error_message: 错误信息（如果失败）
+            
+        注意: 此方法通过Qt信号机制在主线程中执行，可以安全地更新GUI控件
+        """
+        # 如果有当前任务，更新状态为"已停止"
+        if self.current_flow:
+            current_item = None
+            # 查找当前任务在任务树中的项
+            for i in range(self.task_tree.topLevelItemCount()):
+                item = self.task_tree.topLevelItem(i)
+                if item.data(0, Qt.UserRole) == self.current_flow:
+                    current_item = item
+                    break
+            
+            if current_item:
+                # 更新任务状态为"已停止"
+                self.current_flow["status"] = "已停止"
+                current_item.setData(0, Qt.UserRole, self.current_flow)
+                
+                # 更新任务树中的状态图标（红色圆形）
+                self._update_status_widget(current_item, "已停止")
+                
+                # 更新右侧面板的任务状态标签
+                self.task_status_label.setText("已停止")
+                self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+        
+        # 更新状态栏显示
+        if success:
+            self.status_label.setText("任务执行完成")
+            self.log_panel.append("任务执行完成")
+        else:
+            self.status_label.setText("任务执行异常")
+            self.log_panel.append(f"任务执行异常: {error_message}")
+        
+        # 启用开始按钮，禁用停止按钮
+        self.start_task_btn.setEnabled(True)
+        self.stop_task_btn.setEnabled(False)
+        
+        # 发出flow_stopped信号，通知其他组件任务已停止
+        self.flow_stopped.emit()
     
     @Slot()
     def on_stop_flow(self):
@@ -1577,6 +1651,10 @@ class MainWindow(QMainWindow):
         
         # 在日志面板中添加记录
         self.log_panel.append(f"停止任务: {task['name']}")
+        
+        # 启用开始按钮，禁用停止按钮
+        self.start_task_btn.setEnabled(True)
+        self.stop_task_btn.setEnabled(False)
         
         # 发出flow_stopped信号，通知其他组件任务已停止
         self.flow_stopped.emit()

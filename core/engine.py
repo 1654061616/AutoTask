@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, Callable
 import threading
 import time
 from .parser import FlowParser
@@ -15,6 +15,17 @@ class FlowEngine:
         self.thread: Optional[threading.Thread] = None
         self.parser = FlowParser()
         self._init_operations()
+        self.completed_callbacks: List[Callable[[bool, str], None]] = []
+    
+    def add_completed_callback(self, callback: Callable[[bool, str], None]):
+        """添加任务完成回调函数，当任务完成或异常时调用"""
+        if callback not in self.completed_callbacks:
+            self.completed_callbacks.append(callback)
+    
+    def remove_completed_callback(self, callback: Callable[[bool, str], None]):
+        """移除任务完成回调函数"""
+        if callback in self.completed_callbacks:
+            self.completed_callbacks.remove(callback)
     
     def _init_operations(self):
         """初始化操作模块"""
@@ -52,6 +63,8 @@ class FlowEngine:
         self.thread.start()
     
     def _execute_flow(self):
+        success = True
+        error_message = ""
         try:
             self.logger.info("开始执行流程: {}".format(self.flow.get("name", "Unknown")))
             steps = self.flow.get("steps", [])
@@ -69,6 +82,8 @@ class FlowEngine:
                     self._execute_step(step)
                 except Exception as e:
                     self.logger.error(f"步骤执行失败: {str(e)}")
+                    success = False
+                    error_message = str(e)
                 
                 next_step_id = step.get("next_step")
                 if next_step_id:
@@ -77,9 +92,18 @@ class FlowEngine:
                     current_index += 1
             
             self.logger.info("流程执行完成")
+        except Exception as e:
+            self.logger.error(f"流程执行异常: {str(e)}")
+            success = False
+            error_message = str(e)
         finally:
             self.is_running = False
             self.current_step = None
+            for callback in self.completed_callbacks:
+                try:
+                    callback(success, error_message)
+                except Exception:
+                    pass
     
     def _execute_step(self, step: Dict[str, Any]):
         """
