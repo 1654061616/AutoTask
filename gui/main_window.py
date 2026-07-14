@@ -2348,28 +2348,32 @@ class MainWindow(QMainWindow):
         dialog = NodeEditorDialog(self.current_flow, parent=self)
         
         # 显示对话框（模态方式），并判断用户是否点击了"确定"按钮
-        if dialog.exec() == QDialog.Accepted:
-            # 获取节点图数据
-            graph_data = dialog.get_graph_data()
-            
-            # 清理对话框场景
-            dialog.cleanup()
-            
-            # 更新当前任务的节点和连线数据
-            self.current_flow["nodes"] = graph_data.get("nodes", [])
-            self.current_flow["edges"] = graph_data.get("edges", [])
-            
-            # 获取当前选中的任务项
-            current_item = self.task_tree.currentItem()
-            if current_item:
-                # 更新任务树中的任务数据
-                current_item.setData(0, Qt.UserRole, self.current_flow)
-            
-            # 重新加载节点图到场景中
-            self.load_nodes_from_flow(self.current_flow)
-            
-            # 在日志面板中添加记录
-            self.log_panel.append(f"已更新执行步骤: {self.current_flow['name']}")
+        try:
+            if dialog.exec() == QDialog.Accepted:
+                # 获取节点图数据
+                graph_data = dialog.get_graph_data()
+                
+                # 更新当前任务的节点和连线数据
+                self.current_flow["nodes"] = graph_data.get("nodes", [])
+                self.current_flow["edges"] = graph_data.get("edges", [])
+                
+                # 获取当前选中的任务项
+                current_item = self.task_tree.currentItem()
+                if current_item:
+                    # 更新任务树中的任务数据
+                    current_item.setData(0, Qt.UserRole, self.current_flow)
+                
+                # 重新加载节点图到场景中
+                self.load_nodes_from_flow(self.current_flow)
+                
+                # 在日志面板中添加记录
+                self.log_panel.append(f"已更新执行步骤: {self.current_flow['name']}")
+        finally:
+            # 无论用户点击确定还是取消，都清理对话框资源
+            try:
+                dialog.cleanup()
+            except Exception:
+                pass
     
     def load_nodes_from_flow(self, flow_data):
         """

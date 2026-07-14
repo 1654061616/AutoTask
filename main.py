@@ -32,7 +32,8 @@ def excepthook(exc_type, exc_value, exc_traceback):
     logging.error('=' * 80)
     logging.error('UNHANDLED EXCEPTION:')
     logging.error('=' * 80)
-    traceback.print_exception(exc_type, exc_value, exc_traceback, file=sys.stderr)
+    exc_info = ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+    logging.error(exc_info)
     logging.error('=' * 80)
     sys.__excepthook__(exc_type, exc_value, exc_traceback)
 

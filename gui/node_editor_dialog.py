@@ -176,6 +176,11 @@ class NodeEditorDialog(QDialog):
                     self.graph_scene.selectionChanged.disconnect(self._on_selection_changed)
                 except Exception:
                     pass
+            if hasattr(self, '_current_panel') and self._current_panel:
+                try:
+                    self._clear_current_panel()
+                except Exception:
+                    pass
         except Exception as e:
             print(f"关闭对话框时清理失败: {e}")
         event.accept()
@@ -183,7 +188,14 @@ class NodeEditorDialog(QDialog):
     def cleanup(self):
         try:
             if hasattr(self, 'graph_scene') and self.graph_scene:
-                self.graph_scene.clear_all()
+                try:
+                    self.graph_scene.selectionChanged.disconnect(self._on_selection_changed)
+                except Exception:
+                    pass
+                try:
+                    self.graph_scene.clear_all()
+                except Exception:
+                    pass
         except Exception as e:
             print(f"清理场景失败: {e}")
 
