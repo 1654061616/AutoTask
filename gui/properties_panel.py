@@ -160,6 +160,16 @@ class PropertiesPanel(QGroupBox):
                 QComboBox QAbstractItemView::item {
                     padding: 8px 12px;
                     height: 30px;
+                    color: #000000;
+                    background-color: #ffffff;
+                }
+                QComboBox QAbstractItemView::item:hover {
+                    color: #ffffff;
+                    background-color: #3498db;
+                }
+                QComboBox QAbstractItemView::item:selected {
+                    color: #ffffff;
+                    background-color: #2980b9;
                 }
             """)
             if value:
