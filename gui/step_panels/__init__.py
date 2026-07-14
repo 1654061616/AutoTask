@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QLineEdit,
                                QTextEdit, QComboBox, QCheckBox, QRadioButton,
                                QSlider, QPushButton, QFileDialog, QGroupBox,
-                               QFrame)
+                               QFrame, QListView)
 from PySide6.QtCore import Qt, Signal
 
 
@@ -184,18 +184,30 @@ class StepConfigPanel(QWidget):
                 border-top-right-radius: 3px;
                 border-bottom-right-radius: 3px;
             }
-            QComboBox QAbstractItemView {
+        """)
+        
+        list_view = QListView()
+        list_view.setStyleSheet("""
+            QListView {
                 color: #333333;
                 background-color: #ffffff;
-                selection-color: #ffffff;
-                selection-background-color: #3498db;
                 font-size: 13px;
             }
-            QComboBox QAbstractItemView::item {
+            QListView::item {
                 padding: 6px 10px;
                 height: 28px;
             }
+            QListView::item:selected {
+                color: #ffffff;
+                background-color: #3498db;
+            }
+            QListView::item:hover {
+                color: #ffffff;
+                background-color: #3498db;
+            }
         """)
+        combobox.setView(list_view)
+        
         return self.add_line(label_text, combobox)
 
     def add_checkbox(self, text, checked=False):

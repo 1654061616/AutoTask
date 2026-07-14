@@ -1,39 +1,8 @@
 from PySide6.QtWidgets import (QGroupBox, QFormLayout, QLineEdit, QComboBox,
                                QSpinBox, QDoubleSpinBox, QCheckBox, QTextEdit,
-                               QPushButton, QHBoxLayout, QLabel, QFileDialog,
-                               QStyledItemDelegate, QStyle)
-from PySide6.QtCore import Qt, Signal, QRect
-from PySide6.QtGui import QPainter, QColor, QFont
+                               QPushButton, QHBoxLayout, QLabel, QFileDialog)
+from PySide6.QtCore import Qt, Signal
 import json
-
-class ComboBoxDelegate(QStyledItemDelegate):
-    def paint(self, painter, option, index):
-        painter.save()
-        
-        text = index.data(Qt.DisplayRole)
-        
-        if option.state & QStyle.State_Selected:
-            painter.fillRect(option.rect, QColor("#3498db"))
-            painter.setPen(QColor("#ffffff"))
-        elif option.state & QStyle.State_MouseOver:
-            painter.fillRect(option.rect, QColor("#3498db"))
-            painter.setPen(QColor("#ffffff"))
-        else:
-            painter.fillRect(option.rect, QColor("#ffffff"))
-            painter.setPen(QColor("#000000"))
-        
-        font = QFont()
-        font.setPointSize(14)
-        painter.setFont(font)
-        
-        painter.drawText(option.rect.adjusted(12, 0, 0, 0), Qt.AlignVCenter, text)
-        
-        painter.restore()
-
-    def sizeHint(self, option, index):
-        size = super().sizeHint(option, index)
-        size.setHeight(30)
-        return size
 
 class PropertiesPanel(QGroupBox):
     properties_changed = Signal(dict)
@@ -159,31 +128,6 @@ class PropertiesPanel(QGroupBox):
         elif widget_type == "combo":
             widget = QComboBox()
             widget.addItems(params.get("options", []))
-            widget.setStyleSheet("""
-                QComboBox {
-                    color: #000000;
-                    background-color: #ffffff;
-                    border: 1px solid #cccccc;
-                    padding: 6px 10px;
-                    font-size: 14px;
-                    min-height: 28px;
-                }
-                QComboBox::drop-down {
-                    border-left: 1px solid #cccccc;
-                    width: 24px;
-                }
-                QComboBox::down-arrow {
-                    image: none;
-                    border-left: 5px solid transparent;
-                    border-right: 5px solid transparent;
-                    border-top: 5px solid #000000;
-                    margin-right: 8px;
-                }
-            """)
-            
-            delegate = ComboBoxDelegate(widget)
-            widget.setItemDelegate(delegate)
-            
             if value:
                 index = widget.findText(str(value))
                 if index >= 0:
