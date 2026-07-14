@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QComboBox,
-                               QCheckBox, QGroupBox, QTextEdit)
+                               QCheckBox, QGroupBox, QTextEdit, QListView)
 from PySide6.QtCore import Qt, Signal
 from . import StepConfigPanel
 
@@ -157,6 +157,14 @@ class KeyboardPressPanel(StepConfigPanel):
                 border-color: #3498db;
             }
         """)
+        key_view = QListView()
+        key_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.key_combo.setView(key_view)
         self.add_line("按键", self.key_combo)
 
         self.hold_duration_spin = self.add_double_spinbox("按住时长", 0, 10, 0.1, 2)
@@ -238,6 +246,14 @@ class KeyboardHotkeyPanel(StepConfigPanel):
                 border-color: #3498db;
             }
         """)
+        main_key_view = QListView()
+        main_key_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.main_key_combo.setView(main_key_view)
         self.add_line("主按键", self.main_key_combo)
 
         self.hold_duration_spin = self.add_double_spinbox("按住时长", 0, 10, 0.1, 2)

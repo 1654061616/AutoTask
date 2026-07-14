@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QLineEdit,
                                QComboBox, QCheckBox, QRadioButton, QSlider,
-                               QPushButton, QFileDialog, QGroupBox, QFrame)
+                               QPushButton, QFileDialog, QGroupBox, QFrame,
+                               QListView)
 from PySide6.QtCore import Qt, Signal
 from . import StepConfigPanel
 
@@ -102,6 +103,14 @@ class MouseClickPanel(StepConfigPanel):
             QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QComboBox:focus { border-color: #3498db; }
         """)
+        range_list_view = QListView()
+        range_list_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.find_range_combo.setView(range_list_view)
         image_layout.addWidget(self.find_range_combo)
 
         offset_layout = QHBoxLayout()
@@ -139,6 +148,14 @@ class MouseClickPanel(StepConfigPanel):
             QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QComboBox:focus { border-color: #3498db; }
         """)
+        rel_base_view = QListView()
+        rel_base_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.relative_base_combo.setView(rel_base_view)
         relative_layout.addWidget(self.relative_base_combo)
 
         rel_offset_layout = QHBoxLayout()
@@ -365,6 +382,14 @@ class MouseMovePanel(StepConfigPanel):
             QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QComboBox:focus { border-color: #3498db; }
         """)
+        rel_base_view = QListView()
+        rel_base_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.relative_base_combo.setView(rel_base_view)
         relative_layout.addWidget(self.relative_base_combo)
 
         rel_offset_layout = QHBoxLayout()

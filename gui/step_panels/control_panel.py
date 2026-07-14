@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QLineEdit, QTextEdit,
                                QComboBox, QCheckBox, QRadioButton, QSlider,
-                               QPushButton, QFileDialog, QGroupBox)
+                               QPushButton, QFileDialog, QGroupBox, QListView)
 from PySide6.QtCore import Qt, Signal
 from . import StepConfigPanel
 
@@ -57,6 +57,14 @@ class WaitPanel(StepConfigPanel):
             QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QComboBox:focus { border-color: #3498db; }
         """)
+        cond_type_view = QListView()
+        cond_type_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.condition_type_combo.setView(cond_type_view)
         condition_layout.addWidget(self.condition_type_combo)
 
         self.condition_param_group = QGroupBox("条件参数")
@@ -234,6 +242,14 @@ class IfElsePanel(StepConfigPanel):
             QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QComboBox:focus { border-color: #3498db; }
         """)
+        compare_op_view = QListView()
+        compare_op_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.compare_op_combo.setView(compare_op_view)
         value_layout.addRow("比较操作:", self.compare_op_combo)
 
         self.compare_value_edit = QLineEdit()
@@ -488,6 +504,14 @@ class LoopPanel(StepConfigPanel):
             QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QComboBox:focus { border-color: #3498db; }
         """)
+        cond_op_view = QListView()
+        cond_op_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.condition_op_combo.setView(cond_op_view)
         condition_layout.addRow("条件操作:", self.condition_op_combo)
 
         self.condition_value_edit = QLineEdit()
