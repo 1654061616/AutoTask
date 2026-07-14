@@ -130,27 +130,36 @@ class PropertiesPanel(QGroupBox):
             widget.addItems(params.get("options", []))
             widget.setStyleSheet("""
                 QComboBox {
-                    color: #333333;
+                    color: #000000;
                     background-color: #ffffff;
                     border: 1px solid #cccccc;
-                    padding: 4px 8px;
+                    padding: 6px 10px;
+                    font-size: 14px;
+                    min-height: 28px;
                 }
                 QComboBox::drop-down {
                     border-left: 1px solid #cccccc;
-                    width: 20px;
+                    width: 24px;
                 }
                 QComboBox::down-arrow {
                     image: none;
-                    border-left: 4px solid transparent;
-                    border-right: 4px solid transparent;
-                    border-top: 4px solid #333333;
-                    margin-right: 6px;
+                    border-left: 5px solid transparent;
+                    border-right: 5px solid transparent;
+                    border-top: 5px solid #000000;
+                    margin-right: 8px;
                 }
                 QComboBox QAbstractItemView {
-                    color: #333333;
+                    color: #000000;
                     background-color: #ffffff;
                     selection-color: #ffffff;
                     selection-background-color: #3498db;
+                    font-size: 14px;
+                    padding: 6px 10px;
+                    min-height: 28px;
+                }
+                QComboBox QAbstractItemView::item {
+                    padding: 8px 12px;
+                    height: 30px;
                 }
             """)
             if value:
