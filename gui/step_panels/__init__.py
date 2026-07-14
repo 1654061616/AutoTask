@@ -167,6 +167,8 @@ class StepConfigPanel(QWidget):
                 border-radius: 3px;
                 font-size: 13px;
                 min-width: 100px;
+                color: #333333;
+                background-color: #ffffff;
             }
             QComboBox:focus {
                 border-color: #3498db;
@@ -181,6 +183,17 @@ class StepConfigPanel(QWidget):
                 border-left-style: solid;
                 border-top-right-radius: 3px;
                 border-bottom-right-radius: 3px;
+            }
+            QComboBox QAbstractItemView {
+                color: #333333;
+                background-color: #ffffff;
+                selection-color: #ffffff;
+                selection-background-color: #3498db;
+                font-size: 13px;
+            }
+            QComboBox QAbstractItemView::item {
+                padding: 6px 10px;
+                height: 28px;
             }
         """)
         return self.add_line(label_text, combobox)
