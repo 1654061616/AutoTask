@@ -1,8 +1,39 @@
 from PySide6.QtWidgets import (QGroupBox, QFormLayout, QLineEdit, QComboBox,
                                QSpinBox, QDoubleSpinBox, QCheckBox, QTextEdit,
-                               QPushButton, QHBoxLayout, QLabel, QFileDialog)
-from PySide6.QtCore import Qt, Signal
+                               QPushButton, QHBoxLayout, QLabel, QFileDialog,
+                               QStyledItemDelegate, QStyle)
+from PySide6.QtCore import Qt, Signal, QRect
+from PySide6.QtGui import QPainter, QColor, QFont
 import json
+
+class ComboBoxDelegate(QStyledItemDelegate):
+    def paint(self, painter, option, index):
+        painter.save()
+        
+        text = index.data(Qt.DisplayRole)
+        
+        if option.state & QStyle.State_Selected:
+            painter.fillRect(option.rect, QColor("#3498db"))
+            painter.setPen(QColor("#ffffff"))
+        elif option.state & QStyle.State_MouseOver:
+            painter.fillRect(option.rect, QColor("#3498db"))
+            painter.setPen(QColor("#ffffff"))
+        else:
+            painter.fillRect(option.rect, QColor("#ffffff"))
+            painter.setPen(QColor("#000000"))
+        
+        font = QFont()
+        font.setPointSize(14)
+        painter.setFont(font)
+        
+        painter.drawText(option.rect.adjusted(12, 0, 0, 0), Qt.AlignVCenter, text)
+        
+        painter.restore()
+
+    def sizeHint(self, option, index):
+        size = super().sizeHint(option, index)
+        size.setHeight(30)
+        return size
 
 class PropertiesPanel(QGroupBox):
     properties_changed = Signal(dict)
@@ -150,28 +181,8 @@ class PropertiesPanel(QGroupBox):
                 }
             """)
             
-            view = widget.view()
-            view.setStyleSheet("""
-                QListView {
-                    color: #000000;
-                    background-color: #ffffff;
-                    font-size: 14px;
-                }
-                QListView::item {
-                    padding: 8px 12px;
-                    height: 30px;
-                    color: #000000;
-                    background-color: #ffffff;
-                }
-                QListView::item:hover {
-                    color: #ffffff;
-                    background-color: #3498db;
-                }
-                QListView::item:selected {
-                    color: #ffffff;
-                    background-color: #2980b9;
-                }
-            """)
+            delegate = ComboBoxDelegate(widget)
+            widget.setItemDelegate(delegate)
             
             if value:
                 index = widget.findText(str(value))
