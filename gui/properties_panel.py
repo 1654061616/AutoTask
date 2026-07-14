@@ -128,6 +128,31 @@ class PropertiesPanel(QGroupBox):
         elif widget_type == "combo":
             widget = QComboBox()
             widget.addItems(params.get("options", []))
+            widget.setStyleSheet("""
+                QComboBox {
+                    color: #333333;
+                    background-color: #ffffff;
+                    border: 1px solid #cccccc;
+                    padding: 4px 8px;
+                }
+                QComboBox::drop-down {
+                    border-left: 1px solid #cccccc;
+                    width: 20px;
+                }
+                QComboBox::down-arrow {
+                    image: none;
+                    border-left: 4px solid transparent;
+                    border-right: 4px solid transparent;
+                    border-top: 4px solid #333333;
+                    margin-right: 6px;
+                }
+                QComboBox QAbstractItemView {
+                    color: #333333;
+                    background-color: #ffffff;
+                    selection-color: #ffffff;
+                    selection-background-color: #3498db;
+                }
+            """)
             if value:
                 index = widget.findText(str(value))
                 if index >= 0:
