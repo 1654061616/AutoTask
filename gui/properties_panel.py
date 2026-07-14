@@ -148,30 +148,31 @@ class PropertiesPanel(QGroupBox):
                     border-top: 5px solid #000000;
                     margin-right: 8px;
                 }
-                QComboBox QAbstractItemView {
+            """)
+            
+            view = widget.view()
+            view.setStyleSheet("""
+                QListView {
                     color: #000000;
                     background-color: #ffffff;
-                    selection-color: #ffffff;
-                    selection-background-color: #3498db;
                     font-size: 14px;
-                    padding: 6px 10px;
-                    min-height: 28px;
                 }
-                QComboBox QAbstractItemView::item {
+                QListView::item {
                     padding: 8px 12px;
                     height: 30px;
                     color: #000000;
                     background-color: #ffffff;
                 }
-                QComboBox QAbstractItemView::item:hover {
+                QListView::item:hover {
                     color: #ffffff;
                     background-color: #3498db;
                 }
-                QComboBox QAbstractItemView::item:selected {
+                QListView::item:selected {
                     color: #ffffff;
                     background-color: #2980b9;
                 }
             """)
+            
             if value:
                 index = widget.findText(str(value))
                 if index >= 0:
