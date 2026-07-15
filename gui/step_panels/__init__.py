@@ -702,6 +702,9 @@ class ScreenshotOverlay(QDialog):
 
     def _get_cursor_pos(self):
         try:
+            class POINT(ctypes.Structure):
+                _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+            
             pt = POINT()
             user32.GetCursorPos(ctypes.byref(pt))
             return QPoint(pt.x, pt.y)
