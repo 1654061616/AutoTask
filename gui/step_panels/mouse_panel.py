@@ -31,7 +31,12 @@ class MouseClickPanel(StepConfigPanel):
         self.main_layout.addWidget(self.position_radio_group)
 
         self.screen_coord_group = QGroupBox("屏幕坐标")
-        screen_layout = QFormLayout(self.screen_coord_group)
+        screen_layout = QVBoxLayout(self.screen_coord_group)
+        
+        x_layout = QHBoxLayout()
+        x_label = QLabel("X坐标:")
+        x_label.setFixedWidth(50)
+        x_layout.addWidget(x_label)
         self.screen_x_spin = QSpinBox()
         self.screen_x_spin.setRange(0, 4000)
         self.screen_x_spin.setValue(0)
@@ -39,6 +44,13 @@ class MouseClickPanel(StepConfigPanel):
             QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QSpinBox:focus { border-color: #3498db; }
         """)
+        x_layout.addWidget(self.screen_x_spin)
+        screen_layout.addLayout(x_layout)
+        
+        y_layout = QHBoxLayout()
+        y_label = QLabel("Y坐标:")
+        y_label.setFixedWidth(50)
+        y_layout.addWidget(y_label)
         self.screen_y_spin = QSpinBox()
         self.screen_y_spin.setRange(0, 4000)
         self.screen_y_spin.setValue(0)
@@ -46,8 +58,17 @@ class MouseClickPanel(StepConfigPanel):
             QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QSpinBox:focus { border-color: #3498db; }
         """)
-        screen_layout.addRow("X坐标:", self.screen_x_spin)
-        screen_layout.addRow("Y坐标:", self.screen_y_spin)
+        y_layout.addWidget(self.screen_y_spin)
+        screen_layout.addLayout(y_layout)
+        
+        select_btn = QPushButton("选择坐标")
+        select_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
+                          background-color: #3498db; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        select_btn.clicked.connect(self._select_screen_coordinate)
+        screen_layout.addWidget(select_btn)
         self.main_layout.addWidget(self.screen_coord_group)
 
         self.image_group = QGroupBox("图片位置")
@@ -225,6 +246,12 @@ class MouseClickPanel(StepConfigPanel):
         self.image_group.setVisible(selected_index == 2)
         self.relative_group.setVisible(selected_index == 3)
 
+    def _select_screen_coordinate(self):
+        def on_coordinate_selected(x, y):
+            self.screen_x_spin.setValue(x)
+            self.screen_y_spin.setValue(y)
+        self._start_capture_coordinate(on_coordinate_selected)
+
     def get_config(self):
         position_type = self.position_radios.index([r for r in self.position_radios if r.isChecked()][0])
         position_types = ["current", "screen", "image", "relative"]
@@ -307,7 +334,12 @@ class MouseMovePanel(StepConfigPanel):
         self.main_layout.addWidget(self.position_radio_group)
 
         self.screen_coord_group = QGroupBox("屏幕坐标")
-        screen_layout = QFormLayout(self.screen_coord_group)
+        screen_layout = QVBoxLayout(self.screen_coord_group)
+        
+        x_layout = QHBoxLayout()
+        x_label = QLabel("X坐标:")
+        x_label.setFixedWidth(50)
+        x_layout.addWidget(x_label)
         self.screen_x_spin = QSpinBox()
         self.screen_x_spin.setRange(0, 4000)
         self.screen_x_spin.setValue(0)
@@ -315,6 +347,13 @@ class MouseMovePanel(StepConfigPanel):
             QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QSpinBox:focus { border-color: #3498db; }
         """)
+        x_layout.addWidget(self.screen_x_spin)
+        screen_layout.addLayout(x_layout)
+        
+        y_layout = QHBoxLayout()
+        y_label = QLabel("Y坐标:")
+        y_label.setFixedWidth(50)
+        y_layout.addWidget(y_label)
         self.screen_y_spin = QSpinBox()
         self.screen_y_spin.setRange(0, 4000)
         self.screen_y_spin.setValue(0)
@@ -322,8 +361,17 @@ class MouseMovePanel(StepConfigPanel):
             QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QSpinBox:focus { border-color: #3498db; }
         """)
-        screen_layout.addRow("X坐标:", self.screen_x_spin)
-        screen_layout.addRow("Y坐标:", self.screen_y_spin)
+        y_layout.addWidget(self.screen_y_spin)
+        screen_layout.addLayout(y_layout)
+        
+        select_btn = QPushButton("选择坐标")
+        select_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
+                          background-color: #3498db; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        select_btn.clicked.connect(self._select_screen_coordinate)
+        screen_layout.addWidget(select_btn)
         self.main_layout.addWidget(self.screen_coord_group)
 
         self.image_group = QGroupBox("图片位置")
@@ -443,6 +491,12 @@ class MouseMovePanel(StepConfigPanel):
         self.image_group.setVisible(selected_index == 1)
         self.relative_group.setVisible(selected_index == 2)
 
+    def _select_screen_coordinate(self):
+        def on_coordinate_selected(x, y):
+            self.screen_x_spin.setValue(x)
+            self.screen_y_spin.setValue(y)
+        self._start_capture_coordinate(on_coordinate_selected)
+
     def get_config(self):
         position_type = self.position_radios.index([r for r in self.position_radios if r.isChecked()][0])
         position_types = ["screen", "image", "relative"]
@@ -518,7 +572,12 @@ class MouseDragPanel(StepConfigPanel):
         self.main_layout.addWidget(self.start_radio_group)
 
         self.start_screen_group = QGroupBox("起点坐标")
-        start_screen_layout = QFormLayout(self.start_screen_group)
+        start_screen_layout = QVBoxLayout(self.start_screen_group)
+        
+        sx_layout = QHBoxLayout()
+        sx_label = QLabel("起点X:")
+        sx_label.setFixedWidth(55)
+        sx_layout.addWidget(sx_label)
         self.start_x_spin = QSpinBox()
         self.start_x_spin.setRange(0, 4000)
         self.start_x_spin.setValue(0)
@@ -526,6 +585,13 @@ class MouseDragPanel(StepConfigPanel):
             QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QSpinBox:focus { border-color: #3498db; }
         """)
+        sx_layout.addWidget(self.start_x_spin)
+        start_screen_layout.addLayout(sx_layout)
+        
+        sy_layout = QHBoxLayout()
+        sy_label = QLabel("起点Y:")
+        sy_label.setFixedWidth(55)
+        sy_layout.addWidget(sy_label)
         self.start_y_spin = QSpinBox()
         self.start_y_spin.setRange(0, 4000)
         self.start_y_spin.setValue(0)
@@ -533,8 +599,17 @@ class MouseDragPanel(StepConfigPanel):
             QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QSpinBox:focus { border-color: #3498db; }
         """)
-        start_screen_layout.addRow("起点X:", self.start_x_spin)
-        start_screen_layout.addRow("起点Y:", self.start_y_spin)
+        sy_layout.addWidget(self.start_y_spin)
+        start_screen_layout.addLayout(sy_layout)
+        
+        start_select_btn = QPushButton("选择起点")
+        start_select_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
+                          background-color: #3498db; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        start_select_btn.clicked.connect(self._select_start_coordinate)
+        start_screen_layout.addWidget(start_select_btn)
         self.main_layout.addWidget(self.start_screen_group)
 
         self.start_image_group = QGroupBox("起点图片")
@@ -598,7 +673,12 @@ class MouseDragPanel(StepConfigPanel):
         self.main_layout.addWidget(self.end_radio_group)
 
         self.end_screen_group = QGroupBox("终点坐标")
-        end_screen_layout = QFormLayout(self.end_screen_group)
+        end_screen_layout = QVBoxLayout(self.end_screen_group)
+        
+        ex_layout = QHBoxLayout()
+        ex_label = QLabel("终点X:")
+        ex_label.setFixedWidth(55)
+        ex_layout.addWidget(ex_label)
         self.end_x_spin = QSpinBox()
         self.end_x_spin.setRange(0, 4000)
         self.end_x_spin.setValue(0)
@@ -606,6 +686,13 @@ class MouseDragPanel(StepConfigPanel):
             QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QSpinBox:focus { border-color: #3498db; }
         """)
+        ex_layout.addWidget(self.end_x_spin)
+        end_screen_layout.addLayout(ex_layout)
+        
+        ey_layout = QHBoxLayout()
+        ey_label = QLabel("终点Y:")
+        ey_label.setFixedWidth(55)
+        ey_layout.addWidget(ey_label)
         self.end_y_spin = QSpinBox()
         self.end_y_spin.setRange(0, 4000)
         self.end_y_spin.setValue(0)
@@ -613,8 +700,17 @@ class MouseDragPanel(StepConfigPanel):
             QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
             QSpinBox:focus { border-color: #3498db; }
         """)
-        end_screen_layout.addRow("终点X:", self.end_x_spin)
-        end_screen_layout.addRow("终点Y:", self.end_y_spin)
+        ey_layout.addWidget(self.end_y_spin)
+        end_screen_layout.addLayout(ey_layout)
+        
+        end_select_btn = QPushButton("选择终点")
+        end_select_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
+                          background-color: #3498db; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        end_select_btn.clicked.connect(self._select_end_coordinate)
+        end_screen_layout.addWidget(end_select_btn)
         self.main_layout.addWidget(self.end_screen_group)
 
         self.end_image_group = QGroupBox("终点图片")
@@ -715,6 +811,18 @@ class MouseDragPanel(StepConfigPanel):
         self.end_screen_group.setVisible(end_index == 0)
         self.end_image_group.setVisible(end_index == 1)
         self.end_relative_group.setVisible(end_index == 2)
+
+    def _select_start_coordinate(self):
+        def on_coordinate_selected(x, y):
+            self.start_x_spin.setValue(x)
+            self.start_y_spin.setValue(y)
+        self._start_capture_coordinate(on_coordinate_selected)
+
+    def _select_end_coordinate(self):
+        def on_coordinate_selected(x, y):
+            self.end_x_spin.setValue(x)
+            self.end_y_spin.setValue(y)
+        self._start_capture_coordinate(on_coordinate_selected)
 
     def get_config(self):
         start_type = self.start_radios.index([r for r in self.start_radios if r.isChecked()][0])

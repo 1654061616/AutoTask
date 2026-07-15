@@ -1,10 +1,29 @@
 import os
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
+import ctypes
+from PySide6.QtWidgets import (QWidget, QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QLineEdit,
                                QTextEdit, QComboBox, QCheckBox, QRadioButton,
                                QSlider, QPushButton, QFileDialog, QGroupBox,
-                               QFrame, QListView)
+                               QFrame, QListView, QApplication)
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QPainter, QColor, QFont
+
+user32 = ctypes.windll.user32
+
+
+def get_virtual_screen_geometry():
+    try:
+        return (
+            user32.GetSystemMetrics(76),
+            user32.GetSystemMetrics(77),
+            user32.GetSystemMetrics(78),
+            user32.GetSystemMetrics(79)
+        )
+    except:
+        return 0, 0, user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+
+
+VX, VY, VW, VH = get_virtual_screen_geometry()
 
 
 class StepConfigPanel(QWidget):
@@ -23,6 +42,29 @@ class StepConfigPanel(QWidget):
                 font-size: 13px;
             }
         """)
+
+    def _start_capture_coordinate(self, callback):
+        app = QApplication.instance()
+        
+        windows_to_minimize = []
+        for widget in app.topLevelWidgets():
+            if hasattr(widget, 'windowTitle'):
+                title = widget.windowTitle()
+                if "AutoFlow" in title or "节点编辑器" in title:
+                    windows_to_minimize.append(widget)
+        
+        for w in windows_to_minimize:
+            w.showMinimized()
+
+        self._coord_callback = callback
+        self._coord_overlay = CoordOverlay(windows_to_minimize)
+        self._coord_overlay.coordinate_selected.connect(self._on_coordinate_selected)
+        self._coord_overlay.exec()
+
+    def _on_coordinate_selected(self, x, y):
+        if self._coord_callback:
+            self._coord_callback(x, y)
+        self._coord_overlay = None
 
     def get_config(self):
         raise NotImplementedError("Subclasses must implement get_config()")
@@ -496,6 +538,59 @@ class StepConfigPanel(QWidget):
 
         self.main_layout.addLayout(btn_layout)
         return confirm_btn, cancel_btn
+
+
+class CoordOverlay(QDialog):
+    coordinate_selected = Signal(int, int)
+
+    def __init__(self, windows_to_restore=None):
+        super().__init__()
+        self.windows_to_restore = windows_to_restore or []
+        self._init_ui()
+
+    def _init_ui(self):
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+    def showEvent(self, event):
+        self.setGeometry(VX, VY, VW, VH)
+        QApplication.setOverrideCursor(Qt.CrossCursor)
+        super().showEvent(event)
+
+    def hideEvent(self, event):
+        QApplication.restoreOverrideCursor()
+        super().hideEvent(event)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor(0, 0, 0, 50))
+        painter.setPen(QColor(255, 255, 255))
+        painter.setFont(QFont("Microsoft YaHei", 13))
+        painter.drawText(self.rect(), Qt.AlignCenter, "点击鼠标左键确认拾取 | 按 ESC 取消")
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            class POINT(ctypes.Structure):
+                _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+
+            pt = POINT()
+            user32.GetCursorPos(ctypes.byref(pt))
+            x, y = pt.x, pt.y
+
+            self.coordinate_selected.emit(x, y)
+            self._cleanup()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self._cleanup()
+
+    def _cleanup(self):
+        self.reject()
+        app = QApplication.instance()
+        app.processEvents()
+        for w in self.windows_to_restore:
+            w.showNormal()
 
 
 from .mouse_panel import (MouseClickPanel, MouseMovePanel, 
