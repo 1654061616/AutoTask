@@ -39,8 +39,24 @@ class ImageFindPanel(StepConfigPanel):
                 self.image_path_edit.setText(file_path)
 
         browse_btn.clicked.connect(browse_image)
+        
+        screenshot_btn = QPushButton("截图")
+        screenshot_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
+                          background-color: #3498db; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        
+        def capture_screenshot():
+            def on_screenshot_taken(image_path):
+                self.image_path_edit.setText(image_path)
+            self._start_capture_screenshot(on_screenshot_taken)
+        
+        screenshot_btn.clicked.connect(capture_screenshot)
+        
         file_layout.addWidget(self.image_path_edit)
         file_layout.addWidget(browse_btn)
+        file_layout.addWidget(screenshot_btn)
         self.main_layout.addLayout(file_layout)
 
         preview_group = QGroupBox("图片预览")
@@ -187,8 +203,24 @@ class ImageClickPanel(StepConfigPanel):
                 self.image_path_edit.setText(file_path)
 
         browse_btn.clicked.connect(browse_image)
+        
+        screenshot_btn = QPushButton("截图")
+        screenshot_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
+                          background-color: #3498db; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        
+        def capture_screenshot():
+            def on_screenshot_taken(image_path):
+                self.image_path_edit.setText(image_path)
+            self._start_capture_screenshot(on_screenshot_taken)
+        
+        screenshot_btn.clicked.connect(capture_screenshot)
+        
         file_layout.addWidget(self.image_path_edit)
         file_layout.addWidget(browse_btn)
+        file_layout.addWidget(screenshot_btn)
         self.main_layout.addLayout(file_layout)
 
         self.find_range_combo = self.add_combobox("查找范围", ["全屏", "当前窗口", "自定义区域"])
@@ -394,8 +426,24 @@ class ImageExistsPanel(StepConfigPanel):
                 self.image_path_edit.setText(file_path)
 
         browse_btn.clicked.connect(browse_image)
+        
+        screenshot_btn = QPushButton("截图")
+        screenshot_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
+                          background-color: #3498db; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        
+        def capture_screenshot():
+            def on_screenshot_taken(image_path):
+                self.image_path_edit.setText(image_path)
+            self._start_capture_screenshot(on_screenshot_taken)
+        
+        screenshot_btn.clicked.connect(capture_screenshot)
+        
         file_layout.addWidget(self.image_path_edit)
         file_layout.addWidget(browse_btn)
+        file_layout.addWidget(screenshot_btn)
         self.main_layout.addLayout(file_layout)
 
         self.find_range_combo = self.add_combobox("查找范围", ["全屏", "当前窗口", "自定义区域"])

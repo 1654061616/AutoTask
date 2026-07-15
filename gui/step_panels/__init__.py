@@ -1,12 +1,13 @@
 import os
 import ctypes
+from PIL import ImageGrab
 from PySide6.QtWidgets import (QWidget, QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QLineEdit,
                                QTextEdit, QComboBox, QCheckBox, QRadioButton,
                                QSlider, QPushButton, QFileDialog, QGroupBox,
                                QFrame, QListView, QApplication)
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QPainter, QColor, QFont
+from PySide6.QtCore import Qt, Signal, QPoint, QRect
+from PySide6.QtGui import QPainter, QColor, QFont, QPen, QCursor
 
 user32 = ctypes.windll.user32
 
@@ -65,6 +66,29 @@ class StepConfigPanel(QWidget):
         if self._coord_callback:
             self._coord_callback(x, y)
         self._coord_overlay = None
+
+    def _start_capture_screenshot(self, callback):
+        app = QApplication.instance()
+        
+        windows_to_minimize = []
+        for widget in app.topLevelWidgets():
+            if hasattr(widget, 'windowTitle'):
+                title = widget.windowTitle()
+                if "AutoFlow" in title or "节点编辑器" in title:
+                    windows_to_minimize.append(widget)
+        
+        for w in windows_to_minimize:
+            w.showMinimized()
+
+        self._screenshot_callback = callback
+        self._screenshot_overlay = ScreenshotOverlay(windows_to_minimize)
+        self._screenshot_overlay.screenshot_taken.connect(self._on_screenshot_taken)
+        self._screenshot_overlay.exec()
+
+    def _on_screenshot_taken(self, image_path):
+        if self._screenshot_callback:
+            self._screenshot_callback(image_path)
+        self._screenshot_overlay = None
 
     def get_config(self):
         raise NotImplementedError("Subclasses must implement get_config()")
@@ -584,6 +608,111 @@ class CoordOverlay(QDialog):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
             self._cleanup()
+
+    def _cleanup(self):
+        self.reject()
+        app = QApplication.instance()
+        app.processEvents()
+        for w in self.windows_to_restore:
+            w.showNormal()
+
+
+class ScreenshotOverlay(QDialog):
+    screenshot_taken = Signal(str)
+
+    def __init__(self, windows_to_restore=None):
+        super().__init__()
+        self.windows_to_restore = windows_to_restore or []
+        self.start_pos = None
+        self.end_pos = None
+        self.is_dragging = False
+        self._init_ui()
+
+    def _init_ui(self):
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+    def showEvent(self, event):
+        self.setGeometry(VX, VY, VW, VH)
+        QApplication.setOverrideCursor(Qt.CrossCursor)
+        super().showEvent(event)
+
+    def hideEvent(self, event):
+        QApplication.restoreOverrideCursor()
+        super().hideEvent(event)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor(0, 0, 0, 50))
+
+        if self.is_dragging and self.start_pos and self.end_pos:
+            rect = self._get_selection_rect()
+            painter.fillRect(rect, QColor(255, 255, 255, 50))
+            
+            pen = QPen(QColor(0, 150, 255), 2)
+            painter.setPen(pen)
+            painter.drawRect(rect)
+
+            painter.setPen(QColor(255, 255, 255))
+            painter.setFont(QFont("Microsoft YaHei", 12))
+            width = rect.width()
+            height = rect.height()
+            painter.drawText(rect.topRight() + QPoint(5, 15), f"{width} x {height}")
+
+        painter.setPen(QColor(255, 255, 255))
+        painter.setFont(QFont("Microsoft YaHei", 13))
+        painter.drawText(self.rect(), Qt.AlignCenter, "拖拽选择区域 | 松开鼠标完成截图 | 按 ESC 取消")
+
+    def _get_selection_rect(self):
+        x1 = min(self.start_pos.x(), self.end_pos.x())
+        y1 = min(self.start_pos.y(), self.end_pos.y())
+        x2 = max(self.start_pos.x(), self.end_pos.x())
+        y2 = max(self.start_pos.y(), self.end_pos.y())
+        return QRect(x1, y1, x2 - x1, y2 - y1)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.start_pos = event.globalPos()
+            self.is_dragging = True
+
+    def mouseMoveEvent(self, event):
+        if self.is_dragging and self.start_pos:
+            self.end_pos = event.globalPos()
+            self.update()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton and self.is_dragging:
+            self.is_dragging = False
+            if self.start_pos and self.end_pos:
+                rect = self._get_selection_rect()
+                if rect.width() > 10 and rect.height() > 10:
+                    self._take_screenshot(rect)
+                else:
+                    self.start_pos = None
+                    self.end_pos = None
+                    self.update()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self._cleanup()
+
+    def _take_screenshot(self, rect):
+        screenshot = ImageGrab.grab(bbox=(rect.left(), rect.top(), rect.right(), rect.bottom()))
+        
+        save_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources", "image")
+        os.makedirs(save_dir, exist_ok=True)
+        
+        timestamp = os.path.getmtime(__file__)
+        import time
+        timestamp = int(time.time())
+        filename = f"screenshot_{timestamp}.png"
+        save_path = os.path.join(save_dir, filename)
+        
+        screenshot.save(save_path)
+        
+        self.screenshot_taken.emit(save_path)
+        self._cleanup()
 
     def _cleanup(self):
         self.reject()

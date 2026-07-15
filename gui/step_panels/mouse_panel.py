@@ -97,8 +97,24 @@ class MouseClickPanel(StepConfigPanel):
                 self.image_path_edit.setText(file_path)
 
         browse_btn.clicked.connect(browse_image)
+        
+        screenshot_btn = QPushButton("截图")
+        screenshot_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
+                          background-color: #3498db; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        
+        def capture_screenshot():
+            def on_screenshot_taken(image_path):
+                self.image_path_edit.setText(image_path)
+            self._start_capture_screenshot(on_screenshot_taken)
+        
+        screenshot_btn.clicked.connect(capture_screenshot)
+        
         file_layout.addWidget(self.image_path_edit)
         file_layout.addWidget(browse_btn)
+        file_layout.addWidget(screenshot_btn)
         image_layout.addLayout(file_layout)
 
         slider_layout = QVBoxLayout()
@@ -400,8 +416,24 @@ class MouseMovePanel(StepConfigPanel):
                 self.image_path_edit.setText(file_path)
 
         browse_btn.clicked.connect(browse_image)
+        
+        screenshot_btn = QPushButton("截图")
+        screenshot_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
+                          background-color: #3498db; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #2980b9; }
+        """)
+        
+        def capture_screenshot():
+            def on_screenshot_taken(image_path):
+                self.image_path_edit.setText(image_path)
+            self._start_capture_screenshot(on_screenshot_taken)
+        
+        screenshot_btn.clicked.connect(capture_screenshot)
+        
         file_layout.addWidget(self.image_path_edit)
         file_layout.addWidget(browse_btn)
+        file_layout.addWidget(screenshot_btn)
         image_layout.addLayout(file_layout)
 
         slider_layout = QVBoxLayout()
