@@ -647,24 +647,31 @@ class ScreenshotOverlay(QDialog):
         painter.fillRect(self.rect(), QColor(0, 0, 0, 50))
 
         if self.is_dragging and self.start_pos and self.end_pos:
-            rect = self._get_selection_rect()
-            painter.fillRect(rect, QColor(255, 255, 255, 50))
+            draw_rect = self._get_draw_rect()
+            painter.fillRect(draw_rect, QColor(255, 255, 255, 50))
             
             pen = QPen(QColor(0, 150, 255), 2)
             painter.setPen(pen)
-            painter.drawRect(rect)
+            painter.drawRect(draw_rect)
 
             painter.setPen(QColor(255, 255, 255))
             painter.setFont(QFont("Microsoft YaHei", 12))
-            width = rect.width()
-            height = rect.height()
-            painter.drawText(rect.topRight() + QPoint(5, 15), f"{width} x {height}")
+            width = draw_rect.width()
+            height = draw_rect.height()
+            painter.drawText(draw_rect.topRight() + QPoint(5, 15), f"{width} x {height}")
 
         painter.setPen(QColor(255, 255, 255))
         painter.setFont(QFont("Microsoft YaHei", 13))
         painter.drawText(self.rect(), Qt.AlignCenter, "拖拽选择区域 | 松开鼠标完成截图 | 按 ESC 取消")
 
-    def _get_selection_rect(self):
+    def _get_draw_rect(self):
+        x1 = min(self.start_pos.x(), self.end_pos.x()) - VX
+        y1 = min(self.start_pos.y(), self.end_pos.y()) - VY
+        x2 = max(self.start_pos.x(), self.end_pos.x()) - VX
+        y2 = max(self.start_pos.y(), self.end_pos.y()) - VY
+        return QRect(x1, y1, x2 - x1, y2 - y1)
+
+    def _get_screen_rect(self):
         x1 = min(self.start_pos.x(), self.end_pos.x())
         y1 = min(self.start_pos.y(), self.end_pos.y())
         x2 = max(self.start_pos.x(), self.end_pos.x())
@@ -673,25 +680,33 @@ class ScreenshotOverlay(QDialog):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.start_pos = event.globalPos()
+            self.start_pos = self._get_cursor_pos()
             self.is_dragging = True
 
     def mouseMoveEvent(self, event):
         if self.is_dragging and self.start_pos:
-            self.end_pos = event.globalPos()
+            self.end_pos = self._get_cursor_pos()
             self.update()
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and self.is_dragging:
             self.is_dragging = False
             if self.start_pos and self.end_pos:
-                rect = self._get_selection_rect()
+                rect = self._get_screen_rect()
                 if rect.width() > 10 and rect.height() > 10:
                     self._take_screenshot(rect)
                 else:
                     self.start_pos = None
                     self.end_pos = None
                     self.update()
+
+    def _get_cursor_pos(self):
+        try:
+            pt = POINT()
+            user32.GetCursorPos(ctypes.byref(pt))
+            return QPoint(pt.x, pt.y)
+        except:
+            return QPoint(0, 0)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
