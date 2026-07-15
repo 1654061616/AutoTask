@@ -176,6 +176,24 @@ class MouseClickPanel(StepConfigPanel):
         offset_layout.addWidget(QLabel("Y"))
         offset_layout.addWidget(self.image_offset_y_spin)
         image_layout.addLayout(offset_layout)
+
+        wait_layout = QHBoxLayout()
+        wait_layout.setSpacing(8)
+        self.wait_find_check = QCheckBox("等待找到图片")
+        self.wait_find_check.setStyleSheet("QCheckBox { spacing: 8px; }")
+        wait_layout.addWidget(self.wait_find_check)
+        wait_layout.addWidget(QLabel("超时时间:"))
+        self.wait_timeout_spin = QSpinBox()
+        self.wait_timeout_spin.setRange(1, 300)
+        self.wait_timeout_spin.setValue(10)
+        self.wait_timeout_spin.setStyleSheet("""
+            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
+            QSpinBox:focus { border-color: #3498db; }
+        """)
+        wait_layout.addWidget(self.wait_timeout_spin)
+        wait_layout.addWidget(QLabel("秒"))
+        wait_layout.addStretch()
+        image_layout.addLayout(wait_layout)
         self.main_layout.addWidget(self.image_group)
 
         self.relative_group = QGroupBox("相对坐标")
@@ -250,6 +268,7 @@ class MouseClickPanel(StepConfigPanel):
     def _connect_signals(self):
         for radio in self.position_radios:
             radio.toggled.connect(self._update_position_visibility)
+        self.wait_find_check.toggled.connect(self._update_wait_timeout_visibility)
 
     def _update_position_visibility(self):
         selected_index = -1
@@ -261,6 +280,9 @@ class MouseClickPanel(StepConfigPanel):
         self.screen_coord_group.setVisible(selected_index == 1)
         self.image_group.setVisible(selected_index == 2)
         self.relative_group.setVisible(selected_index == 3)
+
+    def _update_wait_timeout_visibility(self):
+        self.wait_timeout_spin.setVisible(self.wait_find_check.isChecked())
 
     def _select_screen_coordinate(self):
         def on_coordinate_selected(x, y):
@@ -289,6 +311,8 @@ class MouseClickPanel(StepConfigPanel):
             config["find_range"] = self.find_range_combo.currentText()
             config["offset_x"] = self.image_offset_x_spin.value()
             config["offset_y"] = self.image_offset_y_spin.value()
+            config["wait_find"] = self.wait_find_check.isChecked()
+            config["wait_timeout"] = self.wait_timeout_spin.value()
         elif position_type == 3:
             config["relative_base"] = ["last_click", "last_move", "current"][self.relative_base_combo.currentIndex()]
             config["relative_x"] = self.relative_x_spin.value()
@@ -316,6 +340,8 @@ class MouseClickPanel(StepConfigPanel):
         self.find_range_combo.setCurrentText(config.get("find_range", "全屏"))
         self.image_offset_x_spin.setValue(config.get("offset_x", 0))
         self.image_offset_y_spin.setValue(config.get("offset_y", 0))
+        self.wait_find_check.setChecked(config.get("wait_find", False))
+        self.wait_timeout_spin.setValue(config.get("wait_timeout", 10))
 
         relative_base_map = {"last_click": 0, "last_move": 1, "current": 2}
         self.relative_base_combo.setCurrentIndex(relative_base_map.get(config.get("relative_base", "last_click"), 0))
@@ -323,6 +349,7 @@ class MouseClickPanel(StepConfigPanel):
         self.relative_y_spin.setValue(config.get("relative_y", 0))
 
         self._update_position_visibility()
+        self._update_wait_timeout_visibility()
 
 
 class MouseMovePanel(StepConfigPanel):
@@ -453,6 +480,24 @@ class MouseMovePanel(StepConfigPanel):
         slider_layout.addWidget(self.similarity_slider)
         slider_layout.addWidget(self.similarity_value_label)
         image_layout.addLayout(slider_layout)
+
+        wait_layout = QHBoxLayout()
+        wait_layout.setSpacing(8)
+        self.wait_find_check = QCheckBox("等待找到图片")
+        self.wait_find_check.setStyleSheet("QCheckBox { spacing: 8px; }")
+        wait_layout.addWidget(self.wait_find_check)
+        wait_layout.addWidget(QLabel("超时时间:"))
+        self.wait_timeout_spin = QSpinBox()
+        self.wait_timeout_spin.setRange(1, 300)
+        self.wait_timeout_spin.setValue(10)
+        self.wait_timeout_spin.setStyleSheet("""
+            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
+            QSpinBox:focus { border-color: #3498db; }
+        """)
+        wait_layout.addWidget(self.wait_timeout_spin)
+        wait_layout.addWidget(QLabel("秒"))
+        wait_layout.addStretch()
+        image_layout.addLayout(wait_layout)
         self.main_layout.addWidget(self.image_group)
 
         self.relative_group = QGroupBox("相对坐标")
@@ -511,6 +556,7 @@ class MouseMovePanel(StepConfigPanel):
     def _connect_signals(self):
         for radio in self.position_radios:
             radio.toggled.connect(self._update_position_visibility)
+        self.wait_find_check.toggled.connect(self._update_wait_timeout_visibility)
 
     def _update_position_visibility(self):
         selected_index = -1
@@ -522,6 +568,9 @@ class MouseMovePanel(StepConfigPanel):
         self.screen_coord_group.setVisible(selected_index == 0)
         self.image_group.setVisible(selected_index == 1)
         self.relative_group.setVisible(selected_index == 2)
+
+    def _update_wait_timeout_visibility(self):
+        self.wait_timeout_spin.setVisible(self.wait_find_check.isChecked())
 
     def _select_screen_coordinate(self):
         def on_coordinate_selected(x, y):
@@ -547,6 +596,8 @@ class MouseMovePanel(StepConfigPanel):
         elif position_type == 1:
             config["image_path"] = self.image_path_edit.text()
             config["similarity"] = self.similarity_slider.value() / 100
+            config["wait_find"] = self.wait_find_check.isChecked()
+            config["wait_timeout"] = self.wait_timeout_spin.value()
         elif position_type == 2:
             config["relative_base"] = ["last_click", "last_move", "current"][self.relative_base_combo.currentIndex()]
             config["relative_x"] = self.relative_x_spin.value()
@@ -572,6 +623,8 @@ class MouseMovePanel(StepConfigPanel):
 
         self.image_path_edit.setText(config.get("image_path", ""))
         self.similarity_slider.setValue(int(config.get("similarity", 0.9) * 100))
+        self.wait_find_check.setChecked(config.get("wait_find", False))
+        self.wait_timeout_spin.setValue(config.get("wait_timeout", 10))
 
         relative_base_map = {"last_click": 0, "last_move": 1, "current": 2}
         self.relative_base_combo.setCurrentIndex(relative_base_map.get(config.get("relative_base", "last_click"), 0))
@@ -579,6 +632,7 @@ class MouseMovePanel(StepConfigPanel):
         self.relative_y_spin.setValue(config.get("relative_y", 0))
 
         self._update_position_visibility()
+        self._update_wait_timeout_visibility()
 
 
 class MouseDragPanel(StepConfigPanel):
@@ -690,6 +744,24 @@ class MouseDragPanel(StepConfigPanel):
         start_slider_layout.addWidget(self.start_similarity_slider)
         start_slider_layout.addWidget(self.start_similarity_value_label)
         start_image_layout.addLayout(start_slider_layout)
+
+        start_wait_layout = QHBoxLayout()
+        start_wait_layout.setSpacing(8)
+        self.start_wait_find_check = QCheckBox("等待找到图片")
+        self.start_wait_find_check.setStyleSheet("QCheckBox { spacing: 8px; }")
+        start_wait_layout.addWidget(self.start_wait_find_check)
+        start_wait_layout.addWidget(QLabel("超时时间:"))
+        self.start_wait_timeout_spin = QSpinBox()
+        self.start_wait_timeout_spin.setRange(1, 300)
+        self.start_wait_timeout_spin.setValue(10)
+        self.start_wait_timeout_spin.setStyleSheet("""
+            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
+            QSpinBox:focus { border-color: #3498db; }
+        """)
+        start_wait_layout.addWidget(self.start_wait_timeout_spin)
+        start_wait_layout.addWidget(QLabel("秒"))
+        start_wait_layout.addStretch()
+        start_image_layout.addLayout(start_wait_layout)
         self.main_layout.addWidget(self.start_image_group)
 
         self.end_radio_group = QGroupBox("终点类型")
@@ -791,6 +863,24 @@ class MouseDragPanel(StepConfigPanel):
         end_slider_layout.addWidget(self.end_similarity_slider)
         end_slider_layout.addWidget(self.end_similarity_value_label)
         end_image_layout.addLayout(end_slider_layout)
+
+        end_wait_layout = QHBoxLayout()
+        end_wait_layout.setSpacing(8)
+        self.end_wait_find_check = QCheckBox("等待找到图片")
+        self.end_wait_find_check.setStyleSheet("QCheckBox { spacing: 8px; }")
+        end_wait_layout.addWidget(self.end_wait_find_check)
+        end_wait_layout.addWidget(QLabel("超时时间:"))
+        self.end_wait_timeout_spin = QSpinBox()
+        self.end_wait_timeout_spin.setRange(1, 300)
+        self.end_wait_timeout_spin.setValue(10)
+        self.end_wait_timeout_spin.setStyleSheet("""
+            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
+            QSpinBox:focus { border-color: #3498db; }
+        """)
+        end_wait_layout.addWidget(self.end_wait_timeout_spin)
+        end_wait_layout.addWidget(QLabel("秒"))
+        end_wait_layout.addStretch()
+        end_image_layout.addLayout(end_wait_layout)
         self.main_layout.addWidget(self.end_image_group)
 
         self.end_relative_group = QGroupBox("相对起点")
@@ -833,6 +923,8 @@ class MouseDragPanel(StepConfigPanel):
             radio.toggled.connect(self._update_visibility)
         for radio in self.end_radios:
             radio.toggled.connect(self._update_visibility)
+        self.start_wait_find_check.toggled.connect(self._update_start_wait_timeout_visibility)
+        self.end_wait_find_check.toggled.connect(self._update_end_wait_timeout_visibility)
 
     def _update_visibility(self):
         start_index = self.start_radios.index([r for r in self.start_radios if r.isChecked()][0])
@@ -843,6 +935,12 @@ class MouseDragPanel(StepConfigPanel):
         self.end_screen_group.setVisible(end_index == 0)
         self.end_image_group.setVisible(end_index == 1)
         self.end_relative_group.setVisible(end_index == 2)
+
+    def _update_start_wait_timeout_visibility(self):
+        self.start_wait_timeout_spin.setVisible(self.start_wait_find_check.isChecked())
+
+    def _update_end_wait_timeout_visibility(self):
+        self.end_wait_timeout_spin.setVisible(self.end_wait_find_check.isChecked())
 
     def _select_start_coordinate(self):
         def on_coordinate_selected(x, y):
@@ -874,6 +972,8 @@ class MouseDragPanel(StepConfigPanel):
         elif start_type == 1:
             config["start_image_path"] = self.start_image_edit.text()
             config["start_similarity"] = self.start_similarity_slider.value() / 100
+            config["start_wait_find"] = self.start_wait_find_check.isChecked()
+            config["start_wait_timeout"] = self.start_wait_timeout_spin.value()
 
         if end_type == 0:
             config["end_x"] = self.end_x_spin.value()
@@ -881,6 +981,8 @@ class MouseDragPanel(StepConfigPanel):
         elif end_type == 1:
             config["end_image_path"] = self.end_image_edit.text()
             config["end_similarity"] = self.end_similarity_slider.value() / 100
+            config["end_wait_find"] = self.end_wait_find_check.isChecked()
+            config["end_wait_timeout"] = self.end_wait_timeout_spin.value()
         elif end_type == 2:
             config["relative_x"] = self.end_relative_x_spin.value()
             config["relative_y"] = self.end_relative_y_spin.value()
@@ -906,15 +1008,21 @@ class MouseDragPanel(StepConfigPanel):
         self.start_y_spin.setValue(config.get("start_y", 0))
         self.start_image_edit.setText(config.get("start_image_path", ""))
         self.start_similarity_slider.setValue(int(config.get("start_similarity", 0.9) * 100))
+        self.start_wait_find_check.setChecked(config.get("start_wait_find", False))
+        self.start_wait_timeout_spin.setValue(config.get("start_wait_timeout", 10))
 
         self.end_x_spin.setValue(config.get("end_x", 0))
         self.end_y_spin.setValue(config.get("end_y", 0))
         self.end_image_edit.setText(config.get("end_image_path", ""))
         self.end_similarity_slider.setValue(int(config.get("end_similarity", 0.9) * 100))
+        self.end_wait_find_check.setChecked(config.get("end_wait_find", False))
+        self.end_wait_timeout_spin.setValue(config.get("end_wait_timeout", 10))
         self.end_relative_x_spin.setValue(config.get("relative_x", 0))
         self.end_relative_y_spin.setValue(config.get("relative_y", 0))
 
         self._update_visibility()
+        self._update_start_wait_timeout_visibility()
+        self._update_end_wait_timeout_visibility()
 
 
 class MouseScrollPanel(StepConfigPanel):
