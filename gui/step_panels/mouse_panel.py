@@ -21,7 +21,7 @@ class MouseClickPanel(StepConfigPanel):
         self.position_radio_group = QGroupBox("点击位置")
         position_layout = QVBoxLayout(self.position_radio_group)
         self.position_radios = []
-        position_options = ["当前位置", "屏幕坐标", "图片位置", "相对坐标"]
+        position_options = ["当前位置", "屏幕坐标", "相对坐标"]
         for i, option in enumerate(position_options):
             radio = QRadioButton(option)
             if i == 0:
@@ -70,131 +70,6 @@ class MouseClickPanel(StepConfigPanel):
         select_btn.clicked.connect(self._select_screen_coordinate)
         screen_layout.addWidget(select_btn)
         self.main_layout.addWidget(self.screen_coord_group)
-
-        self.image_group = QGroupBox("图片位置")
-        image_layout = QVBoxLayout(self.image_group)
-
-        file_layout = QHBoxLayout()
-        file_layout.setSpacing(8)
-        file_label = QLabel("图片路径:")
-        file_label.setFixedWidth(60)
-        file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        file_layout.addWidget(file_label)
-        self.image_path_edit = QLineEdit()
-        self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
-        browse_btn = QPushButton("浏览")
-        browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
-
-        def browse_image():
-            file_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
-            if file_path:
-                self.image_path_edit.setText(file_path)
-
-        browse_btn.clicked.connect(browse_image)
-        
-        screenshot_btn = QPushButton("截图")
-        screenshot_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
-                          background-color: #3498db; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #2980b9; }
-        """)
-        
-        def capture_screenshot():
-            def on_screenshot_taken(image_path):
-                self.image_path_edit.setText(image_path)
-            self._start_capture_screenshot(on_screenshot_taken)
-        
-        screenshot_btn.clicked.connect(capture_screenshot)
-        
-        file_layout.addWidget(self.image_path_edit)
-        file_layout.addWidget(browse_btn)
-        file_layout.addWidget(screenshot_btn)
-        image_layout.addLayout(file_layout)
-
-        slider_layout = QVBoxLayout()
-        slider_label = QLabel("相似度:")
-        slider_layout.addWidget(slider_label)
-        self.similarity_slider = QSlider(Qt.Horizontal)
-        self.similarity_slider.setRange(0, 100)
-        self.similarity_slider.setValue(90)
-        self.similarity_slider.setTickPosition(QSlider.TicksBelow)
-        self.similarity_slider.setTickInterval(10)
-        self.similarity_value_label = QLabel("0.90")
-        self.similarity_value_label.setAlignment(Qt.AlignCenter)
-        self.similarity_value_label.setStyleSheet("color: #27ae60; font-weight: bold;")
-        self.similarity_slider.valueChanged.connect(
-            lambda val: self.similarity_value_label.setText(f"{val / 100:.2f}")
-        )
-        slider_layout.addWidget(self.similarity_slider)
-        slider_layout.addWidget(self.similarity_value_label)
-        image_layout.addLayout(slider_layout)
-
-        self.find_range_combo = QComboBox()
-        self.find_range_combo.addItems(["全屏", "当前窗口", "自定义区域"])
-        self.find_range_combo.setStyleSheet("""
-            QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QComboBox:focus { border-color: #3498db; }
-        """)
-        range_list_view = QListView()
-        range_list_view.setStyleSheet("""
-            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
-            QListView::item { padding: 6px 10px; height: 28px; }
-            QListView::item:selected { color: #ffffff; background-color: #3498db; }
-            QListView::item:hover { color: #ffffff; background-color: #3498db; }
-        """)
-        self.find_range_combo.setView(range_list_view)
-        image_layout.addWidget(self.find_range_combo)
-
-        offset_layout = QHBoxLayout()
-        offset_layout.setSpacing(8)
-        offset_label = QLabel("相对偏移:")
-        offset_label.setFixedWidth(60)
-        offset_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        offset_layout.addWidget(offset_label)
-        self.image_offset_x_spin = QSpinBox()
-        self.image_offset_x_spin.setRange(-1000, 1000)
-        self.image_offset_x_spin.setValue(0)
-        self.image_offset_x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
-        self.image_offset_y_spin = QSpinBox()
-        self.image_offset_y_spin.setRange(-1000, 1000)
-        self.image_offset_y_spin.setValue(0)
-        self.image_offset_y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
-        offset_layout.addWidget(QLabel("X"))
-        offset_layout.addWidget(self.image_offset_x_spin)
-        offset_layout.addWidget(QLabel("Y"))
-        offset_layout.addWidget(self.image_offset_y_spin)
-        image_layout.addLayout(offset_layout)
-
-        wait_layout = QHBoxLayout()
-        wait_layout.setSpacing(8)
-        self.wait_find_check = QCheckBox("等待找到图片")
-        self.wait_find_check.setStyleSheet("QCheckBox { spacing: 8px; }")
-        wait_layout.addWidget(self.wait_find_check)
-        wait_layout.addWidget(QLabel("超时时间:"))
-        self.wait_timeout_spin = QSpinBox()
-        self.wait_timeout_spin.setRange(1, 300)
-        self.wait_timeout_spin.setValue(10)
-        self.wait_timeout_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
-        wait_layout.addWidget(self.wait_timeout_spin)
-        wait_layout.addWidget(QLabel("秒"))
-        wait_layout.addStretch()
-        image_layout.addLayout(wait_layout)
-        self.main_layout.addWidget(self.image_group)
 
         self.relative_group = QGroupBox("相对坐标")
         relative_layout = QVBoxLayout(self.relative_group)
@@ -268,7 +143,6 @@ class MouseClickPanel(StepConfigPanel):
     def _connect_signals(self):
         for radio in self.position_radios:
             radio.toggled.connect(self._update_position_visibility)
-        self.wait_find_check.toggled.connect(self._update_wait_timeout_visibility)
 
     def _update_position_visibility(self):
         selected_index = -1
@@ -278,11 +152,7 @@ class MouseClickPanel(StepConfigPanel):
                 break
 
         self.screen_coord_group.setVisible(selected_index == 1)
-        self.image_group.setVisible(selected_index == 2)
-        self.relative_group.setVisible(selected_index == 3)
-
-    def _update_wait_timeout_visibility(self):
-        self.wait_timeout_spin.setVisible(self.wait_find_check.isChecked())
+        self.relative_group.setVisible(selected_index == 2)
 
     def _select_screen_coordinate(self):
         def on_coordinate_selected(x, y):
@@ -292,7 +162,7 @@ class MouseClickPanel(StepConfigPanel):
 
     def get_config(self):
         position_type = self.position_radios.index([r for r in self.position_radios if r.isChecked()][0])
-        position_types = ["current", "screen", "image", "relative"]
+        position_types = ["current", "screen", "relative"]
 
         config = {
             "click_type": ["left_single", "left_double", "right_single", "middle_single"][self.click_type_combo.currentIndex()],
@@ -306,14 +176,6 @@ class MouseClickPanel(StepConfigPanel):
             config["x"] = self.screen_x_spin.value()
             config["y"] = self.screen_y_spin.value()
         elif position_type == 2:
-            config["image_path"] = self.image_path_edit.text()
-            config["similarity"] = self.similarity_slider.value() / 100
-            config["find_range"] = self.find_range_combo.currentText()
-            config["offset_x"] = self.image_offset_x_spin.value()
-            config["offset_y"] = self.image_offset_y_spin.value()
-            config["wait_find"] = self.wait_find_check.isChecked()
-            config["wait_timeout"] = self.wait_timeout_spin.value()
-        elif position_type == 3:
             config["relative_base"] = ["last_click", "last_move", "current"][self.relative_base_combo.currentIndex()]
             config["relative_x"] = self.relative_x_spin.value()
             config["relative_y"] = self.relative_y_spin.value()
@@ -324,7 +186,7 @@ class MouseClickPanel(StepConfigPanel):
         click_type_map = {"left_single": 0, "left_double": 1, "right_single": 2, "middle_single": 3}
         self.click_type_combo.setCurrentIndex(click_type_map.get(config.get("click_type", "left_single"), 0))
 
-        position_type_map = {"current": 0, "screen": 1, "image": 2, "relative": 3}
+        position_type_map = {"current": 0, "screen": 1, "relative": 2}
         position_type = position_type_map.get(config.get("position_type", "current"), 0)
         self.position_radios[position_type].setChecked(True)
 
@@ -335,21 +197,12 @@ class MouseClickPanel(StepConfigPanel):
         self.screen_x_spin.setValue(config.get("x", 0))
         self.screen_y_spin.setValue(config.get("y", 0))
 
-        self.image_path_edit.setText(config.get("image_path", ""))
-        self.similarity_slider.setValue(int(config.get("similarity", 0.9) * 100))
-        self.find_range_combo.setCurrentText(config.get("find_range", "全屏"))
-        self.image_offset_x_spin.setValue(config.get("offset_x", 0))
-        self.image_offset_y_spin.setValue(config.get("offset_y", 0))
-        self.wait_find_check.setChecked(config.get("wait_find", False))
-        self.wait_timeout_spin.setValue(config.get("wait_timeout", 10))
-
         relative_base_map = {"last_click": 0, "last_move": 1, "current": 2}
         self.relative_base_combo.setCurrentIndex(relative_base_map.get(config.get("relative_base", "last_click"), 0))
         self.relative_x_spin.setValue(config.get("relative_x", 0))
         self.relative_y_spin.setValue(config.get("relative_y", 0))
 
         self._update_position_visibility()
-        self._update_wait_timeout_visibility()
 
 
 class MouseMovePanel(StepConfigPanel):
@@ -367,7 +220,7 @@ class MouseMovePanel(StepConfigPanel):
         self.position_radio_group = QGroupBox("移动位置")
         position_layout = QVBoxLayout(self.position_radio_group)
         self.position_radios = []
-        position_options = ["屏幕坐标", "图片位置", "相对坐标"]
+        position_options = ["屏幕坐标", "相对坐标"]
         for i, option in enumerate(position_options):
             radio = QRadioButton(option)
             if i == 0:
@@ -416,89 +269,6 @@ class MouseMovePanel(StepConfigPanel):
         select_btn.clicked.connect(self._select_screen_coordinate)
         screen_layout.addWidget(select_btn)
         self.main_layout.addWidget(self.screen_coord_group)
-
-        self.image_group = QGroupBox("图片位置")
-        image_layout = QVBoxLayout(self.image_group)
-
-        file_layout = QHBoxLayout()
-        file_layout.setSpacing(8)
-        file_label = QLabel("图片路径:")
-        file_label.setFixedWidth(60)
-        file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        file_layout.addWidget(file_label)
-        self.image_path_edit = QLineEdit()
-        self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
-        browse_btn = QPushButton("浏览")
-        browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
-
-        def browse_image():
-            file_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
-            if file_path:
-                self.image_path_edit.setText(file_path)
-
-        browse_btn.clicked.connect(browse_image)
-        
-        screenshot_btn = QPushButton("截图")
-        screenshot_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
-                          background-color: #3498db; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #2980b9; }
-        """)
-        
-        def capture_screenshot():
-            def on_screenshot_taken(image_path):
-                self.image_path_edit.setText(image_path)
-            self._start_capture_screenshot(on_screenshot_taken)
-        
-        screenshot_btn.clicked.connect(capture_screenshot)
-        
-        file_layout.addWidget(self.image_path_edit)
-        file_layout.addWidget(browse_btn)
-        file_layout.addWidget(screenshot_btn)
-        image_layout.addLayout(file_layout)
-
-        slider_layout = QVBoxLayout()
-        slider_label = QLabel("相似度:")
-        slider_layout.addWidget(slider_label)
-        self.similarity_slider = QSlider(Qt.Horizontal)
-        self.similarity_slider.setRange(0, 100)
-        self.similarity_slider.setValue(90)
-        self.similarity_slider.setTickPosition(QSlider.TicksBelow)
-        self.similarity_slider.setTickInterval(10)
-        self.similarity_value_label = QLabel("0.90")
-        self.similarity_value_label.setAlignment(Qt.AlignCenter)
-        self.similarity_value_label.setStyleSheet("color: #27ae60; font-weight: bold;")
-        self.similarity_slider.valueChanged.connect(
-            lambda val: self.similarity_value_label.setText(f"{val / 100:.2f}")
-        )
-        slider_layout.addWidget(self.similarity_slider)
-        slider_layout.addWidget(self.similarity_value_label)
-        image_layout.addLayout(slider_layout)
-
-        wait_layout = QHBoxLayout()
-        wait_layout.setSpacing(8)
-        self.wait_find_check = QCheckBox("等待找到图片")
-        self.wait_find_check.setStyleSheet("QCheckBox { spacing: 8px; }")
-        wait_layout.addWidget(self.wait_find_check)
-        wait_layout.addWidget(QLabel("超时时间:"))
-        self.wait_timeout_spin = QSpinBox()
-        self.wait_timeout_spin.setRange(1, 300)
-        self.wait_timeout_spin.setValue(10)
-        self.wait_timeout_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
-        wait_layout.addWidget(self.wait_timeout_spin)
-        wait_layout.addWidget(QLabel("秒"))
-        wait_layout.addStretch()
-        image_layout.addLayout(wait_layout)
-        self.main_layout.addWidget(self.image_group)
 
         self.relative_group = QGroupBox("相对坐标")
         relative_layout = QVBoxLayout(self.relative_group)
@@ -556,7 +326,6 @@ class MouseMovePanel(StepConfigPanel):
     def _connect_signals(self):
         for radio in self.position_radios:
             radio.toggled.connect(self._update_position_visibility)
-        self.wait_find_check.toggled.connect(self._update_wait_timeout_visibility)
 
     def _update_position_visibility(self):
         selected_index = -1
@@ -566,11 +335,7 @@ class MouseMovePanel(StepConfigPanel):
                 break
 
         self.screen_coord_group.setVisible(selected_index == 0)
-        self.image_group.setVisible(selected_index == 1)
-        self.relative_group.setVisible(selected_index == 2)
-
-    def _update_wait_timeout_visibility(self):
-        self.wait_timeout_spin.setVisible(self.wait_find_check.isChecked())
+        self.relative_group.setVisible(selected_index == 1)
 
     def _select_screen_coordinate(self):
         def on_coordinate_selected(x, y):
@@ -580,7 +345,7 @@ class MouseMovePanel(StepConfigPanel):
 
     def get_config(self):
         position_type = self.position_radios.index([r for r in self.position_radios if r.isChecked()][0])
-        position_types = ["screen", "image", "relative"]
+        position_types = ["screen", "relative"]
 
         config = {
             "move_type": ["linear", "ease", "random"][self.move_type_combo.currentIndex()],
@@ -594,11 +359,6 @@ class MouseMovePanel(StepConfigPanel):
             config["x"] = self.screen_x_spin.value()
             config["y"] = self.screen_y_spin.value()
         elif position_type == 1:
-            config["image_path"] = self.image_path_edit.text()
-            config["similarity"] = self.similarity_slider.value() / 100
-            config["wait_find"] = self.wait_find_check.isChecked()
-            config["wait_timeout"] = self.wait_timeout_spin.value()
-        elif position_type == 2:
             config["relative_base"] = ["last_click", "last_move", "current"][self.relative_base_combo.currentIndex()]
             config["relative_x"] = self.relative_x_spin.value()
             config["relative_y"] = self.relative_y_spin.value()
@@ -611,7 +371,7 @@ class MouseMovePanel(StepConfigPanel):
 
         self.duration_spin.setValue(config.get("duration", 0.5))
 
-        position_type_map = {"screen": 0, "image": 1, "relative": 2}
+        position_type_map = {"screen": 0, "relative": 1}
         position_type = position_type_map.get(config.get("position_type", "screen"), 0)
         self.position_radios[position_type].setChecked(True)
 
@@ -621,18 +381,12 @@ class MouseMovePanel(StepConfigPanel):
         self.screen_x_spin.setValue(config.get("x", 0))
         self.screen_y_spin.setValue(config.get("y", 0))
 
-        self.image_path_edit.setText(config.get("image_path", ""))
-        self.similarity_slider.setValue(int(config.get("similarity", 0.9) * 100))
-        self.wait_find_check.setChecked(config.get("wait_find", False))
-        self.wait_timeout_spin.setValue(config.get("wait_timeout", 10))
-
         relative_base_map = {"last_click": 0, "last_move": 1, "current": 2}
         self.relative_base_combo.setCurrentIndex(relative_base_map.get(config.get("relative_base", "last_click"), 0))
         self.relative_x_spin.setValue(config.get("relative_x", 0))
         self.relative_y_spin.setValue(config.get("relative_y", 0))
 
         self._update_position_visibility()
-        self._update_wait_timeout_visibility()
 
 
 class MouseDragPanel(StepConfigPanel):
@@ -644,18 +398,6 @@ class MouseDragPanel(StepConfigPanel):
         self.add_section_title("鼠标拖拽配置")
 
         self.drag_button_combo = self.add_combobox("拖拽按钮", ["左键", "右键", "中键"])
-
-        self.start_radio_group = QGroupBox("起点类型")
-        start_layout = QVBoxLayout(self.start_radio_group)
-        self.start_radios = []
-        start_options = ["屏幕坐标", "图片位置"]
-        for i, option in enumerate(start_options):
-            radio = QRadioButton(option)
-            if i == 0:
-                radio.setChecked(True)
-            self.start_radios.append(radio)
-            start_layout.addWidget(radio)
-        self.main_layout.addWidget(self.start_radio_group)
 
         self.start_screen_group = QGroupBox("起点坐标")
         start_screen_layout = QVBoxLayout(self.start_screen_group)
@@ -698,76 +440,10 @@ class MouseDragPanel(StepConfigPanel):
         start_screen_layout.addWidget(start_select_btn)
         self.main_layout.addWidget(self.start_screen_group)
 
-        self.start_image_group = QGroupBox("起点图片")
-        start_image_layout = QVBoxLayout(self.start_image_group)
-        file_layout = QHBoxLayout()
-        file_layout.setSpacing(8)
-        file_label = QLabel("图片路径:")
-        file_label.setFixedWidth(60)
-        file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        file_layout.addWidget(file_label)
-        self.start_image_edit = QLineEdit()
-        self.start_image_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
-        browse_btn = QPushButton("浏览")
-        browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
-
-        def browse_start_image():
-            file_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
-            if file_path:
-                self.start_image_edit.setText(file_path)
-
-        browse_btn.clicked.connect(browse_start_image)
-        file_layout.addWidget(self.start_image_edit)
-        file_layout.addWidget(browse_btn)
-        start_image_layout.addLayout(file_layout)
-
-        start_slider_layout = QVBoxLayout()
-        start_slider_label = QLabel("相似度:")
-        start_slider_layout.addWidget(start_slider_label)
-        self.start_similarity_slider = QSlider(Qt.Horizontal)
-        self.start_similarity_slider.setRange(0, 100)
-        self.start_similarity_slider.setValue(90)
-        self.start_similarity_slider.setTickPosition(QSlider.TicksBelow)
-        self.start_similarity_slider.setTickInterval(10)
-        self.start_similarity_value_label = QLabel("0.90")
-        self.start_similarity_value_label.setAlignment(Qt.AlignCenter)
-        self.start_similarity_value_label.setStyleSheet("color: #27ae60; font-weight: bold;")
-        self.start_similarity_slider.valueChanged.connect(
-            lambda val: self.start_similarity_value_label.setText(f"{val / 100:.2f}")
-        )
-        start_slider_layout.addWidget(self.start_similarity_slider)
-        start_slider_layout.addWidget(self.start_similarity_value_label)
-        start_image_layout.addLayout(start_slider_layout)
-
-        start_wait_layout = QHBoxLayout()
-        start_wait_layout.setSpacing(8)
-        self.start_wait_find_check = QCheckBox("等待找到图片")
-        self.start_wait_find_check.setStyleSheet("QCheckBox { spacing: 8px; }")
-        start_wait_layout.addWidget(self.start_wait_find_check)
-        start_wait_layout.addWidget(QLabel("超时时间:"))
-        self.start_wait_timeout_spin = QSpinBox()
-        self.start_wait_timeout_spin.setRange(1, 300)
-        self.start_wait_timeout_spin.setValue(10)
-        self.start_wait_timeout_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
-        start_wait_layout.addWidget(self.start_wait_timeout_spin)
-        start_wait_layout.addWidget(QLabel("秒"))
-        start_wait_layout.addStretch()
-        start_image_layout.addLayout(start_wait_layout)
-        self.main_layout.addWidget(self.start_image_group)
-
         self.end_radio_group = QGroupBox("终点类型")
         end_layout = QVBoxLayout(self.end_radio_group)
         self.end_radios = []
-        end_options = ["屏幕坐标", "图片位置", "相对起点"]
+        end_options = ["屏幕坐标", "相对起点"]
         for i, option in enumerate(end_options):
             radio = QRadioButton(option)
             if i == 0:
@@ -817,72 +493,6 @@ class MouseDragPanel(StepConfigPanel):
         end_screen_layout.addWidget(end_select_btn)
         self.main_layout.addWidget(self.end_screen_group)
 
-        self.end_image_group = QGroupBox("终点图片")
-        end_image_layout = QVBoxLayout(self.end_image_group)
-        end_file_layout = QHBoxLayout()
-        end_file_layout.setSpacing(8)
-        end_file_label = QLabel("图片路径:")
-        end_file_label.setFixedWidth(60)
-        end_file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        end_file_layout.addWidget(end_file_label)
-        self.end_image_edit = QLineEdit()
-        self.end_image_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
-        end_browse_btn = QPushButton("浏览")
-        end_browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
-
-        def browse_end_image():
-            file_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
-            if file_path:
-                self.end_image_edit.setText(file_path)
-
-        end_browse_btn.clicked.connect(browse_end_image)
-        end_file_layout.addWidget(self.end_image_edit)
-        end_file_layout.addWidget(end_browse_btn)
-        end_image_layout.addLayout(end_file_layout)
-
-        end_slider_layout = QVBoxLayout()
-        end_slider_label = QLabel("相似度:")
-        end_slider_layout.addWidget(end_slider_label)
-        self.end_similarity_slider = QSlider(Qt.Horizontal)
-        self.end_similarity_slider.setRange(0, 100)
-        self.end_similarity_slider.setValue(90)
-        self.end_similarity_slider.setTickPosition(QSlider.TicksBelow)
-        self.end_similarity_slider.setTickInterval(10)
-        self.end_similarity_value_label = QLabel("0.90")
-        self.end_similarity_value_label.setAlignment(Qt.AlignCenter)
-        self.end_similarity_value_label.setStyleSheet("color: #27ae60; font-weight: bold;")
-        self.end_similarity_slider.valueChanged.connect(
-            lambda val: self.end_similarity_value_label.setText(f"{val / 100:.2f}")
-        )
-        end_slider_layout.addWidget(self.end_similarity_slider)
-        end_slider_layout.addWidget(self.end_similarity_value_label)
-        end_image_layout.addLayout(end_slider_layout)
-
-        end_wait_layout = QHBoxLayout()
-        end_wait_layout.setSpacing(8)
-        self.end_wait_find_check = QCheckBox("等待找到图片")
-        self.end_wait_find_check.setStyleSheet("QCheckBox { spacing: 8px; }")
-        end_wait_layout.addWidget(self.end_wait_find_check)
-        end_wait_layout.addWidget(QLabel("超时时间:"))
-        self.end_wait_timeout_spin = QSpinBox()
-        self.end_wait_timeout_spin.setRange(1, 300)
-        self.end_wait_timeout_spin.setValue(10)
-        self.end_wait_timeout_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
-        end_wait_layout.addWidget(self.end_wait_timeout_spin)
-        end_wait_layout.addWidget(QLabel("秒"))
-        end_wait_layout.addStretch()
-        end_image_layout.addLayout(end_wait_layout)
-        self.main_layout.addWidget(self.end_image_group)
-
         self.end_relative_group = QGroupBox("相对起点")
         end_relative_layout = QHBoxLayout(self.end_relative_group)
         end_relative_layout.setSpacing(8)
@@ -919,28 +529,14 @@ class MouseDragPanel(StepConfigPanel):
         self._update_visibility()
 
     def _connect_signals(self):
-        for radio in self.start_radios:
-            radio.toggled.connect(self._update_visibility)
         for radio in self.end_radios:
             radio.toggled.connect(self._update_visibility)
-        self.start_wait_find_check.toggled.connect(self._update_start_wait_timeout_visibility)
-        self.end_wait_find_check.toggled.connect(self._update_end_wait_timeout_visibility)
 
     def _update_visibility(self):
-        start_index = self.start_radios.index([r for r in self.start_radios if r.isChecked()][0])
         end_index = self.end_radios.index([r for r in self.end_radios if r.isChecked()][0])
 
-        self.start_screen_group.setVisible(start_index == 0)
-        self.start_image_group.setVisible(start_index == 1)
         self.end_screen_group.setVisible(end_index == 0)
-        self.end_image_group.setVisible(end_index == 1)
-        self.end_relative_group.setVisible(end_index == 2)
-
-    def _update_start_wait_timeout_visibility(self):
-        self.start_wait_timeout_spin.setVisible(self.start_wait_find_check.isChecked())
-
-    def _update_end_wait_timeout_visibility(self):
-        self.end_wait_timeout_spin.setVisible(self.end_wait_find_check.isChecked())
+        self.end_relative_group.setVisible(end_index == 1)
 
     def _select_start_coordinate(self):
         def on_coordinate_selected(x, y):
@@ -955,35 +551,23 @@ class MouseDragPanel(StepConfigPanel):
         self._start_capture_coordinate(on_coordinate_selected)
 
     def get_config(self):
-        start_type = self.start_radios.index([r for r in self.start_radios if r.isChecked()][0])
         end_type = self.end_radios.index([r for r in self.end_radios if r.isChecked()][0])
 
         config = {
             "button": ["left", "right", "middle"][self.drag_button_combo.currentIndex()],
-            "start_type": ["screen", "image"][start_type],
-            "end_type": ["screen", "image", "relative"][end_type],
+            "start_type": "screen",
+            "end_type": ["screen", "relative"][end_type],
             "duration": self.drag_duration_spin.value(),
             "delay": self.delay_spin.value()
         }
 
-        if start_type == 0:
-            config["start_x"] = self.start_x_spin.value()
-            config["start_y"] = self.start_y_spin.value()
-        elif start_type == 1:
-            config["start_image_path"] = self.start_image_edit.text()
-            config["start_similarity"] = self.start_similarity_slider.value() / 100
-            config["start_wait_find"] = self.start_wait_find_check.isChecked()
-            config["start_wait_timeout"] = self.start_wait_timeout_spin.value()
+        config["start_x"] = self.start_x_spin.value()
+        config["start_y"] = self.start_y_spin.value()
 
         if end_type == 0:
             config["end_x"] = self.end_x_spin.value()
             config["end_y"] = self.end_y_spin.value()
         elif end_type == 1:
-            config["end_image_path"] = self.end_image_edit.text()
-            config["end_similarity"] = self.end_similarity_slider.value() / 100
-            config["end_wait_find"] = self.end_wait_find_check.isChecked()
-            config["end_wait_timeout"] = self.end_wait_timeout_spin.value()
-        elif end_type == 2:
             config["relative_x"] = self.end_relative_x_spin.value()
             config["relative_y"] = self.end_relative_y_spin.value()
 
@@ -993,11 +577,7 @@ class MouseDragPanel(StepConfigPanel):
         button_map = {"left": 0, "right": 1, "middle": 2}
         self.drag_button_combo.setCurrentIndex(button_map.get(config.get("button", "left"), 0))
 
-        start_type_map = {"screen": 0, "image": 1}
-        start_type = start_type_map.get(config.get("start_type", "screen"), 0)
-        self.start_radios[start_type].setChecked(True)
-
-        end_type_map = {"screen": 0, "image": 1, "relative": 2}
+        end_type_map = {"screen": 0, "relative": 1}
         end_type = end_type_map.get(config.get("end_type", "screen"), 0)
         self.end_radios[end_type].setChecked(True)
 
@@ -1006,23 +586,13 @@ class MouseDragPanel(StepConfigPanel):
 
         self.start_x_spin.setValue(config.get("start_x", 0))
         self.start_y_spin.setValue(config.get("start_y", 0))
-        self.start_image_edit.setText(config.get("start_image_path", ""))
-        self.start_similarity_slider.setValue(int(config.get("start_similarity", 0.9) * 100))
-        self.start_wait_find_check.setChecked(config.get("start_wait_find", False))
-        self.start_wait_timeout_spin.setValue(config.get("start_wait_timeout", 10))
 
         self.end_x_spin.setValue(config.get("end_x", 0))
         self.end_y_spin.setValue(config.get("end_y", 0))
-        self.end_image_edit.setText(config.get("end_image_path", ""))
-        self.end_similarity_slider.setValue(int(config.get("end_similarity", 0.9) * 100))
-        self.end_wait_find_check.setChecked(config.get("end_wait_find", False))
-        self.end_wait_timeout_spin.setValue(config.get("end_wait_timeout", 10))
         self.end_relative_x_spin.setValue(config.get("relative_x", 0))
         self.end_relative_y_spin.setValue(config.get("relative_y", 0))
 
         self._update_visibility()
-        self._update_start_wait_timeout_visibility()
-        self._update_end_wait_timeout_visibility()
 
 
 class MouseScrollPanel(StepConfigPanel):
