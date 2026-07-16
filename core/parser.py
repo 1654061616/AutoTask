@@ -72,20 +72,47 @@ class FlowParser:
                     "type": node_type,
                     "name": self._get_step_name(node_type),
                     "config": node.get("config", {}),
-                    "next_step": None
+                    "next_step": None,
+                    "true_step": None,
+                    "false_step": None
                 }
                 steps.append(step)
             
-            # 查找下一个节点
+            # 查找下一个节点（支持分支路径）
+            for edge in edges:
+                if edge["source_node"] == current_node_id:
+                    source_port = edge.get("source_port", "")
+                    target_node_id = edge["target_node"]
+                    target_node_type = node_map.get(target_node_id, {}).get("type")
+                    
+                    # 设置分支路径（包括指向end节点的情况）
+                    if len(steps) > 0:
+                        if source_port == "True":
+                            steps[-1]["true_step"] = target_node_id if target_node_type != "end" else None
+                        elif source_port == "False":
+                            steps[-1]["false_step"] = target_node_id if target_node_type != "end" else None
+                        elif not steps[-1]["next_step"] and target_node_type != "end":
+                            steps[-1]["next_step"] = target_node_id
+            
+            # 处理线性路径（没有分支的情况）
+            if len(steps) > 0 and not steps[-1]["next_step"] and not steps[-1]["true_step"] and not steps[-1]["false_step"]:
+                for edge in edges:
+                    if edge["source_node"] == current_node_id:
+                        target_node_id = edge["target_node"]
+                        if node_map.get(target_node_id, {}).get("type") != "end":
+                            steps[-1]["next_step"] = target_node_id
+                            break
+            
+            # 找到下一个节点继续遍历（使用next_step作为默认路径）
             next_node_id = None
             for edge in edges:
                 if edge["source_node"] == current_node_id:
-                    next_node_id = edge["target_node"]
-                    break
-            
-            # 设置前一个步骤的next_step
-            if len(steps) > 0:
-                steps[-1]["next_step"] = next_node_id if next_node_id and node_map.get(next_node_id, {}).get("type") != "end" else None
+                    source_port = edge.get("source_port", "")
+                    # 使用非分支端口或第一个分支端口作为遍历路径
+                    if source_port not in ["True", "False"] or next_node_id is None:
+                        next_node_id = edge["target_node"]
+                        if node_map.get(next_node_id, {}).get("type") != "end":
+                            break
             
             current_node_id = next_node_id
         

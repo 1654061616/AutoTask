@@ -78,18 +78,41 @@ class FlowEngine:
                 self.current_step = step
                 self.logger.info(f"执行步骤: {step.get('name', step.get('id'))}")
                 
+                step_result = None
                 try:
-                    self._execute_step(step)
+                    step_result = self._execute_step(step)
                 except Exception as e:
                     self.logger.error(f"步骤执行失败: {str(e)}")
                     success = False
                     error_message = str(e)
                 
-                next_step_id = step.get("next_step")
-                if next_step_id:
-                    current_index = self._find_step_index(next_step_id)
+                # 判断是否需要走分支路径
+                true_step_id = step.get("true_step")
+                false_step_id = step.get("false_step")
+                
+                if true_step_id is not None or false_step_id is not None:
+                    # 分支节点，根据执行结果决定走哪个分支
+                    if step_result:
+                        self.logger.info(f"执行结果为True，走True分支")
+                        if true_step_id:
+                            current_index = self._find_step_index(true_step_id)
+                        else:
+                            self.logger.info("True分支连接到end节点，流程结束")
+                            current_index = len(steps)
+                    else:
+                        self.logger.info(f"执行结果为False，走False分支")
+                        if false_step_id:
+                            current_index = self._find_step_index(false_step_id)
+                        else:
+                            self.logger.info("False分支连接到end节点，流程结束")
+                            current_index = len(steps)
                 else:
-                    current_index += 1
+                    # 线性执行
+                    next_step_id = step.get("next_step")
+                    if next_step_id:
+                        current_index = self._find_step_index(next_step_id)
+                    else:
+                        current_index += 1
             
             self.logger.info("流程执行完成")
         except Exception as e:
@@ -111,9 +134,13 @@ class FlowEngine:
         
         参数:
             step: 步骤字典，包含type和config字段
+        
+        返回:
+            step_result: 步骤执行结果，对于分支节点返回True/False，其他节点返回None
         """
         step_type = step["type"]
         config = step.get("config", {})
+        step_result = None
         
         # 执行步骤前等待
         wait_before = step.get("wait_before")
@@ -141,11 +168,11 @@ class FlowEngine:
             elif step_type == "wait":
                 self._execute_wait(config)
             elif step_type == "image_find":
-                self._execute_image_find(config)
+                step_result = self._execute_image_find(config)
             elif step_type == "image_click":
-                self._execute_image_click(config)
+                step_result = self._execute_image_click(config)
             elif step_type == "image_exists":
-                self._execute_image_exists(config)
+                step_result = self._execute_image_exists(config)
             elif step_type == "window_find":
                 self._execute_window_find(config)
             elif step_type == "window_activate":
@@ -163,6 +190,8 @@ class FlowEngine:
         wait_after = step.get("wait_after")
         if wait_after:
             self._execute_wait(wait_after)
+        
+        return step_result
     
     def _execute_mouse_click(self, config):
         """执行鼠标点击操作"""
@@ -265,7 +294,7 @@ class FlowEngine:
         """执行图片查找操作"""
         if not self.image_recognition:
             self.logger.error("图像识别模块未加载")
-            return
+            return False
         
         image_path = config.get("image_path", "")
         region = config.get("region")
@@ -274,17 +303,18 @@ class FlowEngine:
         result = self.image_recognition.find_image(image_path, region=region)
         if result:
             self.logger.info(f"找到图片: {result}")
-            # 将查找结果保存到变量
             self.variable_manager.set_variable("image_result", result)
+            return True
         else:
             self.logger.info("未找到图片")
             self.variable_manager.set_variable("image_result", None)
+            return False
     
     def _execute_image_click(self, config):
         """执行点击图片操作"""
         if not self.image_recognition or not self.mouse:
             self.logger.error("图像识别或鼠标模块未加载")
-            return
+            return False
         
         image_path = config.get("image_path", "")
         offset_x = config.get("offset_x", 0)
@@ -296,12 +326,16 @@ class FlowEngine:
             x, y = result
             self.mouse.click(x + offset_x, y + offset_y)
             self.logger.info(f"点击位置: ({x + offset_x}, {y + offset_y})")
+            return True
+        else:
+            self.logger.info("未找到图片，跳过点击")
+            return False
     
     def _execute_image_exists(self, config):
         """执行图片存在判断操作"""
         if not self.image_recognition:
             self.logger.error("图像识别模块未加载")
-            return
+            return False
         
         image_path = config.get("image_path", "")
         
@@ -309,6 +343,7 @@ class FlowEngine:
         exists = self.image_recognition.image_exists(image_path)
         self.variable_manager.set_variable("image_exists", exists)
         self.logger.info(f"图片存在: {exists}")
+        return exists
     
     def _execute_window_find(self, config):
         """执行窗口查找操作"""
