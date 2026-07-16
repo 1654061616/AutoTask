@@ -5,6 +5,7 @@ from PySide6.QtGui import QPixmap, QImage, QPainter, QPen, QColor, QCursor
 from PySide6.QtCore import Qt, Signal, QRect, QPoint
 import os
 import sys
+from utils.resource_path import ensure_image_dir
 
 try:
     import mss
@@ -78,7 +79,7 @@ class ImagePicker(QWidget):
         layout.addLayout(info_layout)
 
     def _browse_image(self):
-        image_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "resources", "image")
+        image_dir = ensure_image_dir()
         if not os.path.exists(image_dir):
             os.makedirs(image_dir)
         file_path, _ = QFileDialog.getOpenFileName(
@@ -99,7 +100,7 @@ class ImagePicker(QWidget):
                 monitor = sct.monitors[0]
                 screenshot = sct.grab(monitor)
                 
-                image_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "resources", "image")
+                image_dir = ensure_image_dir()
                 os.makedirs(image_dir, exist_ok=True)
                 
                 import time

@@ -3,6 +3,7 @@ import ctypes
 import platform
 from PIL import ImageGrab
 import pyautogui
+from utils.resource_path import ensure_image_dir
 from PySide6.QtWidgets import (QWidget, QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QLineEdit,
                                QTextEdit, QComboBox, QCheckBox, QRadioButton,
@@ -469,7 +470,7 @@ class StepConfigPanel(QWidget):
         def browse_file():
             start_dir = ""
             if "图片" in file_filter or "png" in file_filter.lower() or "jpg" in file_filter.lower():
-                image_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources", "image")
+                image_dir = ensure_image_dir()
                 if os.path.exists(image_dir):
                     start_dir = image_dir
             file_path, _ = QFileDialog.getOpenFileName(self, "选择文件", start_dir, file_filter)
@@ -749,8 +750,7 @@ class ScreenshotOverlay(QDialog):
     def _take_screenshot(self, rect):
         screenshot = ImageGrab.grab(bbox=(rect.left(), rect.top(), rect.right(), rect.bottom()))
         
-        save_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "resources", "image")
-        os.makedirs(save_dir, exist_ok=True)
+        save_dir = ensure_image_dir()
         
         timestamp = os.path.getmtime(__file__)
         import time
