@@ -299,16 +299,17 @@ class FlowEngine:
         image_path = config.get("image_path", "")
         region = config.get("region")
         similarity = config.get("similarity", 0.8)
+        algorithm = config.get("algorithm", "template")
         wait_find = config.get("wait_find", False)
         wait_timeout = config.get("wait_timeout", 5)
         
-        self.logger.info(f"查找图片: {image_path}, 相似度: {similarity}, 超时: {wait_timeout}秒")
+        self.logger.info(f"查找图片: {image_path}, 相似度: {similarity}, 算法: {algorithm}, 超时: {wait_timeout}秒")
         
         start_time = time.time()
         result = None
         
         while True:
-            result = self.image_recognition.find_image(image_path, region=region, threshold=similarity)
+            result = self.image_recognition.find_image(image_path, region=region, threshold=similarity, method=algorithm)
             if result:
                 self.logger.info(f"找到图片: {result}")
                 self.variable_manager.set_variable("image_result", result)
@@ -338,16 +339,17 @@ class FlowEngine:
         offset_x = config.get("offset_x", 0)
         offset_y = config.get("offset_y", 0)
         similarity = config.get("similarity", 0.8)
+        algorithm = config.get("algorithm", "template")
         wait_find = config.get("wait_find", False)
         wait_timeout = config.get("wait_timeout", 5)
         
-        self.logger.info(f"点击图片: {image_path}, 相似度: {similarity}, 超时: {wait_timeout}秒")
+        self.logger.info(f"点击图片: {image_path}, 相似度: {similarity}, 算法: {algorithm}, 超时: {wait_timeout}秒")
         
         start_time = time.time()
         result = None
         
         while True:
-            result = self.image_recognition.find_image(image_path, threshold=similarity)
+            result = self.image_recognition.find_image(image_path, threshold=similarity, method=algorithm)
             if result:
                 x, y = result
                 self.mouse.click(x + offset_x, y + offset_y)
@@ -375,16 +377,17 @@ class FlowEngine:
         
         image_path = config.get("image_path", "")
         similarity = config.get("similarity", 0.8)
+        algorithm = config.get("algorithm", "template")
         wait_find = config.get("wait_find", False)
         wait_timeout = config.get("wait_timeout", 5)
         
-        self.logger.info(f"判断图片是否存在: {image_path}, 相似度: {similarity}, 超时: {wait_timeout}秒")
+        self.logger.info(f"判断图片是否存在: {image_path}, 相似度: {similarity}, 算法: {algorithm}, 超时: {wait_timeout}秒")
         
         start_time = time.time()
         exists = False
         
         while True:
-            exists = self.image_recognition.image_exists(image_path, threshold=similarity)
+            exists = self.image_recognition.image_exists(image_path, threshold=similarity, method=algorithm)
             if exists:
                 self.logger.info("图片存在")
                 self.variable_manager.set_variable("image_exists", True)

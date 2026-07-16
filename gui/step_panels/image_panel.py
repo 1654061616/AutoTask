@@ -97,6 +97,8 @@ class ImageFindPanel(StepConfigPanel):
 
         self.grayscale_check = self.add_checkbox("灰度匹配")
 
+        self.algorithm_combo = self.add_combobox("匹配算法", ["模板匹配", "AKAZE特征匹配"])
+
         wait_layout = QHBoxLayout()
         wait_layout.setSpacing(8)
         self.wait_find_check = QCheckBox("等待找到图片")
@@ -150,6 +152,7 @@ class ImageFindPanel(StepConfigPanel):
             "find_range": self.find_range_combo.currentText(),
             "similarity": self.similarity_slider.value() / 100,
             "grayscale_match": self.grayscale_check.isChecked(),
+            "algorithm": ["template", "akaze"][self.algorithm_combo.currentIndex()],
             "wait_find": self.wait_find_check.isChecked(),
             "wait_timeout": self.wait_timeout_spin.value(),
             "find_action": ["continue", "click", "move"][self.find_action_combo.currentIndex()],
@@ -161,6 +164,10 @@ class ImageFindPanel(StepConfigPanel):
         self.find_range_combo.setCurrentText(config.get("find_range", "全屏"))
         self.similarity_slider.setValue(int(config.get("similarity", 0.9) * 100))
         self.grayscale_check.setChecked(config.get("grayscale_match", False))
+        
+        algorithm_map = {"template": 0, "akaze": 1}
+        self.algorithm_combo.setCurrentIndex(algorithm_map.get(config.get("algorithm", "template"), 0))
+        
         self.wait_find_check.setChecked(config.get("wait_find", False))
         self.wait_timeout_spin.setValue(config.get("wait_timeout", 10))
 
@@ -243,6 +250,8 @@ class ImageClickPanel(StepConfigPanel):
         slider_layout.addWidget(self.similarity_value_label)
         self.main_layout.addLayout(slider_layout)
 
+        self.algorithm_combo = self.add_combobox("匹配算法", ["模板匹配", "AKAZE特征匹配"])
+
         self.click_type_combo = self.add_combobox("点击类型", ["左键单击", "左键双击", "右键单击"])
 
         position_group = QGroupBox("点击位置")
@@ -320,8 +329,6 @@ class ImageClickPanel(StepConfigPanel):
         wait_layout.addStretch()
         self.main_layout.addLayout(wait_layout)
 
-        self.not_found_action_combo = self.add_combobox("未找到时", ["继续执行", "跳过", "报错"])
-
         self.add_separator()
         self.add_delay_section()
 
@@ -353,6 +360,7 @@ class ImageClickPanel(StepConfigPanel):
             "image_path": self.image_path_edit.text(),
             "find_range": self.find_range_combo.currentText(),
             "similarity": self.similarity_slider.value() / 100,
+            "algorithm": ["template", "akaze"][self.algorithm_combo.currentIndex()],
             "click_type": ["left_single", "left_double", "right_single"][self.click_type_combo.currentIndex()],
             "click_position": position_types[position_type],
             "offset_x": self.offset_x_spin.value(),
@@ -361,7 +369,6 @@ class ImageClickPanel(StepConfigPanel):
             "random_range": self.random_range_spin.value(),
             "wait_find": self.wait_find_check.isChecked(),
             "wait_timeout": self.wait_timeout_spin.value(),
-            "not_found_action": ["continue", "skip", "error"][self.not_found_action_combo.currentIndex()],
             "delay": self.delay_spin.value()
         }
 
@@ -369,6 +376,9 @@ class ImageClickPanel(StepConfigPanel):
         self.image_path_edit.setText(config.get("image_path", ""))
         self.find_range_combo.setCurrentText(config.get("find_range", "全屏"))
         self.similarity_slider.setValue(int(config.get("similarity", 0.9) * 100))
+        
+        algorithm_map = {"template": 0, "akaze": 1}
+        self.algorithm_combo.setCurrentIndex(algorithm_map.get(config.get("algorithm", "template"), 0))
 
         click_type_map = {"left_single": 0, "left_double": 1, "right_single": 2}
         self.click_type_combo.setCurrentIndex(click_type_map.get(config.get("click_type", "left_single"), 0))
@@ -386,9 +396,6 @@ class ImageClickPanel(StepConfigPanel):
 
         self.wait_find_check.setChecked(config.get("wait_find", False))
         self.wait_timeout_spin.setValue(config.get("wait_timeout", 10))
-
-        not_found_map = {"continue": 0, "skip": 1, "error": 2}
-        self.not_found_action_combo.setCurrentIndex(not_found_map.get(config.get("not_found_action", "continue"), 0))
 
         self.delay_spin.setValue(config.get("delay", 0))
         self._update_visibility()
@@ -466,6 +473,8 @@ class ImageExistsPanel(StepConfigPanel):
         slider_layout.addWidget(self.similarity_value_label)
         self.main_layout.addLayout(slider_layout)
 
+        self.algorithm_combo = self.add_combobox("匹配算法", ["模板匹配", "AKAZE特征匹配"])
+
         self.result_var_edit = self.add_lineedit("匹配结果变量", default="image_found", placeholder="变量名")
 
         self.exists_action_combo = self.add_combobox("存在时执行", ["继续执行", "跳转到标记"])
@@ -508,6 +517,7 @@ class ImageExistsPanel(StepConfigPanel):
             "image_path": self.image_path_edit.text(),
             "find_range": self.find_range_combo.currentText(),
             "similarity": self.similarity_slider.value() / 100,
+            "algorithm": ["template", "akaze"][self.algorithm_combo.currentIndex()],
             "result_variable": self.result_var_edit.text(),
             "exists_action": ["continue", "jump"][self.exists_action_combo.currentIndex()],
             "not_exists_action": ["continue", "jump"][self.not_exists_action_combo.currentIndex()],
@@ -519,6 +529,10 @@ class ImageExistsPanel(StepConfigPanel):
         self.image_path_edit.setText(config.get("image_path", ""))
         self.find_range_combo.setCurrentText(config.get("find_range", "全屏"))
         self.similarity_slider.setValue(int(config.get("similarity", 0.9) * 100))
+        
+        algorithm_map = {"template": 0, "akaze": 1}
+        self.algorithm_combo.setCurrentIndex(algorithm_map.get(config.get("algorithm", "template"), 0))
+        
         self.result_var_edit.setText(config.get("result_variable", "image_found"))
 
         exists_action_map = {"continue": 0, "jump": 1}

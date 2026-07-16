@@ -34,8 +34,10 @@ class ImageRecognition:
             return None
         
         if method == "akaze":
+            # 使用AKAZE特征匹配，适合图片有旋转、缩放的情况
             return self._find_image_akaze(screen_img, template, threshold)
         else:
+            # 使用模板匹配，简单直接，适合完全匹配的情况
             return self._find_image_template(screen_img, template, threshold)
     
     def _find_image_template(self, screen_img: np.ndarray, template: np.ndarray, 
@@ -115,8 +117,8 @@ class ImageRecognition:
         return matches
     
     def image_exists(self, template_path: str, region: Optional[Tuple[int, int, int, int]] = None,
-                     threshold: float = 0.8) -> bool:
-        return self.find_image(template_path, region=region, threshold=threshold) is not None
+                     threshold: float = 0.8, method: str = "template") -> bool:
+        return self.find_image(template_path, region=region, threshold=threshold, method=method) is not None
     
     def get_screen_size(self) -> Tuple[int, int]:
         return (self.monitor["width"], self.monitor["height"])
