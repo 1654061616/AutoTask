@@ -110,6 +110,25 @@
 
 ---
 
+### 8. QCheckBox样式表解析错误
+
+**问题描述**：节点编辑器点击找图节点时，终端打印 "Could not parse stylesheet of object QCheckBox" 错误
+
+**问题原因**：代码中使用了 `QCheckBox { spacing: 8px; }`，但 `spacing` 不是 Qt Style Sheet 支持的属性，导致样式表解析失败
+
+**解决方案**：移除所有文件中无效的 QCheckBox 样式表设置
+
+**修改文件**：
+- `gui/step_panels/image_panel.py`
+- `gui/step_panels/window_panel.py`
+- `gui/step_panels/keyboard_panel.py`
+- `gui/step_panels/control_panel.py`
+- `gui/step_panels/mouse_panel.py`
+
+**提交哈希**：`914cf82`
+
+---
+
 ## 技术要点
 
 ### DPI感知设置
