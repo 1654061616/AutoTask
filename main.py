@@ -18,6 +18,21 @@
 import sys
 import traceback
 import logging
+import ctypes
+import platform
+
+if platform.system() == "Windows":
+    try:
+        DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = 0x00000022
+        ctypes.windll.user32.SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)
+    except:
+        try:
+            ctypes.windll.shcore.SetProcessDpiAwareness(2)
+        except:
+            try:
+                ctypes.windll.user32.SetProcessDPIAware()
+            except:
+                pass
 
 logging.basicConfig(
     level=logging.DEBUG,

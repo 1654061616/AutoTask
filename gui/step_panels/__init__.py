@@ -1,6 +1,8 @@
 import os
 import ctypes
+import platform
 from PIL import ImageGrab
+import pyautogui
 from PySide6.QtWidgets import (QWidget, QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QLineEdit,
                                QTextEdit, QComboBox, QCheckBox, QRadioButton,
@@ -578,7 +580,12 @@ class CoordOverlay(QDialog):
         self.setAttribute(Qt.WA_TranslucentBackground)
 
     def showEvent(self, event):
-        self.setGeometry(VX, VY, VW, VH)
+        screens = QApplication.screens()
+        min_x = min(s.geometry().left() for s in screens)
+        min_y = min(s.geometry().top() for s in screens)
+        max_x = max(s.geometry().right() for s in screens)
+        max_y = max(s.geometry().bottom() for s in screens)
+        self.setGeometry(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
         QApplication.setOverrideCursor(Qt.CrossCursor)
         super().showEvent(event)
 
@@ -595,13 +602,7 @@ class CoordOverlay(QDialog):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            class POINT(ctypes.Structure):
-                _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
-
-            pt = POINT()
-            user32.GetCursorPos(ctypes.byref(pt))
-            x, y = pt.x, pt.y
-
+            x, y = pyautogui.position()
             self.coordinate_selected.emit(x, y)
             self._cleanup()
 
@@ -635,7 +636,12 @@ class ScreenshotOverlay(QDialog):
         self.setAttribute(Qt.WA_TranslucentBackground)
 
     def showEvent(self, event):
-        self.setGeometry(VX, VY, VW, VH)
+        screens = QApplication.screens()
+        min_x = min(s.geometry().left() for s in screens)
+        min_y = min(s.geometry().top() for s in screens)
+        max_x = max(s.geometry().right() for s in screens)
+        max_y = max(s.geometry().bottom() for s in screens)
+        self.setGeometry(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
         QApplication.setOverrideCursor(Qt.CrossCursor)
         super().showEvent(event)
 
