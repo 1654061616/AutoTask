@@ -627,7 +627,6 @@ class LogPanel(StepConfigPanel):
         self.add_line("日志内容", self.log_content_edit)
 
         self.output_to_file_check = QCheckBox("输出到文件")
-        self.output_to_file_check.setStyleSheet("QCheckBox { spacing: 8px; }")
         self.main_layout.addWidget(self.output_to_file_check)
 
         self.file_path_group = QGroupBox("文件路径")

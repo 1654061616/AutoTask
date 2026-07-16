@@ -119,7 +119,6 @@ class MouseClickPanel(StepConfigPanel):
         random_layout = QHBoxLayout()
         random_layout.setSpacing(8)
         self.random_offset_check = QCheckBox("随机偏移")
-        self.random_offset_check.setStyleSheet("QCheckBox { spacing: 8px; }")
         random_layout.addWidget(self.random_offset_check)
         random_layout.addWidget(QLabel("范围:"))
         self.random_range_spin = QSpinBox()

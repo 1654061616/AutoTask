@@ -20,7 +20,6 @@ class WindowFindPanel(StepConfigPanel):
         self.handle_var_edit = self.add_lineedit("窗口句柄变量", placeholder="存储窗口句柄的变量名")
 
         self.wait_check = QCheckBox("等待窗口出现")
-        self.wait_check.setStyleSheet("QCheckBox { spacing: 8px; }")
         self.main_layout.addWidget(self.wait_check)
 
         self.wait_timeout_group = QGroupBox("超时设置")
@@ -121,7 +120,6 @@ class WindowActivatePanel(StepConfigPanel):
         self.main_layout.addWidget(self.handle_group)
 
         self.wait_check = QCheckBox("等待窗口激活")
-        self.wait_check.setStyleSheet("QCheckBox { spacing: 8px; }")
         self.main_layout.addWidget(self.wait_check)
 
         self.wait_timeout_group = QGroupBox("超时设置")
@@ -237,7 +235,6 @@ class WindowClosePanel(StepConfigPanel):
         self.main_layout.addWidget(self.handle_group)
 
         self.force_close_check = QCheckBox("强制关闭（结束进程）")
-        self.force_close_check.setStyleSheet("QCheckBox { spacing: 8px; }")
         self.main_layout.addWidget(self.force_close_check)
 
         self.add_separator()
@@ -367,11 +364,9 @@ class WindowPositionPanel(StepConfigPanel):
         self.main_layout.addLayout(size_layout)
 
         self.maximize_check = QCheckBox("最大化窗口")
-        self.maximize_check.setStyleSheet("QCheckBox { spacing: 8px; }")
         self.main_layout.addWidget(self.maximize_check)
 
         self.minimize_check = QCheckBox("最小化窗口")
-        self.minimize_check.setStyleSheet("QCheckBox { spacing: 8px; }")
         self.main_layout.addWidget(self.minimize_check)
 
         self.add_separator()

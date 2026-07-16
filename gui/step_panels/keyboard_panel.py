@@ -227,7 +227,6 @@ class KeyboardHotkeyPanel(StepConfigPanel):
         self.modifier_checks = {}
         for key in self.MODIFIER_KEYS:
             checkbox = QCheckBox(key)
-            checkbox.setStyleSheet("QCheckBox { spacing: 8px; }")
             self.modifier_checks[key] = checkbox
             modifier_layout.addWidget(checkbox)
         modifier_layout.addStretch()

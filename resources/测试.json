@@ -7,42 +7,132 @@
     {
       "id": "d8fd2311-5d3d-42ca-b183-4f48641a1f88",
       "type": "start",
-      "x": 99.46947905691326,
-      "y": 788.253699489883,
+      "x": 62.5713396853306,
+      "y": 539.1912587317,
       "config": {}
     },
     {
       "id": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
       "type": "mouse_click",
-      "x": 721.8996937455055,
-      "y": 786.8405557828994,
+      "x": 381.979637136918,
+      "y": 539.7781150247164,
       "config": {
         "click_type": "left_single",
         "delay": 0,
-        "position_type": "current",
+        "position_type": "screen",
         "random_offset": true,
-        "random_range": 5
+        "random_range": 5,
+        "x": 2117,
+        "y": 1570
       }
     },
     {
       "id": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "type": "end",
-      "x": 1257.3524462464188,
-      "y": 790.8500086689759,
+      "x": 1236.040589885246,
+      "y": 702.87233296906,
       "config": {}
+    },
+    {
+      "id": "616c4b51-89f2-484c-a17e-3f6ed703106b",
+      "type": "mouse_move",
+      "x": 1109.242486239542,
+      "y": 523.568722472223,
+      "config": {
+        "delay": 0,
+        "duration": 0.5,
+        "move_type": "linear",
+        "position_type": "screen",
+        "smooth_curve": true,
+        "x": 1563,
+        "y": 832
+      }
+    },
+    {
+      "id": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
+      "type": "image_click",
+      "x": 680.2724932834307,
+      "y": 549.0276207931797,
+      "config": {
+        "image_path": "E:\\A_PycharmProjects\\AutoTask\\gui\\resources\\image\\screenshot_1784180996.png",
+        "find_range": "全屏",
+        "similarity": 0.9,
+        "algorithm": "akaze",
+        "click_type": "left_single",
+        "click_position": "center",
+        "offset_x": 0,
+        "offset_y": 0,
+        "random_offset": false,
+        "random_range": 5,
+        "wait_find": true,
+        "wait_timeout": 15,
+        "delay": 0
+      }
+    },
+    {
+      "id": "2eb3e652-bdd4-49dc-8704-913dcfb3a893",
+      "type": "image_find",
+      "x": 595.5650730974622,
+      "y": 839.9579254539103,
+      "config": {
+        "image_path": "",
+        "find_range": "全屏",
+        "similarity": 0.9,
+        "grayscale_match": false,
+        "algorithm": "template",
+        "wait_find": false,
+        "wait_timeout": 10,
+        "find_action": "continue",
+        "delay": 0
+      }
+    },
+    {
+      "id": "4da0ae36-fe0b-4cf7-bd45-417f17cb227b",
+      "type": "image_exists",
+      "x": 632.9567855778009,
+      "y": 1034.5725493019015,
+      "config": {
+        "image_path": "",
+        "find_range": "全屏",
+        "similarity": 0.9,
+        "algorithm": "template",
+        "result_variable": "image_found",
+        "exists_action": "continue",
+        "not_exists_action": "continue",
+        "jump_mark": "",
+        "delay": 0
+      }
     }
   ],
   "edges": [
     {
-      "source_node": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
+      "source_node": "d8fd2311-5d3d-42ca-b183-4f48641a1f88",
+      "source_port": "输出",
+      "target_node": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
+      "target_port": "输入"
+    },
+    {
+      "source_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
       "source_port": "输出",
       "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "target_port": "输入"
     },
     {
-      "source_node": "d8fd2311-5d3d-42ca-b183-4f48641a1f88",
+      "source_node": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
       "source_port": "输出",
-      "target_node": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
+      "target_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
+      "target_port": "输入"
+    },
+    {
+      "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
+      "source_port": "True",
+      "target_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
+      "target_port": "输入"
+    },
+    {
+      "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
+      "source_port": "False",
+      "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "target_port": "输入"
     }
   ],
