@@ -141,7 +141,7 @@ class MainWindow(QMainWindow):
         # 设置窗口标题，显示在标题栏上
         self.setWindowTitle("AutoFlow")
         
-        icon_path = get_resource_path("icons/自动化选中.png")
+        icon_path = get_resource_path("icons/Icon.png")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
         

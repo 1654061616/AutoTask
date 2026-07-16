@@ -30,4 +30,4 @@ htmlcov/
 *.temp
 output/
 screenshots/
-gui/resources/
+resources/image/

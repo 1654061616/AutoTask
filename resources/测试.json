@@ -52,12 +52,19 @@
       "id": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
       "type": "image_click",
       "x": 680.2724932834307,
-      "y": 549.0276207931797,
+      "y": 547.5090248262668,
       "config": {
-        "image_path": "E:\\A_PycharmProjects\\AutoTask\\gui\\resources\\image\\screenshot_1784180996.png",
-        "find_range": "全屏",
+        "image_path": "e:\\A_PycharmProjects\\AutoTask\\resources\\image\\screenshot_1784193839.png",
+        "find_range": "自定义区域",
+        "region": {
+          "height": 228,
+          "width": 505,
+          "x": 999,
+          "y": 17
+        },
         "similarity": 0.9,
         "algorithm": "akaze",
+        "direction": "default",
         "click_type": "left_single",
         "click_position": "center",
         "offset_x": 0,
@@ -75,15 +82,15 @@
       "x": 595.5650730974622,
       "y": 839.9579254539103,
       "config": {
-        "image_path": "",
-        "find_range": "全屏",
-        "similarity": 0.9,
-        "grayscale_match": false,
         "algorithm": "template",
-        "wait_find": false,
-        "wait_timeout": 10,
+        "delay": 0,
         "find_action": "continue",
-        "delay": 0
+        "find_range": "全屏",
+        "grayscale_match": false,
+        "image_path": "",
+        "similarity": 0.9,
+        "wait_find": false,
+        "wait_timeout": 10
       }
     },
     {
@@ -92,15 +99,15 @@
       "x": 632.9567855778009,
       "y": 1034.5725493019015,
       "config": {
-        "image_path": "",
-        "find_range": "全屏",
-        "similarity": 0.9,
         "algorithm": "template",
-        "result_variable": "image_found",
+        "delay": 0,
         "exists_action": "continue",
-        "not_exists_action": "continue",
+        "find_range": "全屏",
+        "image_path": "",
         "jump_mark": "",
-        "delay": 0
+        "not_exists_action": "continue",
+        "result_variable": "image_found",
+        "similarity": 0.9
       }
     }
   ],
