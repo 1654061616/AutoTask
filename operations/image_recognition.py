@@ -21,7 +21,7 @@ class ImageRecognition:
         return img
     
     def find_image(self, template_path: str, region: Optional[Tuple[int, int, int, int]] = None, 
-                   threshold: float = 0.8, method: str = "template") -> Optional[Tuple[int, int]]:
+                   threshold: float = 0.8, method: str = "template", direction: str = "default") -> Optional[Tuple[int, int]]:
         if not os.path.exists(template_path):
             return None
         
@@ -38,10 +38,10 @@ class ImageRecognition:
             return self._find_image_akaze(screen_img, template, threshold)
         else:
             # 使用模板匹配，简单直接，适合完全匹配的情况
-            return self._find_image_template(screen_img, template, threshold)
+            return self._find_image_template(screen_img, template, threshold, direction)
     
     def _find_image_template(self, screen_img: np.ndarray, template: np.ndarray, 
-                             threshold: float) -> Optional[Tuple[int, int]]:
+                             threshold: float, direction: str = "default") -> Optional[Tuple[int, int]]:
         screen_gray = cv2.cvtColor(screen_img, cv2.COLOR_BGR2GRAY)
         template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         
@@ -50,10 +50,40 @@ class ImageRecognition:
             return None
         
         result = cv2.matchTemplate(screen_gray, template_gray, cv2.TM_CCOEFF_NORMED)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
         
-        if max_val >= threshold:
-            return (max_loc[0] + w // 2, max_loc[1] + h // 2)
+        if direction == "default":
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            if max_val >= threshold:
+                return (max_loc[0] + w // 2, max_loc[1] + h // 2)
+            return None
+        
+        h_result, w_result = result.shape
+        
+        if direction == "top_to_bottom":
+            for y in range(h_result):
+                for x in range(w_result):
+                    if result[y, x] >= threshold:
+                        return (x + w // 2, y + h // 2)
+        elif direction == "bottom_to_top":
+            for y in range(h_result - 1, -1, -1):
+                for x in range(w_result):
+                    if result[y, x] >= threshold:
+                        return (x + w // 2, y + h // 2)
+        elif direction == "left_to_right":
+            for x in range(w_result):
+                for y in range(h_result):
+                    if result[y, x] >= threshold:
+                        return (x + w // 2, y + h // 2)
+        elif direction == "right_to_left":
+            for x in range(w_result - 1, -1, -1):
+                for y in range(h_result):
+                    if result[y, x] >= threshold:
+                        return (x + w // 2, y + h // 2)
+        else:
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            if max_val >= threshold:
+                return (max_loc[0] + w // 2, max_loc[1] + h // 2)
+        
         return None
     
     def _find_image_akaze(self, screen_img: np.ndarray, template: np.ndarray, 
@@ -117,8 +147,8 @@ class ImageRecognition:
         return matches
     
     def image_exists(self, template_path: str, region: Optional[Tuple[int, int, int, int]] = None,
-                     threshold: float = 0.8, method: str = "template") -> bool:
-        return self.find_image(template_path, region=region, threshold=threshold, method=method) is not None
+                     threshold: float = 0.8, method: str = "template", direction: str = "default") -> bool:
+        return self.find_image(template_path, region=region, threshold=threshold, method=method, direction=direction) is not None
     
     def get_screen_size(self) -> Tuple[int, int]:
         return (self.monitor["width"], self.monitor["height"])

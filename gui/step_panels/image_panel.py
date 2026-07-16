@@ -122,8 +122,15 @@ class ImageFindPanel(StepConfigPanel):
         self.main_layout.addLayout(slider_layout)
 
         self.grayscale_check = self.add_checkbox("灰度匹配")
-
+        # "akaze" ：使用 AKAZE 特征匹配算法 （基于特征点的识别，适合图片有旋转、缩放的情况）
+        #  否则（默认） ：使用 模板匹配算法 （template matching，简单直接，适合完全匹配的情况）
         self.algorithm_combo = self.add_combobox("匹配算法", ["模板匹配", "AKAZE特征匹配"])
+        # "default" ：默认查找方向（返回匹配度最高的）
+        # "left_to_right" ：从左到右查找
+        # "right_to_left" ：从右到左查找
+        # "top_to_bottom" ：从上到下查找
+        # "bottom_to_top" ：从下到上查找
+        self.direction_combo = self.add_combobox("查找方向", ["默认", "从左到右", "从右到左", "从上到下", "从下到上"])
 
         wait_layout = QHBoxLayout()
         wait_layout.setSpacing(8)
@@ -178,6 +185,8 @@ class ImageFindPanel(StepConfigPanel):
         self.region_label.setVisible(is_custom)
 
     def get_config(self):
+        direction_map = {"默认": "default", "从左到右": "left_to_right", "从右到左": "right_to_left",
+                         "从上到下": "top_to_bottom", "从下到上": "bottom_to_top"}
         return {
             "image_path": self.image_path_edit.text(),
             "find_range": self.find_range_combo.currentText(),
@@ -185,6 +194,7 @@ class ImageFindPanel(StepConfigPanel):
             "similarity": self.similarity_slider.value() / 100,
             "grayscale_match": self.grayscale_check.isChecked(),
             "algorithm": ["template", "akaze"][self.algorithm_combo.currentIndex()],
+            "direction": direction_map[self.direction_combo.currentText()],
             "wait_find": self.wait_find_check.isChecked(),
             "wait_timeout": self.wait_timeout_spin.value(),
             "find_action": ["continue", "click", "move"][self.find_action_combo.currentIndex()],
@@ -205,6 +215,10 @@ class ImageFindPanel(StepConfigPanel):
 
         find_action_map = {"continue": 0, "click": 1, "move": 2}
         self.find_action_combo.setCurrentIndex(find_action_map.get(config.get("find_action", "continue"), 0))
+
+        direction_map = {"default": "默认", "left_to_right": "从左到右", "right_to_left": "从右到左",
+                         "top_to_bottom": "从上到下", "bottom_to_top": "从下到上"}
+        self.direction_combo.setCurrentText(direction_map.get(config.get("direction", "default"), "默认"))
 
         self.delay_spin.setValue(config.get("delay", 0))
         
@@ -317,6 +331,8 @@ class ImageClickPanel(StepConfigPanel):
 
         self.algorithm_combo = self.add_combobox("匹配算法", ["模板匹配", "AKAZE特征匹配"])
 
+        self.direction_combo = self.add_combobox("查找方向", ["默认", "从左到右", "从右到左", "从上到下", "从下到上"])
+
         self.click_type_combo = self.add_combobox("点击类型", ["左键单击", "左键双击", "右键单击"])
 
         position_group = QGroupBox("点击位置")
@@ -425,12 +441,15 @@ class ImageClickPanel(StepConfigPanel):
         position_type = self.position_radios.index([r for r in self.position_radios if r.isChecked()][0])
         position_types = ["center", "top_left", "top_right", "bottom_left", "bottom_right", "custom"]
 
+        direction_map = {"默认": "default", "从左到右": "left_to_right", "从右到左": "right_to_left",
+                         "从上到下": "top_to_bottom", "从下到上": "bottom_to_top"}
         return {
             "image_path": self.image_path_edit.text(),
             "find_range": self.find_range_combo.currentText(),
             "region": getattr(self, "_selected_region", {}),
             "similarity": self.similarity_slider.value() / 100,
             "algorithm": ["template", "akaze"][self.algorithm_combo.currentIndex()],
+            "direction": direction_map[self.direction_combo.currentText()],
             "click_type": ["left_single", "left_double", "right_single"][self.click_type_combo.currentIndex()],
             "click_position": position_types[position_type],
             "offset_x": self.offset_x_spin.value(),
@@ -466,6 +485,10 @@ class ImageClickPanel(StepConfigPanel):
 
         self.wait_find_check.setChecked(config.get("wait_find", False))
         self.wait_timeout_spin.setValue(config.get("wait_timeout", 10))
+
+        direction_map = {"default": "默认", "left_to_right": "从左到右", "right_to_left": "从右到左",
+                         "top_to_bottom": "从上到下", "bottom_to_top": "从下到上"}
+        self.direction_combo.setCurrentText(direction_map.get(config.get("direction", "default"), "默认"))
 
         self.delay_spin.setValue(config.get("delay", 0))
         
@@ -578,6 +601,8 @@ class ImageExistsPanel(StepConfigPanel):
 
         self.algorithm_combo = self.add_combobox("匹配算法", ["模板匹配", "AKAZE特征匹配"])
 
+        self.direction_combo = self.add_combobox("查找方向", ["默认", "从左到右", "从右到左", "从上到下", "从下到上"])
+
         self.result_var_edit = self.add_lineedit("匹配结果变量", default="image_found", placeholder="变量名")
 
         self.exists_action_combo = self.add_combobox("存在时执行", ["继续执行", "跳转到标记"])
@@ -622,12 +647,15 @@ class ImageExistsPanel(StepConfigPanel):
         self.region_label.setVisible(is_custom)
 
     def get_config(self):
+        direction_map = {"默认": "default", "从左到右": "left_to_right", "从右到左": "right_to_left",
+                         "从上到下": "top_to_bottom", "从下到上": "bottom_to_top"}
         return {
             "image_path": self.image_path_edit.text(),
             "find_range": self.find_range_combo.currentText(),
             "region": getattr(self, "_selected_region", {}),
             "similarity": self.similarity_slider.value() / 100,
             "algorithm": ["template", "akaze"][self.algorithm_combo.currentIndex()],
+            "direction": direction_map[self.direction_combo.currentText()],
             "result_variable": self.result_var_edit.text(),
             "exists_action": ["continue", "jump"][self.exists_action_combo.currentIndex()],
             "not_exists_action": ["continue", "jump"][self.not_exists_action_combo.currentIndex()],
@@ -653,6 +681,10 @@ class ImageExistsPanel(StepConfigPanel):
 
         self.jump_mark_edit.setText(config.get("jump_mark", ""))
         self.delay_spin.setValue(config.get("delay", 0))
+
+        direction_map = {"default": "默认", "left_to_right": "从左到右", "right_to_left": "从右到左",
+                         "top_to_bottom": "从上到下", "bottom_to_top": "从下到上"}
+        self.direction_combo.setCurrentText(direction_map.get(config.get("direction", "default"), "默认"))
         
         region = config.get("region", {})
         if region:
