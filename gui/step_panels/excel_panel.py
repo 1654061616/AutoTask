@@ -11,7 +11,6 @@ class ExcelReadPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("读取Excel配置")
 
         self.file_path_edit = self.add_file_browser("文件路径", "Excel Files (*.xlsx *.xls)")
 

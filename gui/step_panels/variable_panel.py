@@ -7,7 +7,6 @@ class SetVariablePanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("设置变量")
 
         self.var_name_edit = self.add_lineedit("变量名", placeholder="输入变量名称")
 
@@ -43,7 +42,6 @@ class GetVariablePanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("获取变量")
 
         self.var_name_edit = self.add_lineedit("变量名", placeholder="输入要获取的变量名称")
 

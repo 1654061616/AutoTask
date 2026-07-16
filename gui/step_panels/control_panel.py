@@ -12,7 +12,6 @@ class WaitPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("等待配置")
 
         self.wait_type_combo = self.add_combobox("等待类型", ["固定时间", "随机时间", "条件等待"])
 
@@ -221,7 +220,6 @@ class IfElsePanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("条件判断配置")
 
         self.condition_type_combo = self.add_combobox("条件类型", ["值比较", "图片存在", "文字存在", "窗口存在"])
 
@@ -444,7 +442,6 @@ class LoopPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("循环配置")
 
         self.loop_type_combo = self.add_combobox("循环类型", ["次数循环", "条件循环", "遍历列表"])
 
@@ -614,7 +611,6 @@ class LogPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("日志配置")
 
         self.log_level_combo = self.add_combobox("日志级别", ["调试", "信息", "警告", "错误"])
 
@@ -702,7 +698,6 @@ class LabelPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("标记配置")
 
         self.label_name_edit = QLineEdit()
         self.label_name_edit.setPlaceholderText("标记名称")
@@ -727,7 +722,6 @@ class GotoPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("跳转配置")
 
         self.target_label_edit = QLineEdit()
         self.target_label_edit.setPlaceholderText("目标标记名称")

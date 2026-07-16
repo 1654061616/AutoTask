@@ -13,7 +13,6 @@ class MouseClickPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("鼠标点击配置")
 
         self.click_type_combo = self.add_combobox("点击类型", ["左键单击", "左键双击", "右键单击", "中键单击"])
         self.click_type_combo.setMaximumWidth(150)
@@ -210,7 +209,6 @@ class MouseMovePanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("鼠标移动配置")
 
         self.move_type_combo = self.add_combobox("移动方式", ["直线移动", "缓动移动", "随机路径"])
 
@@ -394,7 +392,6 @@ class MouseDragPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("鼠标拖拽配置")
 
         self.drag_button_combo = self.add_combobox("拖拽按钮", ["左键", "右键", "中键"])
 
@@ -600,7 +597,6 @@ class MouseScrollPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("鼠标滚动配置")
 
         self.direction_combo = self.add_combobox("滚动方向", ["向上", "向下", "向左", "向右"])
 

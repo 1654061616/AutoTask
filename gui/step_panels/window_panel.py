@@ -11,7 +11,6 @@ class WindowFindPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("查找窗口配置")
 
         self.window_title_edit = self.add_lineedit("窗口标题", placeholder="支持通配符 * 和 ?")
 
@@ -83,7 +82,6 @@ class WindowActivatePanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("激活窗口配置")
 
         self.activate_type_radio_group = QGroupBox("激活方式")
         activate_layout = QVBoxLayout(self.activate_type_radio_group)
@@ -198,7 +196,6 @@ class WindowClosePanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("关闭窗口配置")
 
         self.close_type_radio_group = QGroupBox("关闭方式")
         close_layout = QVBoxLayout(self.close_type_radio_group)
@@ -293,7 +290,6 @@ class WindowPositionPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("窗口位置配置")
 
         self.window_title_edit = self.add_lineedit("窗口标题", placeholder="输入窗口标题")
 

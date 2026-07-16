@@ -305,24 +305,6 @@ class StepConfigPanel(QWidget):
     def add_checkbox(self, text, checked=False):
         checkbox = QCheckBox(text)
         checkbox.setChecked(checked)
-        checkbox.setStyleSheet("""
-            QCheckBox {
-                spacing: 6px;
-                font-size: 13px;
-                color: #555;
-            }
-            QCheckBox::indicator {
-                width: 16px;
-                height: 16px;
-                border-radius: 3px;
-                border: 1px solid #d0d0d0;
-            }
-            QCheckBox::indicator:checked {
-                background-color: #3498db;
-                border-color: #3498db;
-                image: url(data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><polygon points="2,6 5,9 10,3" fill="white"/></svg>);
-            }
-        """)
         self.main_layout.addWidget(checkbox)
         return checkbox
 
@@ -358,7 +340,6 @@ class StepConfigPanel(QWidget):
             radio_btn = QRadioButton(option)
             radio_btn.setStyleSheet("""
                 QRadioButton {
-                    spacing: 6px;
                     font-size: 12px;
                     color: #555;
                 }

@@ -23,7 +23,10 @@ class PortWidget(QGraphicsObject):
         if self.port_type == "in":
             fill_color = QColor("#ff9800")
         else:
-            fill_color = QColor("#4caf50")
+            if self.label == "False":
+                fill_color = QColor("#f44336")
+            else:
+                fill_color = QColor("#4caf50")
 
         self.ellipse.setBrush(QBrush(fill_color))
         self.ellipse.setPen(QPen(QColor("#ffffff"), 2))
@@ -47,7 +50,10 @@ class PortWidget(QGraphicsObject):
             if self.port_type == "in":
                 self.ellipse.setBrush(QBrush(QColor("#ff9800")))
             else:
-                self.ellipse.setBrush(QBrush(QColor("#4caf50")))
+                if self.label == "False":
+                    self.ellipse.setBrush(QBrush(QColor("#f44336")))
+                else:
+                    self.ellipse.setBrush(QBrush(QColor("#4caf50")))
             self.ellipse.setPen(QPen(QColor("#ffffff"), 2))
 
     def can_connect(self, other_port):

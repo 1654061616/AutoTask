@@ -11,7 +11,6 @@ class KeyboardTypePanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("键盘输入配置")
 
         self.input_text_edit = QTextEdit()
         self.input_text_edit.setPlaceholderText("请输入要输入的文本内容")
@@ -142,7 +141,6 @@ class KeyboardPressPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("按键操作配置")
 
         self.key_combo = QComboBox()
         self.key_combo.addItems(self.KEYS)
@@ -218,7 +216,6 @@ class KeyboardHotkeyPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("快捷键配置")
 
         modifier_group = QGroupBox("修饰键")
         modifier_layout = QHBoxLayout(modifier_group)

@@ -34,7 +34,7 @@ class NodeWidget(QGraphicsObject):
         node_info = get_node_type(self.node_type)
 
         self.node_width = 200
-        self.node_height = 80
+        self._calc_height()
 
         self.body = QGraphicsRectItem(0, 0, self.node_width, self.node_height, self)
         self.body.setBrush(QBrush(QColor("#2a2a4a")))
@@ -54,9 +54,19 @@ class NodeWidget(QGraphicsObject):
 
         self.param_text = QGraphicsTextItem(self._format_params(), self)
         self.param_text.setDefaultTextColor(QColor("#aaa"))
-        self.param_text.setFont(QFont("Arial", 10))
-        self.param_text.setPos(10, 35)
+        self.param_text.setFont(QFont("Arial", 9))
+        self.param_text.setPos(10, 48)
         self.param_text.setZValue(2)
+
+    def _calc_height(self):
+        params = self._format_params()
+        lines = 1
+        if len(params) > 25:
+            lines = (len(params) // 25) + 1
+        base_height = 75
+        if self.node_type in ("image_find", "image_click", "image_exists", "if_else"):
+            base_height = 105
+        self.node_height = base_height + (lines - 1) * 18
 
     def _create_ports(self):
         port_offset = -PortWidget.PORT_SIZE / 2
@@ -68,20 +78,20 @@ class NodeWidget(QGraphicsObject):
 
         if self.node_type == "if_else":
             true_port = PortWidget("out", "True", self, self)
-            true_port.setPos(self.node_width + port_offset, 25)
+            true_port.setPos(self.node_width + port_offset, 32)
             self.output_ports.append(true_port)
 
             false_port = PortWidget("out", "False", self, self)
-            false_port.setPos(self.node_width + port_offset, 55)
+            false_port.setPos(self.node_width + port_offset, 88)
             self.output_ports.append(false_port)
 
         if self.node_type in ("image_find", "image_click", "image_exists"):
             true_port = PortWidget("out", "True", self, self)
-            true_port.setPos(self.node_width + port_offset, 25)
+            true_port.setPos(self.node_width + port_offset, 32)
             self.output_ports.append(true_port)
 
             false_port = PortWidget("out", "False", self, self)
-            false_port.setPos(self.node_width + port_offset, 55)
+            false_port.setPos(self.node_width + port_offset, 88)
             self.output_ports.append(false_port)
 
         elif self.node_type != "end":
@@ -93,20 +103,35 @@ class NodeWidget(QGraphicsObject):
         display_parts = []
         if "image_path" in self.config:
             import os
-            display_parts.append(f"图片: {os.path.basename(self.config['image_path'])}")
+            filename = os.path.basename(self.config['image_path'])
+            if len(filename) > 25:
+                filename = filename[:12] + "..." + filename[-10:]
+            display_parts.append(f"{filename}")
         if "text" in self.config:
-            display_parts.append(f"文本: {self.config['text'][:20]}")
+            display_parts.append(f"文本: {self.config['text'][:15]}")
         if "key" in self.config:
             display_parts.append(f"按键: {self.config['key']}")
         if "wait_time" in self.config:
             display_parts.append(f"等待: {self.config['wait_time']}s")
         if "variable_name" in self.config:
             display_parts.append(f"变量: {self.config['variable_name']}")
-        return ", ".join(display_parts) if display_parts else "无参数"
+        result = ", ".join(display_parts) if display_parts else ""
+        if len(result) > 20:
+            result = result[:18] + "..."
+        return result
 
     def update_params(self, config):
         self.config = config
-        self.param_text.setPlainText(self._format_params())
+        new_params = self._format_params()
+        self.param_text.setPlainText(new_params)
+        
+        old_height = self.node_height
+        self._calc_height()
+        
+        if self.node_height != old_height:
+            self.body.setRect(0, 0, self.node_width, self.node_height)
+            self._create_ports()
+            self.prepareGeometryChange()
 
     def set_node_id(self, node_id):
         self.node_id = node_id

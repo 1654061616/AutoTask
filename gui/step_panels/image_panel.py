@@ -14,13 +14,11 @@ class ImageFindPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("查找图片配置")
 
         file_layout = QHBoxLayout()
         file_layout.setSpacing(8)
         file_label = QLabel("图片路径:")
-        file_label.setFixedWidth(80)
-        file_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setStyleSheet("""
@@ -238,13 +236,11 @@ class ImageClickPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("点击图片配置")
 
         file_layout = QHBoxLayout()
         file_layout.setSpacing(8)
         file_label = QLabel("图片路径:")
-        file_label.setFixedWidth(80)
-        file_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setStyleSheet("""
@@ -508,13 +504,11 @@ class ImageExistsPanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
-        self.add_section_title("图片存在判断配置")
 
         file_layout = QHBoxLayout()
         file_layout.setSpacing(8)
         file_label = QLabel("图片路径:")
-        file_label.setFixedWidth(80)
-        file_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setStyleSheet("""

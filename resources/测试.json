@@ -70,7 +70,7 @@
         "offset_x": 0,
         "offset_y": 0,
         "random_offset": false,
-        "random_range": 5,
+        "random_range": 3,
         "wait_find": true,
         "wait_timeout": 15,
         "delay": 0
@@ -82,15 +82,17 @@
       "x": 595.5650730974622,
       "y": 839.9579254539103,
       "config": {
-        "algorithm": "template",
-        "delay": 0,
-        "find_action": "continue",
-        "find_range": "全屏",
-        "grayscale_match": false,
         "image_path": "",
+        "find_range": "全屏",
+        "region": {},
         "similarity": 0.9,
+        "grayscale_match": false,
+        "algorithm": "template",
+        "direction": "default",
         "wait_find": false,
-        "wait_timeout": 10
+        "wait_timeout": 10,
+        "find_action": "continue",
+        "delay": 0
       }
     },
     {
@@ -99,15 +101,17 @@
       "x": 632.9567855778009,
       "y": 1034.5725493019015,
       "config": {
-        "algorithm": "template",
-        "delay": 0,
-        "exists_action": "continue",
-        "find_range": "全屏",
         "image_path": "",
-        "jump_mark": "",
-        "not_exists_action": "continue",
+        "find_range": "全屏",
+        "region": {},
+        "similarity": 0.9,
+        "algorithm": "template",
+        "direction": "default",
         "result_variable": "image_found",
-        "similarity": 0.9
+        "exists_action": "continue",
+        "not_exists_action": "continue",
+        "jump_mark": "",
+        "delay": 0
       }
     }
   ],
