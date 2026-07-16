@@ -138,7 +138,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         
         # 设置窗口标题，显示在标题栏上
-        self.setWindowTitle("AutoFlow - 自动化操作软件")
+        self.setWindowTitle("AutoFlow")
+        
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources", "icons", "自动化选中.png")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
         
         # 设置窗口的初始位置和大小
         # 参数: (x坐标, y坐标, 宽度, 高度)

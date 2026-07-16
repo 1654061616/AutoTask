@@ -77,6 +77,32 @@ class ImageFindPanel(StepConfigPanel):
 
         self.find_range_combo = self.add_combobox("查找范围", ["全屏", "当前窗口", "自定义区域"])
 
+        region_layout = QHBoxLayout()
+        region_layout.setSpacing(8)
+        region_select_btn = QPushButton("选择区域")
+        region_select_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #e74c3c; 
+                          background-color: #e74c3c; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #c0392b; }
+        """)
+        
+        def select_region():
+            def on_region_selected(x, y, width, height):
+                self.region_label.setText(f"X:{x} Y:{y} W:{width} H:{height}")
+                self._selected_region = {"x": x, "y": y, "width": width, "height": height}
+            self._start_capture_region(on_region_selected)
+        
+        region_select_btn.clicked.connect(select_region)
+        
+        self.region_label = QLabel("未选择区域")
+        self.region_label.setStyleSheet("color: #666; font-size: 12px;")
+        
+        region_layout.addWidget(region_select_btn)
+        region_layout.addWidget(self.region_label)
+        region_layout.addStretch()
+        self.main_layout.addLayout(region_layout)
+        self.region_select_btn = region_select_btn
+
         slider_layout = QVBoxLayout()
         slider_label = QLabel("相似度:")
         slider_layout.addWidget(slider_label)
@@ -127,6 +153,7 @@ class ImageFindPanel(StepConfigPanel):
     def _connect_signals(self):
         self.image_path_edit.textChanged.connect(self._update_preview)
         self.wait_find_check.toggled.connect(self._update_wait_timeout_visibility)
+        self.find_range_combo.currentTextChanged.connect(self._update_region_visibility)
 
     def _update_preview(self):
         image_path = self.image_path_edit.text()
@@ -145,10 +172,16 @@ class ImageFindPanel(StepConfigPanel):
     def _update_wait_timeout_visibility(self):
         self.wait_timeout_spin.setVisible(self.wait_find_check.isChecked())
 
+    def _update_region_visibility(self):
+        is_custom = self.find_range_combo.currentText() == "自定义区域"
+        self.region_select_btn.setVisible(is_custom)
+        self.region_label.setVisible(is_custom)
+
     def get_config(self):
         return {
             "image_path": self.image_path_edit.text(),
             "find_range": self.find_range_combo.currentText(),
+            "region": getattr(self, "_selected_region", {}),
             "similarity": self.similarity_slider.value() / 100,
             "grayscale_match": self.grayscale_check.isChecked(),
             "algorithm": ["template", "akaze"][self.algorithm_combo.currentIndex()],
@@ -174,8 +207,15 @@ class ImageFindPanel(StepConfigPanel):
         self.find_action_combo.setCurrentIndex(find_action_map.get(config.get("find_action", "continue"), 0))
 
         self.delay_spin.setValue(config.get("delay", 0))
+        
+        region = config.get("region", {})
+        if region:
+            self._selected_region = region
+            self.region_label.setText(f"X:{region.get('x', 0)} Y:{region.get('y', 0)} W:{region.get('width', 0)} H:{region.get('height', 0)}")
+        
         self._update_preview()
         self._update_wait_timeout_visibility()
+        self._update_region_visibility()
 
 
 class ImageClickPanel(StepConfigPanel):
@@ -230,6 +270,32 @@ class ImageClickPanel(StepConfigPanel):
         self.main_layout.addLayout(file_layout)
 
         self.find_range_combo = self.add_combobox("查找范围", ["全屏", "当前窗口", "自定义区域"])
+
+        region_layout = QHBoxLayout()
+        region_layout.setSpacing(8)
+        region_select_btn = QPushButton("选择区域")
+        region_select_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #e74c3c; 
+                          background-color: #e74c3c; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #c0392b; }
+        """)
+        
+        def select_region():
+            def on_region_selected(x, y, width, height):
+                self.region_label.setText(f"X:{x} Y:{y} W:{width} H:{height}")
+                self._selected_region = {"x": x, "y": y, "width": width, "height": height}
+            self._start_capture_region(on_region_selected)
+        
+        region_select_btn.clicked.connect(select_region)
+        
+        self.region_label = QLabel("未选择区域")
+        self.region_label.setStyleSheet("color: #666; font-size: 12px;")
+        
+        region_layout.addWidget(region_select_btn)
+        region_layout.addWidget(self.region_label)
+        region_layout.addStretch()
+        self.main_layout.addLayout(region_layout)
+        self.region_select_btn = region_select_btn
 
         slider_layout = QVBoxLayout()
         slider_label = QLabel("相似度:")
@@ -336,6 +402,7 @@ class ImageClickPanel(StepConfigPanel):
         for radio in self.position_radios:
             radio.toggled.connect(self._update_visibility)
         self.wait_find_check.toggled.connect(self._update_wait_timeout_visibility)
+        self.find_range_combo.currentTextChanged.connect(self._update_region_visibility)
 
     def _update_visibility(self):
         selected_index = -1
@@ -349,6 +416,11 @@ class ImageClickPanel(StepConfigPanel):
     def _update_wait_timeout_visibility(self):
         self.wait_timeout_spin.setVisible(self.wait_find_check.isChecked())
 
+    def _update_region_visibility(self):
+        is_custom = self.find_range_combo.currentText() == "自定义区域"
+        self.region_select_btn.setVisible(is_custom)
+        self.region_label.setVisible(is_custom)
+
     def get_config(self):
         position_type = self.position_radios.index([r for r in self.position_radios if r.isChecked()][0])
         position_types = ["center", "top_left", "top_right", "bottom_left", "bottom_right", "custom"]
@@ -356,6 +428,7 @@ class ImageClickPanel(StepConfigPanel):
         return {
             "image_path": self.image_path_edit.text(),
             "find_range": self.find_range_combo.currentText(),
+            "region": getattr(self, "_selected_region", {}),
             "similarity": self.similarity_slider.value() / 100,
             "algorithm": ["template", "akaze"][self.algorithm_combo.currentIndex()],
             "click_type": ["left_single", "left_double", "right_single"][self.click_type_combo.currentIndex()],
@@ -395,8 +468,15 @@ class ImageClickPanel(StepConfigPanel):
         self.wait_timeout_spin.setValue(config.get("wait_timeout", 10))
 
         self.delay_spin.setValue(config.get("delay", 0))
+        
+        region = config.get("region", {})
+        if region:
+            self._selected_region = region
+            self.region_label.setText(f"X:{region.get('x', 0)} Y:{region.get('y', 0)} W:{region.get('width', 0)} H:{region.get('height', 0)}")
+        
         self._update_visibility()
         self._update_wait_timeout_visibility()
+        self._update_region_visibility()
 
 
 class ImageExistsPanel(StepConfigPanel):
@@ -452,6 +532,32 @@ class ImageExistsPanel(StepConfigPanel):
 
         self.find_range_combo = self.add_combobox("查找范围", ["全屏", "当前窗口", "自定义区域"])
 
+        region_layout = QHBoxLayout()
+        region_layout.setSpacing(8)
+        region_select_btn = QPushButton("选择区域")
+        region_select_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #e74c3c; 
+                          background-color: #e74c3c; color: white; font-size: 12px; }
+            QPushButton:hover { background-color: #c0392b; }
+        """)
+        
+        def select_region():
+            def on_region_selected(x, y, width, height):
+                self.region_label.setText(f"X:{x} Y:{y} W:{width} H:{height}")
+                self._selected_region = {"x": x, "y": y, "width": width, "height": height}
+            self._start_capture_region(on_region_selected)
+        
+        region_select_btn.clicked.connect(select_region)
+        
+        self.region_label = QLabel("未选择区域")
+        self.region_label.setStyleSheet("color: #666; font-size: 12px;")
+        
+        region_layout.addWidget(region_select_btn)
+        region_layout.addWidget(self.region_label)
+        region_layout.addStretch()
+        self.main_layout.addLayout(region_layout)
+        self.region_select_btn = region_select_btn
+
         slider_layout = QVBoxLayout()
         slider_label = QLabel("相似度:")
         slider_layout.addWidget(slider_label)
@@ -503,16 +609,23 @@ class ImageExistsPanel(StepConfigPanel):
     def _connect_signals(self):
         self.exists_action_combo.currentTextChanged.connect(self._update_jump_mark_visibility)
         self.not_exists_action_combo.currentTextChanged.connect(self._update_jump_mark_visibility)
+        self.find_range_combo.currentTextChanged.connect(self._update_region_visibility)
 
     def _update_jump_mark_visibility(self):
         exists_jump = self.exists_action_combo.currentText() == "跳转到标记"
         not_exists_jump = self.not_exists_action_combo.currentText() == "跳转到标记"
         self.jump_mark_edit.setVisible(exists_jump or not_exists_jump)
 
+    def _update_region_visibility(self):
+        is_custom = self.find_range_combo.currentText() == "自定义区域"
+        self.region_select_btn.setVisible(is_custom)
+        self.region_label.setVisible(is_custom)
+
     def get_config(self):
         return {
             "image_path": self.image_path_edit.text(),
             "find_range": self.find_range_combo.currentText(),
+            "region": getattr(self, "_selected_region", {}),
             "similarity": self.similarity_slider.value() / 100,
             "algorithm": ["template", "akaze"][self.algorithm_combo.currentIndex()],
             "result_variable": self.result_var_edit.text(),
@@ -540,4 +653,11 @@ class ImageExistsPanel(StepConfigPanel):
 
         self.jump_mark_edit.setText(config.get("jump_mark", ""))
         self.delay_spin.setValue(config.get("delay", 0))
+        
+        region = config.get("region", {})
+        if region:
+            self._selected_region = region
+            self.region_label.setText(f"X:{region.get('x', 0)} Y:{region.get('y', 0)} W:{region.get('width', 0)} H:{region.get('height', 0)}")
+        
         self._update_jump_mark_visibility()
+        self._update_region_visibility()

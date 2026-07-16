@@ -92,6 +92,29 @@ class StepConfigPanel(QWidget):
             self._screenshot_callback(image_path)
         self._screenshot_overlay = None
 
+    def _start_capture_region(self, callback):
+        app = QApplication.instance()
+        
+        windows_to_minimize = []
+        for widget in app.topLevelWidgets():
+            if hasattr(widget, 'windowTitle'):
+                title = widget.windowTitle()
+                if "AutoFlow" in title or "节点编辑器" in title:
+                    windows_to_minimize.append(widget)
+        
+        for w in windows_to_minimize:
+            w.showMinimized()
+
+        self._region_callback = callback
+        self._region_overlay = RegionOverlay(windows_to_minimize)
+        self._region_overlay.region_selected.connect(self._on_region_selected)
+        self._region_overlay.exec()
+
+    def _on_region_selected(self, x, y, width, height):
+        if self._region_callback:
+            self._region_callback(x, y, width, height)
+        self._region_overlay = None
+
     def get_config(self):
         raise NotImplementedError("Subclasses must implement get_config()")
 
@@ -726,7 +749,7 @@ class ScreenshotOverlay(QDialog):
     def _take_screenshot(self, rect):
         screenshot = ImageGrab.grab(bbox=(rect.left(), rect.top(), rect.right(), rect.bottom()))
         
-        save_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources", "image")
+        save_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "resources", "image")
         os.makedirs(save_dir, exist_ok=True)
         
         timestamp = os.path.getmtime(__file__)
@@ -739,6 +762,120 @@ class ScreenshotOverlay(QDialog):
         
         self.screenshot_taken.emit(save_path)
         self._cleanup()
+
+    def _cleanup(self):
+        self.reject()
+        app = QApplication.instance()
+        app.processEvents()
+        for w in self.windows_to_restore:
+            w.showNormal()
+
+
+class RegionOverlay(QDialog):
+    region_selected = Signal(int, int, int, int)
+
+    def __init__(self, windows_to_restore=None):
+        super().__init__()
+        self.windows_to_restore = windows_to_restore or []
+        self.start_draw_pos = None
+        self.end_draw_pos = None
+        self.start_screen_pos = None
+        self.is_dragging = False
+        self._init_ui()
+
+    def _init_ui(self):
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+    def showEvent(self, event):
+        screens = QApplication.screens()
+        min_x = min(s.geometry().left() for s in screens)
+        min_y = min(s.geometry().top() for s in screens)
+        max_x = max(s.geometry().right() for s in screens)
+        max_y = max(s.geometry().bottom() for s in screens)
+        self.setGeometry(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
+        QApplication.setOverrideCursor(Qt.CrossCursor)
+        super().showEvent(event)
+
+    def hideEvent(self, event):
+        QApplication.restoreOverrideCursor()
+        super().hideEvent(event)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor(0, 0, 0, 50))
+
+        if self.is_dragging and self.start_draw_pos and self.end_draw_pos:
+            x1 = min(self.start_draw_pos.x(), self.end_draw_pos.x())
+            y1 = min(self.start_draw_pos.y(), self.end_draw_pos.y())
+            x2 = max(self.start_draw_pos.x(), self.end_draw_pos.x())
+            y2 = max(self.start_draw_pos.y(), self.end_draw_pos.y())
+            draw_rect = QRect(x1, y1, x2 - x1, y2 - y1)
+            
+            painter.fillRect(draw_rect, QColor(255, 255, 255, 50))
+            
+            pen = QPen(QColor(0, 150, 255), 2)
+            painter.setPen(pen)
+            painter.drawRect(draw_rect)
+
+            painter.setPen(QColor(255, 255, 255))
+            painter.setFont(QFont("Microsoft YaHei", 12))
+            width = draw_rect.width()
+            height = draw_rect.height()
+            painter.drawText(draw_rect.topRight() + QPoint(5, 15), f"{width} x {height}")
+
+        painter.setPen(QColor(255, 255, 255))
+        painter.setFont(QFont("Microsoft YaHei", 13))
+        painter.drawText(self.rect(), Qt.AlignCenter, "拖拽选择区域 | 松开鼠标完成 | 按 ESC 取消")
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.start_draw_pos = event.pos()
+            self.start_screen_pos = self._get_cursor_pos()
+            self.is_dragging = True
+
+    def mouseMoveEvent(self, event):
+        if self.is_dragging and self.start_draw_pos:
+            self.end_draw_pos = event.pos()
+            self.update()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton and self.is_dragging:
+            self.is_dragging = False
+            if self.start_screen_pos:
+                end_screen_pos = self._get_cursor_pos()
+                x1 = min(self.start_screen_pos.x(), end_screen_pos.x())
+                y1 = min(self.start_screen_pos.y(), end_screen_pos.y())
+                x2 = max(self.start_screen_pos.x(), end_screen_pos.x())
+                y2 = max(self.start_screen_pos.y(), end_screen_pos.y())
+                
+                if (x2 - x1) > 10 and (y2 - y1) > 10:
+                    self.region_selected.emit(x1, y1, x2 - x1, y2 - y1)
+                    self._cleanup()
+                else:
+                    self.start_draw_pos = None
+                    self.end_draw_pos = None
+                    self.start_screen_pos = None
+                    self.update()
+            self.start_draw_pos = None
+            self.end_draw_pos = None
+            self.start_screen_pos = None
+
+    def _get_cursor_pos(self):
+        try:
+            class POINT(ctypes.Structure):
+                _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+            
+            pt = POINT()
+            user32.GetCursorPos(ctypes.byref(pt))
+            return QPoint(pt.x, pt.y)
+        except:
+            return QPoint(0, 0)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self._cleanup()
 
     def _cleanup(self):
         self.reject()
