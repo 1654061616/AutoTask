@@ -116,7 +116,7 @@ class ImageRecognition:
     
     def image_exists(self, template_path: str, region: Optional[Tuple[int, int, int, int]] = None,
                      threshold: float = 0.8) -> bool:
-        return self.find_image(template_path, region, threshold) is not None
+        return self.find_image(template_path, region=region, threshold=threshold) is not None
     
     def get_screen_size(self) -> Tuple[int, int]:
         return (self.monitor["width"], self.monitor["height"])

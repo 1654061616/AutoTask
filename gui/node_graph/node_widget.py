@@ -66,7 +66,7 @@ class NodeWidget(QGraphicsObject):
             in_port.setPos(port_offset, 40)
             self.input_ports.append(in_port)
 
-        if self.node_type == "if_else" or self.node_type in ("image_find", "image_click", "image_exists"):
+        if self.node_type == "if_else":
             true_port = PortWidget("out", "True", self, self)
             true_port.setPos(self.node_width + port_offset, 25)
             self.output_ports.append(true_port)
@@ -74,6 +74,16 @@ class NodeWidget(QGraphicsObject):
             false_port = PortWidget("out", "False", self, self)
             false_port.setPos(self.node_width + port_offset, 55)
             self.output_ports.append(false_port)
+
+        if self.node_type in ("image_find", "image_click", "image_exists"):
+            true_port = PortWidget("out", "True", self, self)
+            true_port.setPos(self.node_width + port_offset, 25)
+            self.output_ports.append(true_port)
+
+            false_port = PortWidget("out", "False", self, self)
+            false_port.setPos(self.node_width + port_offset, 55)
+            self.output_ports.append(false_port)
+
         elif self.node_type != "end":
             out_port = PortWidget("out", "输出", self, self)
             out_port.setPos(self.node_width + port_offset, 40)

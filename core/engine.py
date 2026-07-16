@@ -298,17 +298,35 @@ class FlowEngine:
         
         image_path = config.get("image_path", "")
         region = config.get("region")
+        similarity = config.get("similarity", 0.8)
+        wait_find = config.get("wait_find", False)
+        wait_timeout = config.get("wait_timeout", 5)
         
-        self.logger.info(f"查找图片: {image_path}")
-        result = self.image_recognition.find_image(image_path, region=region)
-        if result:
-            self.logger.info(f"找到图片: {result}")
-            self.variable_manager.set_variable("image_result", result)
-            return True
-        else:
-            self.logger.info("未找到图片")
-            self.variable_manager.set_variable("image_result", None)
-            return False
+        self.logger.info(f"查找图片: {image_path}, 相似度: {similarity}, 超时: {wait_timeout}秒")
+        
+        start_time = time.time()
+        result = None
+        
+        while True:
+            result = self.image_recognition.find_image(image_path, region=region, threshold=similarity)
+            if result:
+                self.logger.info(f"找到图片: {result}")
+                self.variable_manager.set_variable("image_result", result)
+                return True
+            
+            if not wait_find:
+                break
+            
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= wait_timeout:
+                self.logger.info(f"查找图片超时({wait_timeout}秒)")
+                break
+            
+            time.sleep(0.5)
+        
+        self.logger.info("未找到图片")
+        self.variable_manager.set_variable("image_result", None)
+        return False
     
     def _execute_image_click(self, config):
         """执行点击图片操作"""
@@ -319,17 +337,35 @@ class FlowEngine:
         image_path = config.get("image_path", "")
         offset_x = config.get("offset_x", 0)
         offset_y = config.get("offset_y", 0)
+        similarity = config.get("similarity", 0.8)
+        wait_find = config.get("wait_find", False)
+        wait_timeout = config.get("wait_timeout", 5)
         
-        self.logger.info(f"点击图片: {image_path}")
-        result = self.image_recognition.find_image(image_path)
-        if result:
-            x, y = result
-            self.mouse.click(x + offset_x, y + offset_y)
-            self.logger.info(f"点击位置: ({x + offset_x}, {y + offset_y})")
-            return True
-        else:
-            self.logger.info("未找到图片，跳过点击")
-            return False
+        self.logger.info(f"点击图片: {image_path}, 相似度: {similarity}, 超时: {wait_timeout}秒")
+        
+        start_time = time.time()
+        result = None
+        
+        while True:
+            result = self.image_recognition.find_image(image_path, threshold=similarity)
+            if result:
+                x, y = result
+                self.mouse.click(x + offset_x, y + offset_y)
+                self.logger.info(f"点击位置: ({x + offset_x}, {y + offset_y})")
+                return True
+            
+            if not wait_find:
+                break
+            
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= wait_timeout:
+                self.logger.info(f"点击图片超时({wait_timeout}秒)")
+                break
+            
+            time.sleep(0.5)
+        
+        self.logger.info("未找到图片，跳过点击")
+        return False
     
     def _execute_image_exists(self, config):
         """执行图片存在判断操作"""
@@ -338,12 +374,35 @@ class FlowEngine:
             return False
         
         image_path = config.get("image_path", "")
+        similarity = config.get("similarity", 0.8)
+        wait_find = config.get("wait_find", False)
+        wait_timeout = config.get("wait_timeout", 5)
         
-        self.logger.info(f"判断图片是否存在: {image_path}")
-        exists = self.image_recognition.image_exists(image_path)
-        self.variable_manager.set_variable("image_exists", exists)
-        self.logger.info(f"图片存在: {exists}")
-        return exists
+        self.logger.info(f"判断图片是否存在: {image_path}, 相似度: {similarity}, 超时: {wait_timeout}秒")
+        
+        start_time = time.time()
+        exists = False
+        
+        while True:
+            exists = self.image_recognition.image_exists(image_path, threshold=similarity)
+            if exists:
+                self.logger.info("图片存在")
+                self.variable_manager.set_variable("image_exists", True)
+                return True
+            
+            if not wait_find:
+                break
+            
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= wait_timeout:
+                self.logger.info(f"判断图片存在超时({wait_timeout}秒)")
+                break
+            
+            time.sleep(0.5)
+        
+        self.logger.info("图片不存在")
+        self.variable_manager.set_variable("image_exists", False)
+        return False
     
     def _execute_window_find(self, config):
         """执行窗口查找操作"""
