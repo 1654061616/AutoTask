@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QRadioButton, QGroupBox)
 from PySide6.QtCore import Qt, Signal
 from . import StepConfigPanel
+from gui.styles import Styles
 
 
 class ExcelReadPanel(StepConfigPanel):
@@ -32,10 +33,7 @@ class ExcelReadPanel(StepConfigPanel):
         cell_layout = QFormLayout(self.cell_group)
         self.cell_address_edit = QLineEdit()
         self.cell_address_edit.setPlaceholderText("例如: A1")
-        self.cell_address_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.cell_address_edit.setStyleSheet(Styles.input_field())
         cell_layout.addRow("单元格:", self.cell_address_edit)
         self.main_layout.addWidget(self.cell_group)
 
@@ -44,10 +42,7 @@ class ExcelReadPanel(StepConfigPanel):
         self.row_number_spin = QSpinBox()
         self.row_number_spin.setRange(1, 1048576)
         self.row_number_spin.setValue(1)
-        self.row_number_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.row_number_spin.setStyleSheet(Styles.spin_box())
         row_layout.addRow("行号:", self.row_number_spin)
         self.main_layout.addWidget(self.row_group)
 
@@ -56,10 +51,7 @@ class ExcelReadPanel(StepConfigPanel):
         self.column_number_spin = QSpinBox()
         self.column_number_spin.setRange(1, 16384)
         self.column_number_spin.setValue(1)
-        self.column_number_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.column_number_spin.setStyleSheet(Styles.spin_box())
         column_layout.addRow("列号:", self.column_number_spin)
         self.main_layout.addWidget(self.column_group)
 
@@ -67,16 +59,10 @@ class ExcelReadPanel(StepConfigPanel):
         range_layout = QFormLayout(self.range_group)
         self.start_cell_edit = QLineEdit()
         self.start_cell_edit.setPlaceholderText("起始单元格: A1")
-        self.start_cell_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.start_cell_edit.setStyleSheet(Styles.input_field())
         self.end_cell_edit = QLineEdit()
         self.end_cell_edit.setPlaceholderText("结束单元格: B5")
-        self.end_cell_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.end_cell_edit.setStyleSheet(Styles.input_field())
         range_layout.addRow("起始单元格:", self.start_cell_edit)
         range_layout.addRow("结束单元格:", self.end_cell_edit)
         self.main_layout.addWidget(self.range_group)
