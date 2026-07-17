@@ -188,9 +188,9 @@ class UIBuilderMixin:
                 background-color: #2ecc71;
             }
             QPushButton:disabled {
-                background-color: #95a5a6;
-                color: #bdc3c7;
-                font-weight: normal;
+                background-color: #7ed6a4;
+                color: rgba(255,255,255,0.7);
+                font-weight: bold;
             }
         """)
 
@@ -208,17 +208,27 @@ class UIBuilderMixin:
                 background-color: #ec7063;
             }
             QPushButton:disabled {
-                background-color: #95a5a6;
-                color: #bdc3c7;
-                font-weight: normal;
+                background-color: #f0a0a0;
+                color: rgba(255,255,255,0.7);
+                font-weight: bold;
             }
         """)
         self.stop_task_btn.setEnabled(False)
 
         self.edit_steps_btn = QPushButton("编辑执行步骤")
-        self.edit_steps_btn.setStyleSheet("background-color: #3498db; color: white; font-weight: bold; padding: 8px 20px;")
+        self.edit_steps_btn.setStyleSheet("""
+            QPushButton { background-color: #3498db; color: white; font-weight: bold; padding: 8px 20px; border: none; border-radius: 4px; }
+            QPushButton:hover { background-color: #2980b9; }
+            QPushButton:pressed { background-color: #1c6ea4; }
+            QPushButton:disabled { background-color: #7ab8e4; color: rgba(255,255,255,0.7); }
+        """)
         self.save_config_btn = QPushButton("保存配置")
-        self.save_config_btn.setStyleSheet("background-color: #3498db; color: white; font-weight: bold; padding: 8px 20px;")
+        self.save_config_btn.setStyleSheet("""
+            QPushButton { background-color: #3498db; color: white; font-weight: bold; padding: 8px 20px; border: none; border-radius: 4px; }
+            QPushButton:hover { background-color: #2980b9; }
+            QPushButton:pressed { background-color: #1c6ea4; }
+            QPushButton:disabled { background-color: #7ab8e4; color: rgba(255,255,255,0.7); }
+        """)
 
         action_btn_layout.addWidget(self.start_task_btn)
         action_btn_layout.addWidget(self.stop_task_btn)
