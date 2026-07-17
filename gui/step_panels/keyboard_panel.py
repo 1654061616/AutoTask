@@ -37,8 +37,8 @@ class KeyboardTypePanel(StepConfigPanel):
         browse_btn = QPushButton("浏览")
         browse_btn.setStyleSheet("""
             QPushButton { padding: 4px 12px; border: 1px solid #3498db; border-radius: 3px;
-                color: #3498db; font-size: 12px; background: #fff; }
-            QPushButton:hover { background: #3498db; color: #fff; }
+                color: #3498db; font-size: 12px; background: transparent; }
+            QPushButton:hover { background: #3498db; color: white; }
         """)
         browse_btn.clicked.connect(lambda: self._browse_excel_file())
         file_layout.addWidget(browse_btn)
