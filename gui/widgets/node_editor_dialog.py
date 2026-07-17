@@ -4,8 +4,8 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
 from PySide6.QtCore import Qt, Signal
 import uuid
 
-from .node_graph import GraphScene, GraphView, NodeToolbar
-from .step_panels import PANEL_MAP, get_panel_class
+from ..node_graph import GraphScene, GraphView, NodeToolbar
+from ..step_panels import PANEL_MAP, get_panel_class
 
 
 class NodeEditorDialog(QDialog):

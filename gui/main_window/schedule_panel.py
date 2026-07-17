@@ -1,3 +1,5 @@
+"""定时设置面板：立即执行、间隔执行、CRON定时、指定时间"""
+
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                                QComboBox, QSpinBox, QLineEdit, QPushButton,
                                QDateTimeEdit, QStackedWidget)
@@ -5,7 +7,7 @@ from PySide6.QtCore import Qt, QDateTime, Signal
 from croniter import croniter
 from datetime import datetime
 
-from .cron_generator import CronGeneratorDialog
+from ..widgets.cron_generator import CronGeneratorDialog
 
 
 class SchedulePanel(QWidget):
@@ -44,7 +46,6 @@ class SchedulePanel(QWidget):
 
         self.stack = QStackedWidget()
 
-        # 0: immediate
         immediate_widget = QWidget()
         immediate_layout = QVBoxLayout(immediate_widget)
         immediate_layout.setContentsMargins(0, 5, 0, 0)
@@ -52,7 +53,6 @@ class SchedulePanel(QWidget):
         immediate_layout.addStretch()
         self.stack.addWidget(immediate_widget)
 
-        # 1: interval
         interval_widget = QWidget()
         interval_layout = QHBoxLayout(interval_widget)
         interval_layout.setContentsMargins(0, 5, 0, 0)
@@ -78,7 +78,6 @@ class SchedulePanel(QWidget):
         interval_layout.addStretch()
         self.stack.addWidget(interval_widget)
 
-        # 2: cron
         cron_widget = QWidget()
         cron_layout = QVBoxLayout(cron_widget)
         cron_layout.setContentsMargins(0, 5, 0, 0)
@@ -102,7 +101,6 @@ class SchedulePanel(QWidget):
         cron_layout.addStretch()
         self.stack.addWidget(cron_widget)
 
-        # 3: date
         date_widget = QWidget()
         date_layout = QHBoxLayout(date_widget)
         date_layout.setContentsMargins(0, 5, 0, 0)

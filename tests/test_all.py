@@ -1,5 +1,5 @@
 import pytest
-import sys
+
 
 def test_core_modules():
     from core.logger import Logger
@@ -49,10 +49,10 @@ def test_operations_modules():
     assert condition is not None
 
 def test_gui_modules():
-    from gui.toolbox_panel import ToolboxPanel
+    from resources.bak.gui.toolbox_panel import ToolboxPanel
     from gui.step_editor import StepEditor
-    from gui.properties_panel import PropertiesPanel
-    from gui.monitor_panel import MonitorPanel
+    from resources.bak.gui.properties_panel import PropertiesPanel
+    from resources.bak.gui.monitor_panel import MonitorPanel
     
     toolbox = ToolboxPanel()
     step_editor = StepEditor()
