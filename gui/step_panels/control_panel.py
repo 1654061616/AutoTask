@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QPushButton, QFileDialog, QGroupBox, QListView)
 from PySide6.QtCore import Qt, Signal
 from . import StepConfigPanel
+from gui.styles import Styles
 
 
 class WaitPanel(StepConfigPanel):
@@ -20,10 +21,7 @@ class WaitPanel(StepConfigPanel):
         self.fixed_time_spin = QSpinBox()
         self.fixed_time_spin.setRange(0, 3600)
         self.fixed_time_spin.setValue(1)
-        self.fixed_time_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.fixed_time_spin.setStyleSheet(Styles.spin_box())
         fixed_layout.addRow("等待时间(秒):", self.fixed_time_spin)
         self.main_layout.addWidget(self.fixed_group)
 
@@ -32,17 +30,11 @@ class WaitPanel(StepConfigPanel):
         self.min_time_spin = QSpinBox()
         self.min_time_spin.setRange(0, 3600)
         self.min_time_spin.setValue(1)
-        self.min_time_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.min_time_spin.setStyleSheet(Styles.spin_box())
         self.max_time_spin = QSpinBox()
         self.max_time_spin.setRange(0, 3600)
         self.max_time_spin.setValue(5)
-        self.max_time_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.max_time_spin.setStyleSheet(Styles.spin_box())
         random_layout.addRow("最小时间(秒):", self.min_time_spin)
         random_layout.addRow("最大时间(秒):", self.max_time_spin)
         self.main_layout.addWidget(self.random_group)
@@ -52,17 +44,9 @@ class WaitPanel(StepConfigPanel):
 
         self.condition_type_combo = QComboBox()
         self.condition_type_combo.addItems(["图片出现", "文字出现", "窗口出现"])
-        self.condition_type_combo.setStyleSheet("""
-            QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QComboBox:focus { border-color: #3498db; }
-        """)
+        self.condition_type_combo.setStyleSheet(Styles.combo_box())
         cond_type_view = QListView()
-        cond_type_view.setStyleSheet("""
-            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
-            QListView::item { padding: 6px 10px; height: 28px; }
-            QListView::item:selected { color: #ffffff; background-color: #3498db; }
-            QListView::item:hover { color: #ffffff; background-color: #3498db; }
-        """)
+        cond_type_view.setStyleSheet(Styles.combo_view())
         self.condition_type_combo.setView(cond_type_view)
         condition_layout.addWidget(self.condition_type_combo)
 
@@ -71,18 +55,12 @@ class WaitPanel(StepConfigPanel):
 
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setPlaceholderText("图片路径")
-        self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.image_path_edit.setStyleSheet(Styles.input_field())
         condition_param_layout.addWidget(self.image_path_edit)
 
         browse_layout = QHBoxLayout()
         browse_btn = QPushButton("浏览图片")
-        browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
+        browse_btn.setStyleSheet(Styles.browse_btn_text())
 
         def browse_image():
             file_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
@@ -101,7 +79,7 @@ class WaitPanel(StepConfigPanel):
         self.similarity_slider.setTickInterval(10)
         self.similarity_value_label = QLabel("0.90")
         self.similarity_value_label.setAlignment(Qt.AlignCenter)
-        self.similarity_value_label.setStyleSheet("color: #27ae60; font-weight: bold;")
+        self.similarity_value_label.setStyleSheet(Styles.slider_value_label())
         self.similarity_slider.valueChanged.connect(
             lambda val: self.similarity_value_label.setText(f"{val / 100:.2f}")
         )
@@ -111,18 +89,12 @@ class WaitPanel(StepConfigPanel):
 
         self.text_content_edit = QLineEdit()
         self.text_content_edit.setPlaceholderText("要查找的文字内容")
-        self.text_content_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.text_content_edit.setStyleSheet(Styles.input_field())
         condition_param_layout.addWidget(self.text_content_edit)
 
         self.window_title_edit = QLineEdit()
         self.window_title_edit.setPlaceholderText("窗口标题（支持通配符）")
-        self.window_title_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.window_title_edit.setStyleSheet(Styles.input_field())
         condition_param_layout.addWidget(self.window_title_edit)
 
         condition_layout.addWidget(self.condition_param_group)
@@ -131,10 +103,7 @@ class WaitPanel(StepConfigPanel):
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(1, 300)
         self.timeout_spin.setValue(30)
-        self.timeout_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.timeout_spin.setStyleSheet(Styles.spin_box())
         timeout_layout.addRow("超时时间(秒):", self.timeout_spin)
         condition_layout.addLayout(timeout_layout)
 
@@ -228,34 +197,20 @@ class IfElsePanel(StepConfigPanel):
 
         self.var_name_edit = QLineEdit()
         self.var_name_edit.setPlaceholderText("变量名")
-        self.var_name_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.var_name_edit.setStyleSheet(Styles.input_field())
         value_layout.addRow("变量名:", self.var_name_edit)
 
         self.compare_op_combo = QComboBox()
         self.compare_op_combo.addItems(["==", "!=", "<", "<=", ">", ">="])
-        self.compare_op_combo.setStyleSheet("""
-            QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QComboBox:focus { border-color: #3498db; }
-        """)
+        self.compare_op_combo.setStyleSheet(Styles.combo_box())
         compare_op_view = QListView()
-        compare_op_view.setStyleSheet("""
-            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
-            QListView::item { padding: 6px 10px; height: 28px; }
-            QListView::item:selected { color: #ffffff; background-color: #3498db; }
-            QListView::item:hover { color: #ffffff; background-color: #3498db; }
-        """)
+        compare_op_view.setStyleSheet(Styles.combo_view())
         self.compare_op_combo.setView(compare_op_view)
         value_layout.addRow("比较操作:", self.compare_op_combo)
 
         self.compare_value_edit = QLineEdit()
         self.compare_value_edit.setPlaceholderText("比较值")
-        self.compare_value_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.compare_value_edit.setStyleSheet(Styles.input_field())
         value_layout.addRow("比较值:", self.compare_value_edit)
         self.main_layout.addWidget(self.value_compare_group)
 
@@ -270,16 +225,10 @@ class IfElsePanel(StepConfigPanel):
         image_path_layout.addWidget(image_label)
         self.image_path_edit = QLineEdit()
         self.image_path_edit.setPlaceholderText("选择图片")
-        self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.image_path_edit.setStyleSheet(Styles.input_field())
         image_path_layout.addWidget(self.image_path_edit)
         browse_btn = QPushButton("浏览")
-        browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
+        browse_btn.setStyleSheet(Styles.browse_btn())
 
         def browse_image():
             file_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
@@ -300,7 +249,7 @@ class IfElsePanel(StepConfigPanel):
         self.similarity_slider.setTickInterval(10)
         self.similarity_value_label = QLabel("0.90")
         self.similarity_value_label.setAlignment(Qt.AlignCenter)
-        self.similarity_value_label.setStyleSheet("color: #27ae60; font-weight: bold;")
+        self.similarity_value_label.setStyleSheet(Styles.slider_value_label())
         self.similarity_slider.valueChanged.connect(
             lambda val: self.similarity_value_label.setText(f"{val / 100:.2f}")
         )
@@ -313,10 +262,7 @@ class IfElsePanel(StepConfigPanel):
         text_layout = QFormLayout(self.text_exists_group)
         self.text_content_edit = QLineEdit()
         self.text_content_edit.setPlaceholderText("要查找的文字")
-        self.text_content_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.text_content_edit.setStyleSheet(Styles.input_field())
         text_layout.addRow("文字内容:", self.text_content_edit)
         self.main_layout.addWidget(self.text_exists_group)
 
@@ -324,10 +270,7 @@ class IfElsePanel(StepConfigPanel):
         window_layout = QFormLayout(self.window_exists_group)
         self.window_title_edit = QLineEdit()
         self.window_title_edit.setPlaceholderText("窗口标题（支持通配符）")
-        self.window_title_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.window_title_edit.setStyleSheet(Styles.input_field())
         window_layout.addRow("窗口标题:", self.window_title_edit)
         self.main_layout.addWidget(self.window_exists_group)
 
@@ -336,19 +279,13 @@ class IfElsePanel(StepConfigPanel):
         self.true_action_combo = self.add_combobox("条件成立时", ["继续执行", "跳转到标记"])
         self.true_goto_edit = QLineEdit()
         self.true_goto_edit.setPlaceholderText("目标标记名称")
-        self.true_goto_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.true_goto_edit.setStyleSheet(Styles.input_field())
         self.add_line("跳转标记", self.true_goto_edit)
 
         self.false_action_combo = self.add_combobox("条件不成立时", ["继续执行", "跳转到标记"])
         self.false_goto_edit = QLineEdit()
         self.false_goto_edit.setPlaceholderText("目标标记名称")
-        self.false_goto_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.false_goto_edit.setStyleSheet(Styles.input_field())
         self.add_line("跳转标记", self.false_goto_edit)
 
         self.add_separator()
@@ -451,36 +388,24 @@ class LoopPanel(StepConfigPanel):
         self.loop_count_spin = QSpinBox()
         self.loop_count_spin.setRange(1, 10000)
         self.loop_count_spin.setValue(10)
-        self.loop_count_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.loop_count_spin.setStyleSheet(Styles.spin_box())
         count_layout.addRow("循环次数:", self.loop_count_spin)
 
         self.loop_var_edit = QLineEdit()
         self.loop_var_edit.setPlaceholderText("循环变量名（可选）")
-        self.loop_var_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.loop_var_edit.setStyleSheet(Styles.input_field())
         count_layout.addRow("循环变量:", self.loop_var_edit)
 
         self.start_value_spin = QSpinBox()
         self.start_value_spin.setRange(-1000000, 1000000)
         self.start_value_spin.setValue(0)
-        self.start_value_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.start_value_spin.setStyleSheet(Styles.spin_box())
         count_layout.addRow("起始值:", self.start_value_spin)
 
         self.step_spin = QSpinBox()
         self.step_spin.setRange(1, 10000)
         self.step_spin.setValue(1)
-        self.step_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.step_spin.setStyleSheet(Styles.spin_box())
         count_layout.addRow("步长:", self.step_spin)
         self.main_layout.addWidget(self.count_group)
 
@@ -489,34 +414,20 @@ class LoopPanel(StepConfigPanel):
 
         self.condition_var_edit = QLineEdit()
         self.condition_var_edit.setPlaceholderText("条件变量名")
-        self.condition_var_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.condition_var_edit.setStyleSheet(Styles.input_field())
         condition_layout.addRow("条件变量:", self.condition_var_edit)
 
         self.condition_op_combo = QComboBox()
         self.condition_op_combo.addItems(["==", "!=", "<", "<=", ">", ">=", "exists", "not_exists"])
-        self.condition_op_combo.setStyleSheet("""
-            QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QComboBox:focus { border-color: #3498db; }
-        """)
+        self.condition_op_combo.setStyleSheet(Styles.combo_box())
         cond_op_view = QListView()
-        cond_op_view.setStyleSheet("""
-            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
-            QListView::item { padding: 6px 10px; height: 28px; }
-            QListView::item:selected { color: #ffffff; background-color: #3498db; }
-            QListView::item:hover { color: #ffffff; background-color: #3498db; }
-        """)
+        cond_op_view.setStyleSheet(Styles.combo_view())
         self.condition_op_combo.setView(cond_op_view)
         condition_layout.addRow("条件操作:", self.condition_op_combo)
 
         self.condition_value_edit = QLineEdit()
         self.condition_value_edit.setPlaceholderText("条件值")
-        self.condition_value_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.condition_value_edit.setStyleSheet(Styles.input_field())
         condition_layout.addRow("条件值:", self.condition_value_edit)
         self.main_layout.addWidget(self.condition_group)
 
@@ -525,18 +436,12 @@ class LoopPanel(StepConfigPanel):
 
         self.list_var_edit = QLineEdit()
         self.list_var_edit.setPlaceholderText("列表变量名")
-        self.list_var_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.list_var_edit.setStyleSheet(Styles.input_field())
         iterate_layout.addRow("列表变量:", self.list_var_edit)
 
         self.element_var_edit = QLineEdit()
         self.element_var_edit.setPlaceholderText("元素变量名")
-        self.element_var_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.element_var_edit.setStyleSheet(Styles.input_field())
         iterate_layout.addRow("元素变量:", self.element_var_edit)
         self.main_layout.addWidget(self.iterate_group)
 
@@ -616,10 +521,7 @@ class LogPanel(StepConfigPanel):
 
         self.log_content_edit = QTextEdit()
         self.log_content_edit.setPlaceholderText("日志内容（支持变量引用 ${var}）")
-        self.log_content_edit.setStyleSheet("""
-            QTextEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px; }
-            QTextEdit:focus { border-color: #3498db; }
-        """)
+        self.log_content_edit.setStyleSheet(Styles.text_edit())
         self.add_line("日志内容", self.log_content_edit)
 
         self.output_to_file_check = QCheckBox("输出到文件")
@@ -631,17 +533,11 @@ class LogPanel(StepConfigPanel):
 
         self.file_path_edit = QLineEdit()
         self.file_path_edit.setPlaceholderText("日志文件路径")
-        self.file_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.file_path_edit.setStyleSheet(Styles.input_field())
         file_layout.addWidget(self.file_path_edit)
 
         browse_btn = QPushButton("浏览")
-        browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
+        browse_btn.setStyleSheet(Styles.browse_btn())
 
         def browse_file():
             file_path, _ = QFileDialog.getSaveFileName(self, "选择日志文件", "", "Text Files (*.txt);;All Files (*)")
@@ -701,10 +597,7 @@ class LabelPanel(StepConfigPanel):
 
         self.label_name_edit = QLineEdit()
         self.label_name_edit.setPlaceholderText("标记名称")
-        self.label_name_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.label_name_edit.setStyleSheet(Styles.input_field())
         self.add_line("标记名称", self.label_name_edit)
 
     def get_config(self):
@@ -725,10 +618,7 @@ class GotoPanel(StepConfigPanel):
 
         self.target_label_edit = QLineEdit()
         self.target_label_edit.setPlaceholderText("目标标记名称")
-        self.target_label_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.target_label_edit.setStyleSheet(Styles.input_field())
         self.add_line("目标标记", self.target_label_edit)
 
         self.add_separator()
