@@ -1,8 +1,9 @@
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
                                QLabel, QSplitter, QWidget, QStackedWidget,
-                               QScrollArea, QSizePolicy)
+                               QScrollArea, QSizePolicy, QToolButton)
 from PySide6.QtCore import Qt, Signal
 import uuid
+import warnings
 
 from ..node_graph import GraphScene, GraphView, NodeToolbar
 from ..step_panels import PANEL_MAP, get_panel_class
@@ -23,46 +24,17 @@ class NodeEditorDialog(QDialog):
         task_name = self.flow_data.get("name", "未命名任务")
         self.setWindowTitle(f"节点编辑器 - {task_name}")
         self.setWindowFlags(
-            self.windowFlags() & ~Qt.WindowContextHelpButtonHint |
-            Qt.WindowMaximizeButtonHint |
-            Qt.WindowMinimizeButtonHint
+            Qt.Dialog |
+            Qt.WindowCloseButtonHint |
+            Qt.WindowTitleHint |
+            Qt.WindowSystemMenuHint |
+            Qt.WindowMinMaxButtonsHint
         )
         self.resize(1400, 800)
 
         self.setLayout(QVBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().setSpacing(0)
-
-        toggle_bar = QWidget()
-        toggle_bar.setFixedHeight(32)
-        toggle_bar.setStyleSheet("background: #f0f0f0; border-bottom: 1px solid #ccc;")
-        toggle_layout = QHBoxLayout(toggle_bar)
-        toggle_layout.setContentsMargins(6, 0, 6, 0)
-        toggle_layout.setSpacing(4)
-
-        self.toggle_left_btn = QPushButton("◀")
-        self.toggle_left_btn.setToolTip("隐藏节点栏")
-        self.toggle_left_btn.setFixedSize(50, 26)
-        self.toggle_left_btn.setStyleSheet("""
-            QPushButton { border: 1px solid #bbb; border-radius: 3px; font-size: 11px; color: #444; background: #fff; }
-            QPushButton:hover { background: #3498db; color: white; border-color: #3498db; }
-        """)
-        self.toggle_left_btn.clicked.connect(self._toggle_left_panel)
-        toggle_layout.addWidget(self.toggle_left_btn)
-
-        toggle_layout.addStretch()
-
-        self.toggle_right_btn = QPushButton("▶")
-        self.toggle_right_btn.setToolTip("隐藏配置面板")
-        self.toggle_right_btn.setFixedSize(50, 26)
-        self.toggle_right_btn.setStyleSheet("""
-            QPushButton { border: 1px solid #bbb; border-radius: 3px; font-size: 11px; color: #444; background: #fff; }
-            QPushButton:hover { background: #3498db; color: white; border-color: #3498db; }
-        """)
-        self.toggle_right_btn.clicked.connect(self._toggle_right_panel)
-        toggle_layout.addWidget(self.toggle_right_btn)
-
-        self.layout().addWidget(toggle_bar)
 
         self.splitter = QSplitter(Qt.Horizontal)
         self.splitter.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -100,6 +72,33 @@ class NodeEditorDialog(QDialog):
         self._right_width = 320
 
         self.layout().addWidget(self.splitter)
+
+        btn_style = """
+            QToolButton {
+                border: none; border-radius: 2px; font-size: 20px; font-weight: bold;
+                color: #27ae60; background: transparent;
+            }
+            QToolButton:hover {
+                color: #2ecc71; background: rgba(0,0,0,0.08);
+            }
+        """
+        self.toggle_left_btn = QToolButton(self)
+        self.toggle_left_btn.setText("◀")
+        self.toggle_left_btn.setToolTip("隐藏节点栏")
+        self.toggle_left_btn.setFixedSize(32, 28)
+        self.toggle_left_btn.setStyleSheet(btn_style)
+        self.toggle_left_btn.clicked.connect(self._toggle_left_panel)
+        self.toggle_left_btn.move(4, 4)
+        self.toggle_left_btn.raise_()
+
+        self.toggle_right_btn = QToolButton(self)
+        self.toggle_right_btn.setText("▶")
+        self.toggle_right_btn.setToolTip("隐藏配置面板")
+        self.toggle_right_btn.setFixedSize(32, 28)
+        self.toggle_right_btn.setStyleSheet(btn_style)
+        self.toggle_right_btn.clicked.connect(self._toggle_right_panel)
+        self.toggle_right_btn.move(self.width() - 36, 4)
+        self.toggle_right_btn.raise_()
 
         self.node_toolbar.node_drag_started.connect(self._on_node_drag_started)
 
@@ -208,10 +207,12 @@ class NodeEditorDialog(QDialog):
     def closeEvent(self, event):
         try:
             if hasattr(self, 'graph_scene') and self.graph_scene:
-                try:
-                    self.graph_scene.selectionChanged.disconnect(self._on_selection_changed)
-                except Exception:
-                    pass
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", RuntimeWarning)
+                    try:
+                        self.graph_scene.selectionChanged.disconnect(self._on_selection_changed)
+                    except Exception:
+                        pass
             if hasattr(self, '_current_panel') and self._current_panel:
                 try:
                     self._clear_current_panel()
@@ -224,10 +225,12 @@ class NodeEditorDialog(QDialog):
     def cleanup(self):
         try:
             if hasattr(self, 'graph_scene') and self.graph_scene:
-                try:
-                    self.graph_scene.selectionChanged.disconnect(self._on_selection_changed)
-                except Exception:
-                    pass
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", RuntimeWarning)
+                    try:
+                        self.graph_scene.selectionChanged.disconnect(self._on_selection_changed)
+                    except Exception:
+                        pass
                 try:
                     self.graph_scene.clear_all()
                 except Exception:
@@ -374,6 +377,10 @@ class NodeEditorDialog(QDialog):
         node = self.graph_scene.add_node(node_type, x, y)
         self.graph_scene.clearSelection()
         node.setSelected(True)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.toggle_right_btn.move(self.width() - 36, 4)
 
     def _toggle_left_panel(self):
         if self.node_toolbar.isVisible():

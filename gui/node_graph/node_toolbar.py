@@ -24,7 +24,7 @@ class NodeToolbar(QWidget):
         content_layout.setSpacing(8)
         content_layout.setContentsMargins(10, 10, 10, 10)
 
-        title_label = QLabel("节点工具箱")
+        title_label = QLabel("      节点工具箱")
         title_label.setStyleSheet("font-weight: bold; font-size: 14px; color: #fff;")
         content_layout.addWidget(title_label)
 

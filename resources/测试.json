@@ -2,7 +2,7 @@
   "id": "e8d59afc",
   "name": "测试",
   "version": "1.0",
-  "status": "已停止",
+  "status": "执行中",
   "nodes": [
     {
       "id": "d8fd2311-5d3d-42ca-b183-4f48641a1f88",
@@ -112,6 +112,34 @@
         "region": {},
         "result_variable": "image_found",
         "similarity": 0.9
+      }
+    },
+    {
+      "id": "9c62f357-a9fd-448e-a88c-f244a47c9fe5",
+      "type": "keyboard_type",
+      "x": 560.0,
+      "y": 220.0,
+      "config": {
+        "data_source": "excel",
+        "delay": 0,
+        "excel": {
+          "cell_address": "",
+          "column_number": 1,
+          "end_cell": "",
+          "file_path": "D:/Users/ming/Desktop/出勤统计.xlsx",
+          "read_mode": "sequential",
+          "read_range": "column",
+          "row_number": 1,
+          "sheet": "Sheet1",
+          "start_cell": "",
+          "var_format": "string"
+        },
+        "human_input": false,
+        "input_method": "clipboard",
+        "interval": 0.05,
+        "random_interval": false,
+        "random_max_interval": 0.15,
+        "random_min_interval": 0.02
       }
     }
   ],
