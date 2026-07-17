@@ -34,18 +34,18 @@ class NodeEditorDialog(QDialog):
         self.layout().setSpacing(0)
 
         toggle_bar = QWidget()
-        toggle_bar.setFixedHeight(28)
-        toggle_bar.setStyleSheet("background: #e8e8e8; border-bottom: 1px solid #d0d0d0;")
+        toggle_bar.setFixedHeight(32)
+        toggle_bar.setStyleSheet("background: #f0f0f0; border-bottom: 1px solid #ccc;")
         toggle_layout = QHBoxLayout(toggle_bar)
-        toggle_layout.setContentsMargins(4, 0, 4, 0)
-        toggle_layout.setSpacing(2)
+        toggle_layout.setContentsMargins(6, 0, 6, 0)
+        toggle_layout.setSpacing(4)
 
         self.toggle_left_btn = QPushButton("◀")
         self.toggle_left_btn.setToolTip("隐藏节点栏")
-        self.toggle_left_btn.setFixedSize(24, 24)
+        self.toggle_left_btn.setFixedSize(50, 26)
         self.toggle_left_btn.setStyleSheet("""
-            QPushButton { border: none; background: transparent; font-size: 12px; color: #666; }
-            QPushButton:hover { background: #d0d0d0; border-radius: 3px; }
+            QPushButton { border: 1px solid #bbb; border-radius: 3px; font-size: 11px; color: #444; background: #fff; }
+            QPushButton:hover { background: #3498db; color: white; border-color: #3498db; }
         """)
         self.toggle_left_btn.clicked.connect(self._toggle_left_panel)
         toggle_layout.addWidget(self.toggle_left_btn)
@@ -54,10 +54,10 @@ class NodeEditorDialog(QDialog):
 
         self.toggle_right_btn = QPushButton("▶")
         self.toggle_right_btn.setToolTip("隐藏配置面板")
-        self.toggle_right_btn.setFixedSize(24, 24)
+        self.toggle_right_btn.setFixedSize(50, 26)
         self.toggle_right_btn.setStyleSheet("""
-            QPushButton { border: none; background: transparent; font-size: 12px; color: #666; }
-            QPushButton:hover { background: #d0d0d0; border-radius: 3px; }
+            QPushButton { border: 1px solid #bbb; border-radius: 3px; font-size: 11px; color: #444; background: #fff; }
+            QPushButton:hover { background: #3498db; color: white; border-color: #3498db; }
         """)
         self.toggle_right_btn.clicked.connect(self._toggle_right_panel)
         toggle_layout.addWidget(self.toggle_right_btn)
@@ -376,26 +376,26 @@ class NodeEditorDialog(QDialog):
         node.setSelected(True)
 
     def _toggle_left_panel(self):
-        sizes = self.splitter.sizes()
-        if sizes[0] > 0:
-            self._left_width = sizes[0]
-            self.splitter.setSizes([0, sizes[0] + sizes[1], sizes[2]])
+        if self.node_toolbar.isVisible():
+            self._left_width = self.splitter.sizes()[0]
+            self.node_toolbar.setVisible(False)
             self.toggle_left_btn.setText("▶")
             self.toggle_left_btn.setToolTip("显示节点栏")
         else:
-            self.splitter.setSizes([self._left_width, sizes[1] - self._left_width, sizes[2]])
+            self.node_toolbar.setVisible(True)
+            self.splitter.setSizes([self._left_width, self.splitter.sizes()[1] - self._left_width, self.splitter.sizes()[2]])
             self.toggle_left_btn.setText("◀")
             self.toggle_left_btn.setToolTip("隐藏节点栏")
 
     def _toggle_right_panel(self):
-        sizes = self.splitter.sizes()
-        if sizes[2] > 0:
-            self._right_width = sizes[2]
-            self.splitter.setSizes([sizes[0], sizes[1] + sizes[2], 0])
+        if self.config_panel.isVisible():
+            self._right_width = self.splitter.sizes()[2]
+            self.config_panel.setVisible(False)
             self.toggle_right_btn.setText("◀")
             self.toggle_right_btn.setToolTip("显示配置面板")
         else:
-            self.splitter.setSizes([sizes[0], sizes[1] - self._right_width, self._right_width])
+            self.config_panel.setVisible(True)
+            self.splitter.setSizes([self.splitter.sizes()[0], self.splitter.sizes()[1] - self._right_width, self._right_width])
             self.toggle_right_btn.setText("▶")
             self.toggle_right_btn.setToolTip("隐藏配置面板")
 
