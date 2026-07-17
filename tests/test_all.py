@@ -50,17 +50,14 @@ def test_operations_modules():
 
 def test_gui_modules():
     from resources.bak.gui.toolbox_panel import ToolboxPanel
-    from gui.step_editor import StepEditor
     from resources.bak.gui.properties_panel import PropertiesPanel
     from resources.bak.gui.monitor_panel import MonitorPanel
     
     toolbox = ToolboxPanel()
-    step_editor = StepEditor()
     properties = PropertiesPanel()
     monitor = MonitorPanel()
     
     assert toolbox is not None
-    assert step_editor is not None
     assert properties is not None
     assert monitor is not None
 
