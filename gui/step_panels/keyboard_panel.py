@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QComboBox,
-                               QCheckBox, QGroupBox, QTextEdit, QListView)
+                               QCheckBox, QGroupBox, QTextEdit, QListView,
+                               QLineEdit, QRadioButton, QPushButton, QFileDialog)
 from PySide6.QtCore import Qt, Signal
 from . import StepConfigPanel
 
@@ -11,7 +12,173 @@ class KeyboardTypePanel(StepConfigPanel):
         self.init_ui()
 
     def init_ui(self):
+        # 数据来源选择
+        self.data_source_combo = self.add_combobox("数据来源", ["手动输入", "从Excel读取", "从变量读取"])
 
+        # --- Excel 读取配置区域 ---
+        self.excel_group = QGroupBox("Excel 读取配置")
+        excel_layout = QVBoxLayout(self.excel_group)
+        excel_layout.setContentsMargins(8, 8, 8, 8)
+        excel_layout.setSpacing(6)
+
+        # 文件路径
+        file_layout = QHBoxLayout()
+        file_layout.setSpacing(4)
+        file_label = QLabel("文件路径:")
+        file_label.setStyleSheet("color: #555; font-size: 13px; min-width: 70px; max-width: 90px;")
+        file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        file_layout.addWidget(file_label)
+        self.file_path_edit = QLineEdit()
+        self.file_path_edit.setStyleSheet("""
+            QLineEdit { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; font-size: 12px; }
+            QLineEdit:focus { border-color: #3498db; }
+        """)
+        file_layout.addWidget(self.file_path_edit, 1)
+        browse_btn = QPushButton("浏览")
+        browse_btn.setStyleSheet("""
+            QPushButton { padding: 4px 12px; border: 1px solid #3498db; border-radius: 3px;
+                color: #3498db; font-size: 12px; background: #fff; }
+            QPushButton:hover { background: #3498db; color: #fff; }
+        """)
+        browse_btn.clicked.connect(lambda: self._browse_excel_file())
+        file_layout.addWidget(browse_btn)
+        excel_layout.addLayout(file_layout)
+
+        # 工作表
+        sheet_row = QHBoxLayout()
+        sheet_row.setSpacing(4)
+        sheet_label = QLabel("工作表:")
+        sheet_label.setStyleSheet("color: #555; font-size: 13px; min-width: 70px; max-width: 90px;")
+        sheet_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        sheet_row.addWidget(sheet_label)
+        self.sheet_edit = QLineEdit()
+        self.sheet_edit.setText("Sheet1")
+        self.sheet_edit.setPlaceholderText("默认 Sheet1")
+        self.sheet_edit.setStyleSheet("""
+            QLineEdit { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; font-size: 13px; }
+            QLineEdit:focus { border-color: #3498db; }
+        """)
+        sheet_row.addWidget(self.sheet_edit, 1)
+        excel_layout.addLayout(sheet_row)
+
+        # 读取模式
+        mode_row = QHBoxLayout()
+        mode_row.setSpacing(4)
+        mode_label = QLabel("读取模式:")
+        mode_label.setStyleSheet("color: #555; font-size: 13px; min-width: 70px; max-width: 90px;")
+        mode_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        mode_row.addWidget(mode_label)
+        self.read_mode_combo = QComboBox()
+        self.read_mode_combo.addItems(["顺序读取", "随机读取"])
+        self.read_mode_combo.setStyleSheet("""
+            QComboBox { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; font-size: 13px; }
+            QComboBox:focus { border-color: #3498db; }
+        """)
+        mode_row.addWidget(self.read_mode_combo, 1)
+        excel_layout.addLayout(mode_row)
+
+        # 读取范围单选
+        self.read_range_group = QGroupBox("读取范围")
+        range_layout = QVBoxLayout(self.read_range_group)
+        self.read_range_radios = []
+        range_options = ["单元格", "行", "列", "区域"]
+        for i, option in enumerate(range_options):
+            radio = QRadioButton(option)
+            if i == 0:
+                radio.setChecked(True)
+            self.read_range_radios.append(radio)
+            range_layout.addWidget(radio)
+        excel_layout.addWidget(self.read_range_group)
+
+        # 单元格地址
+        self.cell_group = QGroupBox("单元格地址")
+        cell_layout = QFormLayout(self.cell_group)
+        self.cell_address_edit = QLineEdit()
+        self.cell_address_edit.setPlaceholderText("例如: A1")
+        self.cell_address_edit.setStyleSheet("""
+            QLineEdit { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; }
+            QLineEdit:focus { border-color: #3498db; }
+        """)
+        cell_layout.addRow("单元格:", self.cell_address_edit)
+        excel_layout.addWidget(self.cell_group)
+
+        # 行号
+        self.row_group = QGroupBox("行号")
+        row_layout = QFormLayout(self.row_group)
+        self.row_number_spin = QSpinBox()
+        self.row_number_spin.setRange(1, 1048576)
+        self.row_number_spin.setValue(1)
+        self.row_number_spin.setStyleSheet("""
+            QSpinBox { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; }
+            QSpinBox:focus { border-color: #3498db; }
+        """)
+        row_layout.addRow("起始行:", self.row_number_spin)
+        excel_layout.addWidget(self.row_group)
+
+        # 列号
+        self.column_group = QGroupBox("列号")
+        column_layout = QFormLayout(self.column_group)
+        self.column_number_spin = QSpinBox()
+        self.column_number_spin.setRange(1, 16384)
+        self.column_number_spin.setValue(1)
+        self.column_number_spin.setStyleSheet("""
+            QSpinBox { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; }
+            QSpinBox:focus { border-color: #3498db; }
+        """)
+        column_layout.addRow("列号:", self.column_number_spin)
+        excel_layout.addWidget(self.column_group)
+
+        # 区域范围
+        self.range_group = QGroupBox("区域范围")
+        range_form = QFormLayout(self.range_group)
+        self.start_cell_edit = QLineEdit()
+        self.start_cell_edit.setPlaceholderText("起始: A1")
+        self.start_cell_edit.setStyleSheet("""
+            QLineEdit { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; }
+            QLineEdit:focus { border-color: #3498db; }
+        """)
+        self.end_cell_edit = QLineEdit()
+        self.end_cell_edit.setPlaceholderText("结束: B5")
+        self.end_cell_edit.setStyleSheet("""
+            QLineEdit { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; }
+            QLineEdit:focus { border-color: #3498db; }
+        """)
+        range_form.addRow("起始:", self.start_cell_edit)
+        range_form.addRow("结束:", self.end_cell_edit)
+        excel_layout.addWidget(self.range_group)
+
+        # 输出格式
+        fmt_row = QHBoxLayout()
+        fmt_row.setSpacing(4)
+        fmt_label = QLabel("输出格式:")
+        fmt_label.setStyleSheet("color: #555; font-size: 13px; min-width: 70px; max-width: 90px;")
+        fmt_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        fmt_row.addWidget(fmt_label)
+        self.var_format_combo = QComboBox()
+        self.var_format_combo.addItems(["字符串", "数字", "列表"])
+        self.var_format_combo.setStyleSheet("""
+            QComboBox { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; font-size: 13px; }
+            QComboBox:focus { border-color: #3498db; }
+        """)
+        fmt_row.addWidget(self.var_format_combo, 1)
+        excel_layout.addLayout(fmt_row)
+
+        self.main_layout.addWidget(self.excel_group)
+
+        # --- 变量读取区域 ---
+        self.variable_group = QGroupBox("变量读取")
+        var_layout = QVBoxLayout(self.variable_group)
+        var_layout.setContentsMargins(8, 8, 8, 8)
+        self.variable_name_edit = QLineEdit()
+        self.variable_name_edit.setPlaceholderText("输入变量名")
+        self.variable_name_edit.setStyleSheet("""
+            QLineEdit { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; font-size: 13px; }
+            QLineEdit:focus { border-color: #3498db; }
+        """)
+        var_layout.addWidget(self.variable_name_edit)
+        self.main_layout.addWidget(self.variable_group)
+
+        # --- 手动输入区域（现有）---
         self.input_text_edit = QTextEdit()
         self.input_text_edit.setPlaceholderText("请输入要输入的文本内容")
         self.input_text_edit.setStyleSheet("""
@@ -85,28 +252,101 @@ class KeyboardTypePanel(StepConfigPanel):
 
         self._connect_signals()
         self._update_random_interval_visibility()
+        self._update_data_source_visibility()
+        self._update_read_range_visibility()
+
+    def _browse_excel_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "选择Excel文件", "", "Excel Files (*.xlsx *.xls)")
+        if file_path:
+            self.file_path_edit.setText(file_path)
 
     def _connect_signals(self):
         self.random_interval_check.toggled.connect(self._update_random_interval_visibility)
+        self.data_source_combo.currentIndexChanged.connect(self._update_data_source_visibility)
+        for radio in self.read_range_radios:
+            radio.toggled.connect(self._update_read_range_visibility)
 
     def _update_random_interval_visibility(self):
         visible = self.random_interval_check.isChecked()
         self.interval_spin.parentWidget().setVisible(not visible)
 
+    def _update_data_source_visibility(self):
+        source = self.data_source_combo.currentIndex()
+        self.input_text_edit.parentWidget().setVisible(source == 0)
+        self.excel_group.setVisible(source == 1)
+        self.variable_group.setVisible(source == 2)
+
+    def _update_read_range_visibility(self):
+        selected = -1
+        for i, radio in enumerate(self.read_range_radios):
+            if radio.isChecked():
+                selected = i
+                break
+        self.cell_group.setVisible(selected == 0)
+        self.row_group.setVisible(selected == 1)
+        self.column_group.setVisible(selected == 2)
+        self.range_group.setVisible(selected == 3)
+
     def get_config(self):
-        return {
-            "input_text": self.input_text_edit.toPlainText(),
+        source_map = {0: "manual", 1: "excel", 2: "variable"}
+        read_range_types = ["cell", "row", "column", "range"]
+        checked_index = next((i for i, r in enumerate(self.read_range_radios) if r.isChecked()), 0)
+
+        config = {
+            "data_source": source_map[self.data_source_combo.currentIndex()],
             "input_method": "typing" if self.input_method_combo.currentIndex() == 0 else "clipboard",
             "interval": self.interval_spin.value(),
             "random_interval": self.random_interval_check.isChecked(),
             "random_min_interval": self.random_min_spin.value(),
             "random_max_interval": self.random_max_spin.value(),
             "human_input": self.human_input_check.isChecked(),
-            "delay": self.delay_spin.value()
+            "delay": self.delay_spin.value(),
         }
 
+        if config["data_source"] == "manual":
+            config["input_text"] = self.input_text_edit.toPlainText()
+
+        if config["data_source"] == "excel":
+            config["excel"] = {
+                "file_path": self.file_path_edit.text(),
+                "sheet": self.sheet_edit.text(),
+                "read_mode": "sequential" if self.read_mode_combo.currentIndex() == 0 else "random",
+                "read_range": read_range_types[checked_index],
+                "cell_address": self.cell_address_edit.text(),
+                "row_number": self.row_number_spin.value(),
+                "column_number": self.column_number_spin.value(),
+                "start_cell": self.start_cell_edit.text(),
+                "end_cell": self.end_cell_edit.text(),
+                "var_format": ["string", "number", "list"][self.var_format_combo.currentIndex()],
+            }
+
+        if config["data_source"] == "variable":
+            config["variable_name"] = self.variable_name_edit.text()
+
+        return config
+
     def set_config(self, config):
+        source_map = {"manual": 0, "excel": 1, "variable": 2}
+        self.data_source_combo.setCurrentIndex(source_map.get(config.get("data_source", "manual"), 0))
+
         self.input_text_edit.setPlainText(config.get("input_text", ""))
+
+        excel = config.get("excel", {})
+        self.file_path_edit.setText(excel.get("file_path", ""))
+        self.sheet_edit.setText(excel.get("sheet", "Sheet1"))
+        self.read_mode_combo.setCurrentIndex(0 if excel.get("read_mode", "sequential") == "sequential" else 1)
+        read_range_map = {"cell": 0, "row": 1, "column": 2, "range": 3}
+        self.read_range_radios[read_range_map.get(excel.get("read_range", "cell"), 0)].setChecked(True)
+        self.cell_address_edit.setText(excel.get("cell_address", ""))
+        self.row_number_spin.setValue(excel.get("row_number", 1))
+        self.column_number_spin.setValue(excel.get("column_number", 1))
+        self.start_cell_edit.setText(excel.get("start_cell", ""))
+        self.end_cell_edit.setText(excel.get("end_cell", ""))
+        var_format_map = {"string": 0, "number": 1, "list": 2}
+        self.var_format_combo.setCurrentIndex(var_format_map.get(excel.get("var_format", "string"), 0))
+
+        self.variable_name_edit.setText(config.get("variable_name", ""))
+
         input_method_map = {"typing": 0, "clipboard": 1}
         self.input_method_combo.setCurrentIndex(input_method_map.get(config.get("input_method", "typing"), 0))
         self.interval_spin.setValue(config.get("interval", 0.05))
@@ -115,7 +355,10 @@ class KeyboardTypePanel(StepConfigPanel):
         self.random_max_spin.setValue(config.get("random_max_interval", 0.15))
         self.human_input_check.setChecked(config.get("human_input", False))
         self.delay_spin.setValue(config.get("delay", 0))
+
         self._update_random_interval_visibility()
+        self._update_data_source_visibility()
+        self._update_read_range_visibility()
 
 
 class KeyboardPressPanel(StepConfigPanel):
