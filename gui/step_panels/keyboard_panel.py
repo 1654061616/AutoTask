@@ -74,6 +74,14 @@ class KeyboardTypePanel(StepConfigPanel):
             QComboBox { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; font-size: 13px; }
             QComboBox:focus { border-color: #3498db; }
         """)
+        read_mode_view = QListView()
+        read_mode_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.read_mode_combo.setView(read_mode_view)
         mode_row.addWidget(self.read_mode_combo, 1)
         excel_layout.addLayout(mode_row)
 
@@ -160,6 +168,14 @@ class KeyboardTypePanel(StepConfigPanel):
             QComboBox { padding: 4px 6px; border: 1px solid #d0d0d0; border-radius: 3px; font-size: 13px; }
             QComboBox:focus { border-color: #3498db; }
         """)
+        var_format_view = QListView()
+        var_format_view.setStyleSheet("""
+            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
+            QListView::item { padding: 6px 10px; height: 28px; }
+            QListView::item:selected { color: #ffffff; background-color: #3498db; }
+            QListView::item:hover { color: #ffffff; background-color: #3498db; }
+        """)
+        self.var_format_combo.setView(var_format_view)
         fmt_row.addWidget(self.var_format_combo, 1)
         excel_layout.addLayout(fmt_row)
 
