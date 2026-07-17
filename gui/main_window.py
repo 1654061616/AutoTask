@@ -90,6 +90,7 @@ from .node_graph import GraphScene, GraphView, NodeToolbar  # 节点图相关类
 from .node_editor_dialog import NodeEditorDialog  # 节点编辑器对话框
 from core.engine import FlowEngine  # 执行引擎
 from utils.resource_path import get_resource_path, get_resources_dir, ensure_resources_dir  # 资源路径管理
+from gui.widgets.schedule_panel import SchedulePanel
 
 class MainWindow(QMainWindow):
     """
@@ -494,51 +495,11 @@ class MainWindow(QMainWindow):
         right_layout.addWidget(self.task_info_group)
         
         # -------------------- 定时设置分组框 --------------------
-        
-        # 创建"定时设置"分组框
         self.schedule_group = QGroupBox("定时设置")
-        
-        # 使用网格布局（QGridLayout），可以灵活控制控件位置
-        schedule_layout = QGridLayout(self.schedule_group)
-        
-        # 创建执行方式下拉框
-        self.execute_mode_combo = QComboBox()
-        
-        # 添加三种执行方式选项
-        self.execute_mode_combo.addItems(["定时执行", "循环执行", "手动执行"])
-        
-        # 创建执行时间输入框，默认值为"13:14:00"
-        self.execute_time_edit = QLineEdit("13:14:00")
-        
-        # 创建重复间隔数字输入框（QSpinBox）
-        self.delay_spin = QSpinBox()
-        
-        # 设置范围：0到10000分钟
-        self.delay_spin.setRange(0, 10000)
-        
-        # 设置默认值：1440分钟（24小时）
-        self.delay_spin.setValue(1440)
-        
-        # 创建下次执行时间标签
-        self.next_execute_label = QLabel("下次执行时间")
-        
-        # 将控件添加到网格布局（行, 列）
-        # 第0行：执行方式标签、下拉框、执行时间标签、输入框
-        schedule_layout.addWidget(QLabel("执行方式:"), 0, 0)
-        schedule_layout.addWidget(self.execute_mode_combo, 0, 1)
-        schedule_layout.addWidget(QLabel("执行时间:"), 0, 2)
-        schedule_layout.addWidget(self.execute_time_edit, 0, 3)
-        
-        # 第1行：重复间隔标签、数字输入框、单位标签
-        schedule_layout.addWidget(QLabel("重复间隔:"), 1, 0)
-        schedule_layout.addWidget(self.delay_spin, 1, 1)
-        schedule_layout.addWidget(QLabel("分钟"), 1, 2)
-        
-        # 下次执行时间标签跨越第0、1行，放在第4列
-        # 参数: (控件, 起始行, 起始列, 跨行数, 跨列数)
-        schedule_layout.addWidget(self.next_execute_label, 0, 4, 2, 1)
-        
-        # 将定时设置分组框添加到右侧面板布局
+        schedule_layout = QVBoxLayout(self.schedule_group)
+        self.schedule_panel = SchedulePanel()
+        self.schedule_panel.start_scheduled.connect(self._on_start_scheduled)
+        schedule_layout.addWidget(self.schedule_panel)
         right_layout.addWidget(self.schedule_group)
         
         # -------------------- 执行步骤查看分组框 --------------------
@@ -699,9 +660,7 @@ class MainWindow(QMainWindow):
                         "status": flow_data.get("status", "已停止"),  # 任务状态
                         "nodes": flow_data.get("nodes", []),  # 节点列表
                         "edges": flow_data.get("edges", []),  # 连线列表
-                        "execute_mode": flow_data.get("execute_mode", "手动执行"),  # 执行方式
-                        "execute_time": flow_data.get("execute_time", ""),  # 执行时间
-                        "delay": flow_data.get("delay", 0),  # 重复间隔（分钟）
+                        "schedule": flow_data.get("schedule", {}),
                         "file_path": file_path  # 文件路径，用于保存时使用
                     }
                     
@@ -1236,9 +1195,7 @@ class MainWindow(QMainWindow):
                     "status": "已停止",                                           # 初始状态
                     "nodes": flow_data.get("nodes", []),                         # 节点列表
                     "edges": flow_data.get("edges", []),                         # 连线列表
-                    "execute_mode": flow_data.get("execute_mode", "手动执行"),     # 执行方式
-                    "execute_time": flow_data.get("execute_time", ""),           # 执行时间
-                    "delay": flow_data.get("delay", 0),                          # 重复间隔
+                    "schedule": flow_data.get("schedule", {}),
                     "file_path": file_path                                       # 文件路径
                 }
                 
@@ -1267,27 +1224,8 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "打开失败", f"无法打开任务文件: {str(e)}")
 
     def load_schedule_settings(self, task):
-        """
-        加载定时设置方法: 将任务的定时设置显示到右侧面板
-        
-        参数:
-            task: 任务字典，包含定时设置信息
-        """
-        # 获取执行方式（默认"手动执行"）
-        execute_mode = task.get("execute_mode", "手动执行")
-        
-        # 在下拉框中查找对应的选项索引
-        index = self.execute_mode_combo.findText(execute_mode)
-        
-        # 如果找到了对应的选项，设置为当前选中项
-        if index >= 0:
-            self.execute_mode_combo.setCurrentIndex(index)
-        
-        # 设置执行时间（默认"13:14:00"）
-        self.execute_time_edit.setText(task.get("execute_time", "13:14:00"))
-        
-        # 设置重复间隔（默认1440分钟，即24小时）
-        self.delay_spin.setValue(task.get("delay", 1440))
+        schedule_config = task.get("schedule", {})
+        self.schedule_panel.load_config(schedule_config)
     
     @Slot()
     def on_save_flow(self, task=None):
@@ -1388,9 +1326,7 @@ class MainWindow(QMainWindow):
                     "status": task.get("status", "已停止"),                  # 任务状态
                     "nodes": nodes,                                        # 节点列表
                     "edges": edges,                                        # 连线列表
-                    "execute_mode": self.execute_mode_combo.currentText(),  # 执行方式（从右侧面板获取）
-                    "execute_time": self.execute_time_edit.text(),          # 执行时间（从右侧面板获取）
-                    "delay": self.delay_spin.value()                        # 重复间隔（从右侧面板获取）
+                    "schedule": self.schedule_panel.get_config()
                 }
                 
                 # 打开文件并写入内容
@@ -1503,9 +1439,7 @@ class MainWindow(QMainWindow):
             "version": task.get("version", "1.0"),
             "nodes": task.get("nodes", []),
             "edges": task.get("edges", []),
-            "execute_mode": task.get("execute_mode", "手动执行"),
-            "execute_time": task.get("execute_time", ""),
-            "delay": task.get("delay", 0)
+            "schedule": task.get("schedule", {})
         }
         
         # 加载任务数据到执行引擎
@@ -1608,6 +1542,77 @@ class MainWindow(QMainWindow):
         # 发出flow_stopped信号，通知其他组件任务已停止
         self.flow_stopped.emit()
     
+    @Slot()
+    def _on_start_scheduled(self):
+        """
+        启动定时任务：读取 SchedulePanel 配置，加入 TaskScheduler 执行
+        """
+        from core.scheduler import TaskScheduler
+
+        if self.current_flow is None:
+            QMessageBox.warning(self, "启动失败", "请先选择一个任务")
+            return
+
+        config = self.schedule_panel.get_config()
+        if config is None:
+            return
+
+        trigger_type = config["trigger_type"]
+        params = config["params"]
+
+        if trigger_type == "immediate":
+            QMessageBox.information(self, "定时任务", "立即执行任务已启动")
+            self.on_run_flow()
+            return
+
+        self.scheduler = TaskScheduler()
+        self.scheduler.add_task(
+            task_id=self.current_flow.get("id", "scheduled"),
+            name=self.current_flow.get("name", "定时任务"),
+            trigger_type=trigger_type,
+            func=lambda: self.on_run_flow(),
+            **params
+        )
+        self.scheduler.start()
+        self.log_panel.append(f"定时任务已启动: {trigger_type}")
+        self.task_status_label.setText("定时中")
+
+        self.start_scheduled_btn = self.schedule_panel.start_scheduled_btn
+        self.start_scheduled_btn.setText("■ 停止定时")
+        self.start_scheduled_btn.setStyleSheet(
+            "QPushButton {"
+            "  background-color: #ff4d4f; color: white; border: none;"
+            "  border-radius: 4px; padding: 4px 14px; font-size: 13px;"
+            "  font-weight: bold;"
+            "}"
+            "QPushButton:hover { background-color: #ff7875; }"
+            "QPushButton:pressed { background-color: #d9363e; }"
+        )
+        self.start_scheduled_btn.clicked.disconnect()
+        self.start_scheduled_btn.clicked.connect(self._on_stop_scheduled)
+
+    def _on_stop_scheduled(self):
+        """停止定时任务"""
+        if hasattr(self, 'scheduler') and self.scheduler:
+            self.scheduler.stop()
+            self.scheduler = None
+        self.log_panel.append("定时任务已停止")
+        self.task_status_label.setText("已停止")
+
+        self.start_scheduled_btn = self.schedule_panel.start_scheduled_btn
+        self.start_scheduled_btn.setText("▶ 开始定时")
+        self.start_scheduled_btn.setStyleSheet(
+            "QPushButton {"
+            "  background-color: #1890ff; color: white; border: none;"
+            "  border-radius: 4px; padding: 4px 14px; font-size: 13px;"
+            "  font-weight: bold;"
+            "}"
+            "QPushButton:hover { background-color: #40a9ff; }"
+            "QPushButton:pressed { background-color: #096dd9; }"
+        )
+        self.start_scheduled_btn.clicked.disconnect()
+        self.start_scheduled_btn.clicked.connect(lambda: self.schedule_panel.start_scheduled.emit())
+
     @Slot()
     def on_stop_flow(self):
         """

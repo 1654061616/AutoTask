@@ -13,3 +13,4 @@ pytest>=7.4.0
 pywin32>=306
 psutil>=5.9.0
 keyboard>=0.13.5
+croniter>=2.0.0

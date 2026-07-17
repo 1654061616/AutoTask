@@ -14,15 +14,35 @@ class TaskScheduler:
     def add_task(self, task_id: str, trigger_type: str, **kwargs):
         func = kwargs.pop('func', None)
         
-        if trigger_type == "interval":
+        if trigger_type == "immediate":
+            if func:
+                func()
+            return True
+        elif trigger_type == "interval":
             seconds = kwargs.get('interval', 60)
             trigger = IntervalTrigger(seconds=seconds)
         elif trigger_type == "cron":
-            hour = kwargs.get('hour', 0)
-            minute = kwargs.get('minute', 0)
-            trigger = CronTrigger(hour=hour, minute=minute)
+            cron_expression = kwargs.get('cron_expression', '0 9 * * *')
+            parts = cron_expression.split()
+            if len(parts) == 5:
+                trigger = CronTrigger(
+                    minute=parts[0], hour=parts[1], day=parts[2],
+                    month=parts[3], day_of_week=parts[4]
+                )
+            elif len(parts) == 7:
+                trigger = CronTrigger(
+                    second=parts[0], minute=parts[1], hour=parts[2],
+                    day=parts[3], month=parts[4], day_of_week=parts[5],
+                    year=parts[6]
+                )
+            else:
+                return False
         elif trigger_type == "date":
-            run_date = kwargs.get('run_date', datetime.datetime.now())
+            run_date = kwargs.get('run_date')
+            if isinstance(run_date, str):
+                run_date = datetime.datetime.fromisoformat(run_date)
+            if run_date is None:
+                run_date = datetime.datetime.now()
             trigger = DateTrigger(run_date=run_date)
         else:
             return False

@@ -54,8 +54,17 @@
       "x": 680.2724932834307,
       "y": 547.5090248262668,
       "config": {
-        "image_path": "e:\\A_PycharmProjects\\AutoTask\\resources\\image\\screenshot_1784193839.png",
+        "algorithm": "akaze",
+        "click_position": "center",
+        "click_type": "left_single",
+        "delay": 0,
+        "direction": "default",
         "find_range": "自定义区域",
+        "image_path": "e:\\A_PycharmProjects\\AutoTask\\resources\\image\\screenshot_1784193839.png",
+        "offset_x": 0,
+        "offset_y": 0,
+        "random_offset": false,
+        "random_range": 3,
         "region": {
           "height": 228,
           "width": 505,
@@ -63,17 +72,8 @@
           "y": 17
         },
         "similarity": 0.9,
-        "algorithm": "akaze",
-        "direction": "default",
-        "click_type": "left_single",
-        "click_position": "center",
-        "offset_x": 0,
-        "offset_y": 0,
-        "random_offset": false,
-        "random_range": 3,
         "wait_find": true,
-        "wait_timeout": 15,
-        "delay": 0
+        "wait_timeout": 15
       }
     },
     {
@@ -82,17 +82,17 @@
       "x": 595.5650730974622,
       "y": 839.9579254539103,
       "config": {
-        "image_path": "",
+        "algorithm": "template",
+        "delay": 0,
+        "direction": "default",
+        "find_action": "continue",
         "find_range": "全屏",
+        "grayscale_match": false,
+        "image_path": "",
         "region": {},
         "similarity": 0.9,
-        "grayscale_match": false,
-        "algorithm": "template",
-        "direction": "default",
         "wait_find": false,
-        "wait_timeout": 10,
-        "find_action": "continue",
-        "delay": 0
+        "wait_timeout": 10
       }
     },
     {
@@ -101,17 +101,17 @@
       "x": 632.9567855778009,
       "y": 1034.5725493019015,
       "config": {
-        "image_path": "",
-        "find_range": "全屏",
-        "region": {},
-        "similarity": 0.9,
         "algorithm": "template",
+        "delay": 0,
         "direction": "default",
-        "result_variable": "image_found",
         "exists_action": "continue",
-        "not_exists_action": "continue",
+        "find_range": "全屏",
+        "image_path": "",
         "jump_mark": "",
-        "delay": 0
+        "not_exists_action": "continue",
+        "region": {},
+        "result_variable": "image_found",
+        "similarity": 0.9
       }
     }
   ],
@@ -147,7 +147,10 @@
       "target_port": "输入"
     }
   ],
-  "execute_mode": "手动执行",
-  "execute_time": "13:14:00",
-  "delay": 1440
+  "schedule": {
+    "trigger_type": "cron",
+    "params": {
+      "cron_expression": "0 9,18 * * *"
+    }
+  }
 }
