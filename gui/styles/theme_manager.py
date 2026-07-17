@@ -1,0 +1,60 @@
+"""主题管理器 — 加载 QSS、切换主题、热更新"""
+
+import os
+from PySide6.QtWidgets import QWidget
+
+
+class ThemeManager:
+    _instance = None
+    _current_theme = "light"
+    _watched_widgets: list[QWidget] = []
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    @classmethod
+    def instance(cls) -> "ThemeManager":
+        return cls()
+
+    @property
+    def current_theme(self) -> str:
+        return self._current_theme
+
+    def _theme_path(self, theme: str) -> str:
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        return os.path.join(base_dir, "resources", "themes", f"{theme}.qss")
+
+    def load_qss(self, theme: str = "light") -> str:
+        path = self._theme_path(theme)
+        if not os.path.exists(path):
+            print(f"[ThemeManager] 主题文件不存在: {path}")
+            return ""
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+
+    def apply_to(self, widget: QWidget, theme: str = "light"):
+        qss = self.load_qss(theme)
+        if qss:
+            widget.setStyleSheet(qss)
+        self._current_theme = theme
+
+    def watch(self, widget: QWidget):
+        if widget not in self._watched_widgets:
+            self._watched_widgets.append(widget)
+
+    def unwatch(self, widget: QWidget):
+        if widget in self._watched_widgets:
+            self._watched_widgets.remove(widget)
+
+    def switch_theme(self, theme: str):
+        qss = self.load_qss(theme)
+        if not qss:
+            return
+        self._current_theme = theme
+        for widget in self._watched_widgets:
+            try:
+                widget.setStyleSheet(qss)
+            except Exception as e:
+                print(f"[ThemeManager] 切换主题失败: {e}")
