@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QListView)
 from PySide6.QtCore import Qt, Signal
 from . import StepConfigPanel
+from gui.styles import Styles
 
 
 class MouseClickPanel(StepConfigPanel):
@@ -39,10 +40,7 @@ class MouseClickPanel(StepConfigPanel):
         self.screen_x_spin = QSpinBox()
         self.screen_x_spin.setRange(0, 4000)
         self.screen_x_spin.setValue(0)
-        self.screen_x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.screen_x_spin.setStyleSheet(Styles.spin_box())
         x_layout.addWidget(self.screen_x_spin)
         screen_layout.addLayout(x_layout)
         
@@ -53,19 +51,12 @@ class MouseClickPanel(StepConfigPanel):
         self.screen_y_spin = QSpinBox()
         self.screen_y_spin.setRange(0, 4000)
         self.screen_y_spin.setValue(0)
-        self.screen_y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.screen_y_spin.setStyleSheet(Styles.spin_box())
         y_layout.addWidget(self.screen_y_spin)
         screen_layout.addLayout(y_layout)
         
         select_btn = QPushButton("选择坐标")
-        select_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
-                          background-color: #3498db; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #2980b9; }
-        """)
+        select_btn.setStyleSheet(Styles.btn_primary("4px 12px"))
         select_btn.clicked.connect(self._select_screen_coordinate)
         screen_layout.addWidget(select_btn)
         self.main_layout.addWidget(self.screen_coord_group)
@@ -74,17 +65,9 @@ class MouseClickPanel(StepConfigPanel):
         relative_layout = QVBoxLayout(self.relative_group)
         self.relative_base_combo = QComboBox()
         self.relative_base_combo.addItems(["上一次点击位置", "上一次移动位置", "当前鼠标位置"])
-        self.relative_base_combo.setStyleSheet("""
-            QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QComboBox:focus { border-color: #3498db; }
-        """)
+        self.relative_base_combo.setStyleSheet(Styles.combo_box())
         rel_base_view = QListView()
-        rel_base_view.setStyleSheet("""
-            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
-            QListView::item { padding: 6px 10px; height: 28px; }
-            QListView::item:selected { color: #ffffff; background-color: #3498db; }
-            QListView::item:hover { color: #ffffff; background-color: #3498db; }
-        """)
+        rel_base_view.setStyleSheet(Styles.combo_view())
         self.relative_base_combo.setView(rel_base_view)
         relative_layout.addWidget(self.relative_base_combo)
 
@@ -97,17 +80,11 @@ class MouseClickPanel(StepConfigPanel):
         self.relative_x_spin = QSpinBox()
         self.relative_x_spin.setRange(-4000, 4000)
         self.relative_x_spin.setValue(0)
-        self.relative_x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.relative_x_spin.setStyleSheet(Styles.spin_box())
         self.relative_y_spin = QSpinBox()
         self.relative_y_spin.setRange(-4000, 4000)
         self.relative_y_spin.setValue(0)
-        self.relative_y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.relative_y_spin.setStyleSheet(Styles.spin_box())
         rel_offset_layout.addWidget(QLabel("X"))
         rel_offset_layout.addWidget(self.relative_x_spin)
         rel_offset_layout.addWidget(QLabel("Y"))
@@ -123,10 +100,7 @@ class MouseClickPanel(StepConfigPanel):
         self.random_range_spin = QSpinBox()
         self.random_range_spin.setRange(1, 50)
         self.random_range_spin.setValue(5)
-        self.random_range_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.random_range_spin.setStyleSheet(Styles.spin_box())
         random_layout.addWidget(self.random_range_spin)
         random_layout.addWidget(QLabel("像素"))
         random_layout.addStretch()
@@ -236,10 +210,7 @@ class MouseMovePanel(StepConfigPanel):
         self.screen_x_spin = QSpinBox()
         self.screen_x_spin.setRange(0, 4000)
         self.screen_x_spin.setValue(0)
-        self.screen_x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.screen_x_spin.setStyleSheet(Styles.spin_box())
         x_layout.addWidget(self.screen_x_spin)
         screen_layout.addLayout(x_layout)
         
@@ -250,19 +221,12 @@ class MouseMovePanel(StepConfigPanel):
         self.screen_y_spin = QSpinBox()
         self.screen_y_spin.setRange(0, 4000)
         self.screen_y_spin.setValue(0)
-        self.screen_y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.screen_y_spin.setStyleSheet(Styles.spin_box())
         y_layout.addWidget(self.screen_y_spin)
         screen_layout.addLayout(y_layout)
         
         select_btn = QPushButton("选择坐标")
-        select_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
-                          background-color: #3498db; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #2980b9; }
-        """)
+        select_btn.setStyleSheet(Styles.btn_primary("4px 12px"))
         select_btn.clicked.connect(self._select_screen_coordinate)
         screen_layout.addWidget(select_btn)
         self.main_layout.addWidget(self.screen_coord_group)
@@ -271,17 +235,9 @@ class MouseMovePanel(StepConfigPanel):
         relative_layout = QVBoxLayout(self.relative_group)
         self.relative_base_combo = QComboBox()
         self.relative_base_combo.addItems(["上一次点击位置", "上一次移动位置", "当前鼠标位置"])
-        self.relative_base_combo.setStyleSheet("""
-            QComboBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QComboBox:focus { border-color: #3498db; }
-        """)
+        self.relative_base_combo.setStyleSheet(Styles.combo_box())
         rel_base_view = QListView()
-        rel_base_view.setStyleSheet("""
-            QListView { color: #333333; background-color: #ffffff; font-size: 13px; }
-            QListView::item { padding: 6px 10px; height: 28px; }
-            QListView::item:selected { color: #ffffff; background-color: #3498db; }
-            QListView::item:hover { color: #ffffff; background-color: #3498db; }
-        """)
+        rel_base_view.setStyleSheet(Styles.combo_view())
         self.relative_base_combo.setView(rel_base_view)
         relative_layout.addWidget(self.relative_base_combo)
 
@@ -294,17 +250,11 @@ class MouseMovePanel(StepConfigPanel):
         self.relative_x_spin = QSpinBox()
         self.relative_x_spin.setRange(-4000, 4000)
         self.relative_x_spin.setValue(0)
-        self.relative_x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.relative_x_spin.setStyleSheet(Styles.spin_box())
         self.relative_y_spin = QSpinBox()
         self.relative_y_spin.setRange(-4000, 4000)
         self.relative_y_spin.setValue(0)
-        self.relative_y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.relative_y_spin.setStyleSheet(Styles.spin_box())
         rel_offset_layout.addWidget(QLabel("X"))
         rel_offset_layout.addWidget(self.relative_x_spin)
         rel_offset_layout.addWidget(QLabel("Y"))
@@ -405,10 +355,7 @@ class MouseDragPanel(StepConfigPanel):
         self.start_x_spin = QSpinBox()
         self.start_x_spin.setRange(0, 4000)
         self.start_x_spin.setValue(0)
-        self.start_x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.start_x_spin.setStyleSheet(Styles.spin_box())
         sx_layout.addWidget(self.start_x_spin)
         start_screen_layout.addLayout(sx_layout)
         
@@ -419,19 +366,12 @@ class MouseDragPanel(StepConfigPanel):
         self.start_y_spin = QSpinBox()
         self.start_y_spin.setRange(0, 4000)
         self.start_y_spin.setValue(0)
-        self.start_y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.start_y_spin.setStyleSheet(Styles.spin_box())
         sy_layout.addWidget(self.start_y_spin)
         start_screen_layout.addLayout(sy_layout)
         
         start_select_btn = QPushButton("选择起点")
-        start_select_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
-                          background-color: #3498db; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #2980b9; }
-        """)
+        start_select_btn.setStyleSheet(Styles.btn_primary("4px 12px"))
         start_select_btn.clicked.connect(self._select_start_coordinate)
         start_screen_layout.addWidget(start_select_btn)
         self.main_layout.addWidget(self.start_screen_group)
@@ -458,10 +398,7 @@ class MouseDragPanel(StepConfigPanel):
         self.end_x_spin = QSpinBox()
         self.end_x_spin.setRange(0, 4000)
         self.end_x_spin.setValue(0)
-        self.end_x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.end_x_spin.setStyleSheet(Styles.spin_box())
         ex_layout.addWidget(self.end_x_spin)
         end_screen_layout.addLayout(ex_layout)
         
@@ -472,19 +409,12 @@ class MouseDragPanel(StepConfigPanel):
         self.end_y_spin = QSpinBox()
         self.end_y_spin.setRange(0, 4000)
         self.end_y_spin.setValue(0)
-        self.end_y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.end_y_spin.setStyleSheet(Styles.spin_box())
         ey_layout.addWidget(self.end_y_spin)
         end_screen_layout.addLayout(ey_layout)
         
         end_select_btn = QPushButton("选择终点")
-        end_select_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
-                          background-color: #3498db; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #2980b9; }
-        """)
+        end_select_btn.setStyleSheet(Styles.btn_primary("4px 12px"))
         end_select_btn.clicked.connect(self._select_end_coordinate)
         end_screen_layout.addWidget(end_select_btn)
         self.main_layout.addWidget(self.end_screen_group)
@@ -499,17 +429,11 @@ class MouseDragPanel(StepConfigPanel):
         self.end_relative_x_spin = QSpinBox()
         self.end_relative_x_spin.setRange(-4000, 4000)
         self.end_relative_x_spin.setValue(0)
-        self.end_relative_x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.end_relative_x_spin.setStyleSheet(Styles.spin_box())
         self.end_relative_y_spin = QSpinBox()
         self.end_relative_y_spin.setRange(-4000, 4000)
         self.end_relative_y_spin.setValue(0)
-        self.end_relative_y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.end_relative_y_spin.setStyleSheet(Styles.spin_box())
         end_relative_layout.addWidget(QLabel("X"))
         end_relative_layout.addWidget(self.end_relative_x_spin)
         end_relative_layout.addWidget(QLabel("Y"))
