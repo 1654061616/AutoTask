@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QWidget, QDialog, QVBoxLayout, QHBoxLayout, QForm
                                QFrame, QListView, QApplication)
 from PySide6.QtCore import Qt, Signal, QPoint, QRect
 from PySide6.QtGui import QPainter, QColor, QFont, QPen, QCursor
+from gui.styles import Styles, Colors
 
 user32 = ctypes.windll.user32
 
@@ -40,12 +41,7 @@ class StepConfigPanel(QWidget):
         self.main_layout.setSpacing(6)
         self.setLayout(self.main_layout)
         self._config = {}
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #f8f9fa;
-                font-size: 13px;
-            }
-        """)
+        self.setStyleSheet(Styles.panel_bg())
 
     def _start_capture_coordinate(self, callback):
         app = QApplication.instance()
@@ -124,16 +120,7 @@ class StepConfigPanel(QWidget):
 
     def add_section_title(self, text):
         label = QLabel(f"<b>{text}</b>")
-        label.setStyleSheet("""
-            QLabel {
-                color: #27ae60;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 0 4px 0;
-                border-bottom: 1px solid #e0e0e0;
-                margin-bottom: 4px;
-            }
-        """)
+        label.setStyleSheet(Styles.section_title())
         self.main_layout.addWidget(label)
         return label
 
@@ -142,22 +129,11 @@ class StepConfigPanel(QWidget):
         row_layout.setSpacing(6)
 
         label = QLabel(f"{label_text}:")
-        label.setStyleSheet("""
-            QLabel {
-                color: #555;
-                font-size: 13px;
-                min-width: 70px;
-                max-width: 90px;
-            }
-        """)
+        label.setStyleSheet(Styles.LABEL_SECTION)
         label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         row_layout.addWidget(label)
 
-        widget.setStyleSheet("""
-            QWidget {
-                font-size: 13px;
-            }
-        """)
+        widget.setStyleSheet("QWidget { font-size: 13px; }")
         row_layout.addWidget(widget, 1)
 
         self.main_layout.addLayout(row_layout)
@@ -168,22 +144,7 @@ class StepConfigPanel(QWidget):
         spinbox.setRange(min_val, max_val)
         spinbox.setValue(default)
         spinbox.setSingleStep(step)
-        spinbox.setStyleSheet("""
-            QSpinBox {
-                padding: 4px 6px;
-                border: 1px solid #d0d0d0;
-                border-radius: 3px;
-                font-size: 13px;
-                min-width: 80px;
-            }
-            QSpinBox:focus {
-                border-color: #3498db;
-                outline: none;
-            }
-            QSpinBox::up-button, QSpinBox::down-button {
-                width: 20px;
-            }
-        """)
+        spinbox.setStyleSheet(Styles.small_spin_box())
         return self.add_line(label_text, spinbox)
 
     def add_double_spinbox(self, label_text, min_val, max_val, default, decimals=2):
@@ -191,40 +152,14 @@ class StepConfigPanel(QWidget):
         spinbox.setRange(min_val, max_val)
         spinbox.setValue(default)
         spinbox.setDecimals(decimals)
-        spinbox.setStyleSheet("""
-            QDoubleSpinBox {
-                padding: 4px 6px;
-                border: 1px solid #d0d0d0;
-                border-radius: 3px;
-                font-size: 13px;
-                min-width: 80px;
-            }
-            QDoubleSpinBox:focus {
-                border-color: #3498db;
-                outline: none;
-            }
-            QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
-                width: 20px;
-            }
-        """)
+        spinbox.setStyleSheet(Styles.small_double_spin_box())
         return self.add_line(label_text, spinbox)
 
     def add_lineedit(self, label_text, default="", placeholder=""):
         lineedit = QLineEdit()
         lineedit.setText(default)
         lineedit.setPlaceholderText(placeholder)
-        lineedit.setStyleSheet("""
-            QLineEdit {
-                padding: 4px 6px;
-                border: 1px solid #d0d0d0;
-                border-radius: 3px;
-                font-size: 13px;
-            }
-            QLineEdit:focus {
-                border-color: #3498db;
-                outline: none;
-            }
-        """)
+        lineedit.setStyleSheet(Styles.small_line_edit())
         return self.add_line(label_text, lineedit)
 
     def add_textedit(self, label_text, default="", placeholder=""):
@@ -232,19 +167,7 @@ class StepConfigPanel(QWidget):
         textedit.setPlaceholderText(placeholder)
         if default:
             textedit.setText(default)
-        textedit.setStyleSheet("""
-            QTextEdit {
-                padding: 4px 6px;
-                border: 1px solid #d0d0d0;
-                border-radius: 3px;
-                font-size: 13px;
-                min-height: 60px;
-            }
-            QTextEdit:focus {
-                border-color: #3498db;
-                outline: none;
-            }
-        """)
+        textedit.setStyleSheet(Styles.small_text_edit())
         return self.add_line(label_text, textedit)
 
     def add_combobox(self, label_text, items, default_index=0):
@@ -252,52 +175,10 @@ class StepConfigPanel(QWidget):
         combobox.addItems(items)
         if 0 <= default_index < len(items):
             combobox.setCurrentIndex(default_index)
-        combobox.setStyleSheet("""
-            QComboBox {
-                padding: 4px 6px;
-                border: 1px solid #d0d0d0;
-                border-radius: 3px;
-                font-size: 13px;
-                min-width: 100px;
-                color: #333333;
-                background-color: #ffffff;
-            }
-            QComboBox:focus {
-                border-color: #3498db;
-                outline: none;
-            }
-            QComboBox::drop-down {
-                subcontrol-origin: padding;
-                subcontrol-position: right;
-                width: 20px;
-                border-left-width: 1px;
-                border-left-color: #d0d0d0;
-                border-left-style: solid;
-                border-top-right-radius: 3px;
-                border-bottom-right-radius: 3px;
-            }
-        """)
+        combobox.setStyleSheet(Styles.small_combo_box())
         
         list_view = QListView()
-        list_view.setStyleSheet("""
-            QListView {
-                color: #333333;
-                background-color: #ffffff;
-                font-size: 13px;
-            }
-            QListView::item {
-                padding: 6px 10px;
-                height: 28px;
-            }
-            QListView::item:selected {
-                color: #ffffff;
-                background-color: #3498db;
-            }
-            QListView::item:hover {
-                color: #ffffff;
-                background-color: #3498db;
-            }
-        """)
+        list_view.setStyleSheet(Styles.small_combo_view())
         combobox.setView(list_view)
         
         return self.add_line(label_text, combobox)
@@ -310,27 +191,7 @@ class StepConfigPanel(QWidget):
 
     def add_radio_group(self, label_text, options, default_index=0):
         group_box = QGroupBox(label_text)
-        group_box.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 13px;
-                color: #555;
-                border: 1px solid #e0e0e0;
-                border-radius: 4px;
-                margin-top: 6px;
-                padding-top: 8px;
-                padding-left: 8px;
-                padding-right: 8px;
-                padding-bottom: 8px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 8px;
-                padding: 0 4px;
-                font-size: 12px;
-                color: #666;
-            }
-        """)
+        group_box.setStyleSheet(Styles.radio_group())
         group_layout = QVBoxLayout(group_box)
         group_layout.setSpacing(4)
         group_layout.setContentsMargins(4, 4, 4, 4)
@@ -338,22 +199,7 @@ class StepConfigPanel(QWidget):
         buttons = []
         for i, option in enumerate(options):
             radio_btn = QRadioButton(option)
-            radio_btn.setStyleSheet("""
-                QRadioButton {
-                    font-size: 12px;
-                    color: #555;
-                }
-                QRadioButton::indicator {
-                    width: 14px;
-                    height: 14px;
-                    border-radius: 7px;
-                    border: 2px solid #d0d0d0;
-                }
-                QRadioButton::indicator:checked {
-                    border-color: #3498db;
-                    background-color: #3498db;
-                }
-            """)
+            radio_btn.setStyleSheet(Styles.radio_btn())
             if i == default_index:
                 radio_btn.setChecked(True)
             buttons.append(radio_btn)
@@ -373,25 +219,11 @@ class StepConfigPanel(QWidget):
         slider = QSlider(Qt.Horizontal)
         slider.setRange(min_val, max_val)
         slider.setValue(default)
-        slider.setStyleSheet("""
-            QSlider::groove:horizontal {
-                height: 4px;
-                background: #e0e0e0;
-                border-radius: 2px;
-            }
-            QSlider::handle:horizontal {
-                width: 14px;
-                height: 14px;
-                background: #3498db;
-                border-radius: 7px;
-                margin: -5px 0;
-                border: 2px solid white;
-            }
-        """)
+        slider.setStyleSheet(Styles.slider())
 
         value_label = QLabel(f"{default}{suffix}")
         value_label.setAlignment(Qt.AlignCenter)
-        value_label.setStyleSheet("color: #27ae60; font-weight: bold; font-size: 12px;")
+        value_label.setStyleSheet(Styles.slider_value_label())
 
         slider.valueChanged.connect(lambda val: value_label.setText(f"{val}{suffix}"))
 
@@ -406,47 +238,16 @@ class StepConfigPanel(QWidget):
         file_layout.setSpacing(4)
 
         label = QLabel(f"{label_text}:")
-        label.setStyleSheet("""
-            QLabel {
-                color: #555;
-                font-size: 13px;
-                min-width: 70px;
-                max-width: 90px;
-            }
-        """)
+        label.setStyleSheet("color: #555; font-size: 13px;")
         label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         file_layout.addWidget(label)
 
         line_edit = QLineEdit()
         line_edit.setText(default_path)
-        line_edit.setStyleSheet("""
-            QLineEdit {
-                padding: 4px 6px;
-                border: 1px solid #d0d0d0;
-                border-radius: 3px;
-                font-size: 12px;
-            }
-            QLineEdit:focus {
-                border-color: #3498db;
-                outline: none;
-            }
-        """)
+        line_edit.setStyleSheet(Styles.small_line_edit())
 
         browse_btn = QPushButton("...")
-        browse_btn.setStyleSheet("""
-            QPushButton {
-                padding: 4px 8px;
-                border-radius: 3px;
-                border: 1px solid #d0d0d0;
-                background-color: #ffffff;
-                font-size: 12px;
-                min-width: 28px;
-                max-width: 28px;
-            }
-            QPushButton:hover {
-                background-color: #f0f0f0;
-            }
-        """)
+        browse_btn.setStyleSheet(Styles.browse_btn())
 
         def browse_file():
             start_dir = ""
@@ -468,49 +269,17 @@ class StepConfigPanel(QWidget):
 
     def add_delay_section(self, default_delay=0):
         delay_group = QGroupBox("延时设置")
-        delay_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 13px;
-                color: #555;
-                border: 1px solid #e0e0e0;
-                border-radius: 4px;
-                margin-top: 6px;
-                padding-top: 8px;
-                padding-left: 8px;
-                padding-right: 8px;
-                padding-bottom: 8px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 8px;
-                padding: 0 4px;
-                font-size: 12px;
-                color: #666;
-            }
-        """)
+        delay_group.setStyleSheet(Styles.delay_group())
         delay_layout = QFormLayout(delay_group)
         delay_layout.setSpacing(4)
 
         self.delay_spin = QSpinBox()
         self.delay_spin.setRange(0, 3600)
         self.delay_spin.setValue(default_delay)
-        self.delay_spin.setStyleSheet("""
-            QSpinBox {
-                padding: 4px 6px;
-                border: 1px solid #d0d0d0;
-                border-radius: 3px;
-                font-size: 13px;
-                min-width: 80px;
-            }
-            QSpinBox:focus {
-                border-color: #3498db;
-                outline: none;
-            }
-        """)
+        self.delay_spin.setStyleSheet(Styles.delay_spin())
 
         delay_label = QLabel("执行后延时(秒):")
-        delay_label.setStyleSheet("font-size: 12px; color: #666;")
+        delay_label.setStyleSheet(Styles.delay_label())
         delay_layout.addRow(delay_label, self.delay_spin)
 
         self.main_layout.addWidget(delay_group)
@@ -520,7 +289,7 @@ class StepConfigPanel(QWidget):
         separator = QFrame()
         separator.setFrameShape(QFrame.HLine)
         separator.setFrameShadow(QFrame.Sunken)
-        separator.setStyleSheet("color: #e0e0e0;")
+        separator.setStyleSheet(Styles.separator())
         self.main_layout.addWidget(separator)
         return separator
 
@@ -530,36 +299,10 @@ class StepConfigPanel(QWidget):
         btn_layout.addStretch()
 
         confirm_btn = QPushButton("确定")
-        confirm_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #27ae60;
-                color: white;
-                font-weight: bold;
-                padding: 5px 16px;
-                border-radius: 3px;
-                border: none;
-                font-size: 13px;
-            }
-            QPushButton:hover {
-                background-color: #2ecc71;
-            }
-        """)
+        confirm_btn.setStyleSheet(Styles.confirm_btn())
 
         cancel_btn = QPushButton("取消")
-        cancel_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #e74c3c;
-                color: white;
-                font-weight: bold;
-                padding: 5px 16px;
-                border-radius: 3px;
-                border: none;
-                font-size: 13px;
-            }
-            QPushButton:hover {
-                background-color: #c0392b;
-            }
-        """)
+        cancel_btn.setStyleSheet(Styles.cancel_btn())
 
         confirm_btn.clicked.connect(confirm_callback)
         cancel_btn.clicked.connect(cancel_callback)
