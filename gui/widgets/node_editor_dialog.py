@@ -33,37 +33,73 @@ class NodeEditorDialog(QDialog):
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().setSpacing(0)
 
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        splitter.setChildrenCollapsible(False)
+        toggle_bar = QWidget()
+        toggle_bar.setFixedHeight(28)
+        toggle_bar.setStyleSheet("background: #e8e8e8; border-bottom: 1px solid #d0d0d0;")
+        toggle_layout = QHBoxLayout(toggle_bar)
+        toggle_layout.setContentsMargins(4, 0, 4, 0)
+        toggle_layout.setSpacing(2)
+
+        self.toggle_left_btn = QPushButton("◀")
+        self.toggle_left_btn.setToolTip("隐藏节点栏")
+        self.toggle_left_btn.setFixedSize(24, 24)
+        self.toggle_left_btn.setStyleSheet("""
+            QPushButton { border: none; background: transparent; font-size: 12px; color: #666; }
+            QPushButton:hover { background: #d0d0d0; border-radius: 3px; }
+        """)
+        self.toggle_left_btn.clicked.connect(self._toggle_left_panel)
+        toggle_layout.addWidget(self.toggle_left_btn)
+
+        toggle_layout.addStretch()
+
+        self.toggle_right_btn = QPushButton("▶")
+        self.toggle_right_btn.setToolTip("隐藏配置面板")
+        self.toggle_right_btn.setFixedSize(24, 24)
+        self.toggle_right_btn.setStyleSheet("""
+            QPushButton { border: none; background: transparent; font-size: 12px; color: #666; }
+            QPushButton:hover { background: #d0d0d0; border-radius: 3px; }
+        """)
+        self.toggle_right_btn.clicked.connect(self._toggle_right_panel)
+        toggle_layout.addWidget(self.toggle_right_btn)
+
+        self.layout().addWidget(toggle_bar)
+
+        self.splitter = QSplitter(Qt.Horizontal)
+        self.splitter.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.splitter.setChildrenCollapsible(False)
 
         self.node_toolbar = NodeToolbar()
-        self.node_toolbar.setFixedWidth(180)
-        self.node_toolbar.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        splitter.addWidget(self.node_toolbar)
+        self.node_toolbar.setMinimumWidth(100)
+        self.node_toolbar.setMaximumWidth(400)
+        self.node_toolbar.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.splitter.addWidget(self.node_toolbar)
 
         self.graph_scene = GraphScene()
         self.graph_view = GraphView(self.graph_scene)
         self.graph_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        splitter.addWidget(self.graph_view)
+        self.splitter.addWidget(self.graph_view)
 
         self.config_panel = QWidget()
-        self.config_panel.setFixedWidth(320)
-        self.config_panel.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.config_panel.setMinimumWidth(200)
+        self.config_panel.setMaximumWidth(600)
+        self.config_panel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.config_panel.setStyleSheet("""
             QWidget {
                 background-color: #f8f9fa;
             }
         """)
         self._init_config_panel()
-        splitter.addWidget(self.config_panel)
+        self.splitter.addWidget(self.config_panel)
 
-        splitter.setSizes([180, 900, 320])
-        splitter.setStretchFactor(0, 0)
-        splitter.setStretchFactor(1, 1)
-        splitter.setStretchFactor(2, 0)
+        self.splitter.setSizes([180, 900, 320])
+        self.splitter.setStretchFactor(0, 0)
+        self.splitter.setStretchFactor(1, 1)
+        self.splitter.setStretchFactor(2, 0)
 
-        self.layout().addWidget(splitter)
+        self._left_width = 180
+        self._right_width = 320
+
+        self.layout().addWidget(self.splitter)
 
         self.node_toolbar.node_drag_started.connect(self._on_node_drag_started)
 
@@ -338,6 +374,30 @@ class NodeEditorDialog(QDialog):
         node = self.graph_scene.add_node(node_type, x, y)
         self.graph_scene.clearSelection()
         node.setSelected(True)
+
+    def _toggle_left_panel(self):
+        sizes = self.splitter.sizes()
+        if sizes[0] > 0:
+            self._left_width = sizes[0]
+            self.splitter.setSizes([0, sizes[0] + sizes[1], sizes[2]])
+            self.toggle_left_btn.setText("▶")
+            self.toggle_left_btn.setToolTip("显示节点栏")
+        else:
+            self.splitter.setSizes([self._left_width, sizes[1] - self._left_width, sizes[2]])
+            self.toggle_left_btn.setText("◀")
+            self.toggle_left_btn.setToolTip("隐藏节点栏")
+
+    def _toggle_right_panel(self):
+        sizes = self.splitter.sizes()
+        if sizes[2] > 0:
+            self._right_width = sizes[2]
+            self.splitter.setSizes([sizes[0], sizes[1] + sizes[2], 0])
+            self.toggle_right_btn.setText("◀")
+            self.toggle_right_btn.setToolTip("显示配置面板")
+        else:
+            self.splitter.setSizes([sizes[0], sizes[1] - self._right_width, self._right_width])
+            self.toggle_right_btn.setText("▶")
+            self.toggle_right_btn.setToolTip("隐藏配置面板")
 
     def get_graph_data(self):
         return self.graph_scene.to_json()
