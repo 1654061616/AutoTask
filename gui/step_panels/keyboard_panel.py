@@ -192,11 +192,48 @@ class KeyboardTypePanel(StepConfigPanel):
                 border-color: #3498db;
             }
         """)
-        self.add_line("输入内容", self.input_text_edit)
+        self.input_widget = QWidget()
+        input_layout = QVBoxLayout(self.input_widget)
+        input_layout.setContentsMargins(0, 0, 0, 0)
+        input_layout.setSpacing(2)
+        input_label = QLabel("输入内容:")
+        input_label.setStyleSheet("color: #555; font-size: 13px;")
+        input_layout.addWidget(input_label)
+        input_layout.addWidget(self.input_text_edit)
+        self.main_layout.addWidget(self.input_widget)
 
         self.input_method_combo = self.add_combobox("输入方式", ["逐字输入", "剪贴板粘贴"])
 
-        self.interval_spin = self.add_double_spinbox("输入间隔", 0, 1, 0.05, 2)
+        self.interval_spin = QDoubleSpinBox()
+        self.interval_spin.setRange(0, 1)
+        self.interval_spin.setValue(0.05)
+        self.interval_spin.setDecimals(2)
+        self.interval_spin.setStyleSheet("""
+            QDoubleSpinBox {
+                padding: 4px 6px;
+                border: 1px solid #d0d0d0;
+                border-radius: 3px;
+                font-size: 13px;
+                min-width: 80px;
+            }
+            QDoubleSpinBox:focus {
+                border-color: #3498db;
+                outline: none;
+            }
+            QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
+                width: 20px;
+            }
+        """)
+        self.interval_widget = QWidget()
+        interval_row = QHBoxLayout(self.interval_widget)
+        interval_row.setContentsMargins(0, 0, 0, 0)
+        interval_row.setSpacing(6)
+        interval_label = QLabel("输入间隔:")
+        interval_label.setStyleSheet("color: #555; font-size: 13px; min-width: 70px; max-width: 90px;")
+        interval_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        interval_row.addWidget(interval_label)
+        interval_row.addWidget(self.interval_spin, 1)
+        self.main_layout.addWidget(self.interval_widget)
 
         self.random_interval_check = self.add_checkbox("随机间隔", checked=False)
 
@@ -268,11 +305,11 @@ class KeyboardTypePanel(StepConfigPanel):
 
     def _update_random_interval_visibility(self):
         visible = self.random_interval_check.isChecked()
-        self.interval_spin.parentWidget().setVisible(not visible)
+        self.interval_widget.setVisible(not visible)
 
     def _update_data_source_visibility(self):
         source = self.data_source_combo.currentIndex()
-        self.input_text_edit.parentWidget().setVisible(source == 0)
+        self.input_widget.setVisible(source == 0)
         self.excel_group.setVisible(source == 1)
         self.variable_group.setVisible(source == 2)
 
