@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QRadioButton, QGroupBox)
 from PySide6.QtCore import Qt, Signal
 from . import StepConfigPanel
+from gui.styles import Styles
 
 
 class WindowFindPanel(StepConfigPanel):
@@ -26,10 +27,7 @@ class WindowFindPanel(StepConfigPanel):
         self.wait_timeout_spin = QSpinBox()
         self.wait_timeout_spin.setRange(1, 300)
         self.wait_timeout_spin.setValue(30)
-        self.wait_timeout_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.wait_timeout_spin.setStyleSheet(Styles.spin_box())
         wait_layout.addRow("超时时间(秒):", self.wait_timeout_spin)
         self.main_layout.addWidget(self.wait_timeout_group)
 
@@ -99,10 +97,7 @@ class WindowActivatePanel(StepConfigPanel):
         title_layout = QFormLayout(self.title_group)
         self.window_title_edit = QLineEdit()
         self.window_title_edit.setPlaceholderText("输入窗口标题")
-        self.window_title_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.window_title_edit.setStyleSheet(Styles.small_line_edit())
         title_layout.addRow("标题:", self.window_title_edit)
         self.main_layout.addWidget(self.title_group)
 
@@ -110,10 +105,7 @@ class WindowActivatePanel(StepConfigPanel):
         handle_layout = QFormLayout(self.handle_group)
         self.handle_var_edit = QLineEdit()
         self.handle_var_edit.setPlaceholderText("存储窗口句柄的变量名")
-        self.handle_var_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.handle_var_edit.setStyleSheet(Styles.small_line_edit())
         handle_layout.addRow("变量名:", self.handle_var_edit)
         self.main_layout.addWidget(self.handle_group)
 
@@ -125,10 +117,7 @@ class WindowActivatePanel(StepConfigPanel):
         self.wait_timeout_spin = QSpinBox()
         self.wait_timeout_spin.setRange(1, 300)
         self.wait_timeout_spin.setValue(30)
-        self.wait_timeout_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.wait_timeout_spin.setStyleSheet(Styles.spin_box())
         wait_layout.addRow("超时时间(秒):", self.wait_timeout_spin)
         self.main_layout.addWidget(self.wait_timeout_group)
 
@@ -213,10 +202,7 @@ class WindowClosePanel(StepConfigPanel):
         title_layout = QFormLayout(self.title_group)
         self.window_title_edit = QLineEdit()
         self.window_title_edit.setPlaceholderText("输入窗口标题")
-        self.window_title_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.window_title_edit.setStyleSheet(Styles.small_line_edit())
         title_layout.addRow("标题:", self.window_title_edit)
         self.main_layout.addWidget(self.title_group)
 
@@ -224,10 +210,7 @@ class WindowClosePanel(StepConfigPanel):
         handle_layout = QFormLayout(self.handle_group)
         self.handle_var_edit = QLineEdit()
         self.handle_var_edit.setPlaceholderText("存储窗口句柄的变量名")
-        self.handle_var_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.handle_var_edit.setStyleSheet(Styles.small_line_edit())
         handle_layout.addRow("变量名:", self.handle_var_edit)
         self.main_layout.addWidget(self.handle_group)
 
@@ -304,10 +287,7 @@ class WindowPositionPanel(StepConfigPanel):
         self.x_spin = QSpinBox()
         self.x_spin.setRange(-10000, 10000)
         self.x_spin.setValue(0)
-        self.x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.x_spin.setStyleSheet(Styles.spin_box())
         pos_layout.addWidget(self.x_spin)
 
         y_label = QLabel("Y坐标:")
@@ -318,10 +298,7 @@ class WindowPositionPanel(StepConfigPanel):
         self.y_spin = QSpinBox()
         self.y_spin.setRange(-10000, 10000)
         self.y_spin.setValue(0)
-        self.y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.y_spin.setStyleSheet(Styles.spin_box())
         pos_layout.addWidget(self.y_spin)
 
         self.main_layout.addLayout(pos_layout)
@@ -337,10 +314,7 @@ class WindowPositionPanel(StepConfigPanel):
         self.width_spin = QSpinBox()
         self.width_spin.setRange(0, 10000)
         self.width_spin.setValue(800)
-        self.width_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.width_spin.setStyleSheet(Styles.spin_box())
         size_layout.addWidget(self.width_spin)
 
         height_label = QLabel("高度:")
@@ -351,10 +325,7 @@ class WindowPositionPanel(StepConfigPanel):
         self.height_spin = QSpinBox()
         self.height_spin.setRange(0, 10000)
         self.height_spin.setValue(600)
-        self.height_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 100px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.height_spin.setStyleSheet(Styles.spin_box())
         size_layout.addWidget(self.height_spin)
 
         self.main_layout.addLayout(size_layout)
