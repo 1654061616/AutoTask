@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap, QImage
 from . import StepConfigPanel
+from gui.styles import Styles
 import os
 
 
@@ -21,15 +22,9 @@ class ImageFindPanel(StepConfigPanel):
         file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
-        self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.image_path_edit.setStyleSheet(Styles.small_line_edit())
         browse_btn = QPushButton("浏览")
-        browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
+        browse_btn.setStyleSheet(Styles.browse_btn())
 
         def browse_image():
             file_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
@@ -39,11 +34,7 @@ class ImageFindPanel(StepConfigPanel):
         browse_btn.clicked.connect(browse_image)
         
         screenshot_btn = QPushButton("截图")
-        screenshot_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
-                          background-color: #3498db; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #2980b9; }
-        """)
+        screenshot_btn.setStyleSheet(Styles.btn_primary("4px 12px"))
         
         def capture_screenshot():
             def on_screenshot_taken(image_path):
@@ -60,14 +51,7 @@ class ImageFindPanel(StepConfigPanel):
         preview_group = QGroupBox("图片预览")
         preview_layout = QVBoxLayout(preview_group)
         self.preview_label = QLabel()
-        self.preview_label.setStyleSheet("""
-            QLabel {
-                background-color: #f8f9fa;
-                border: 1px dashed #ddd;
-                border-radius: 4px;
-                min-height: 120px;
-            }
-        """)
+        self.preview_label.setStyleSheet(Styles.preview_text())
         self.preview_label.setAlignment(Qt.AlignCenter)
         self.preview_label.setText("请选择图片")
         preview_layout.addWidget(self.preview_label)
@@ -78,11 +62,7 @@ class ImageFindPanel(StepConfigPanel):
         region_layout = QHBoxLayout()
         region_layout.setSpacing(8)
         region_select_btn = QPushButton("选择区域")
-        region_select_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #e74c3c; 
-                          background-color: #e74c3c; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #c0392b; }
-        """)
+        region_select_btn.setStyleSheet(Styles.btn_danger("4px 12px"))
         
         def select_region():
             def on_region_selected(x, y, width, height):
@@ -93,7 +73,7 @@ class ImageFindPanel(StepConfigPanel):
         region_select_btn.clicked.connect(select_region)
         
         self.region_label = QLabel("未选择区域")
-        self.region_label.setStyleSheet("color: #666; font-size: 12px;")
+        self.region_label.setStyleSheet(Styles.LABEL_SECONDARY)
         
         region_layout.addWidget(region_select_btn)
         region_layout.addWidget(self.region_label)
@@ -111,7 +91,7 @@ class ImageFindPanel(StepConfigPanel):
         self.similarity_slider.setTickInterval(10)
         self.similarity_value_label = QLabel("0.90")
         self.similarity_value_label.setAlignment(Qt.AlignCenter)
-        self.similarity_value_label.setStyleSheet("color: #27ae60; font-weight: bold;")
+        self.similarity_value_label.setStyleSheet(Styles.slider_value_label())
         self.similarity_slider.valueChanged.connect(
             lambda val: self.similarity_value_label.setText(f"{val / 100:.2f}")
         )
@@ -120,14 +100,7 @@ class ImageFindPanel(StepConfigPanel):
         self.main_layout.addLayout(slider_layout)
 
         self.grayscale_check = self.add_checkbox("灰度匹配")
-        # "akaze" ：使用 AKAZE 特征匹配算法 （基于特征点的识别，适合图片有旋转、缩放的情况）
-        #  否则（默认） ：使用 模板匹配算法 （template matching，简单直接，适合完全匹配的情况）
         self.algorithm_combo = self.add_combobox("匹配算法", ["模板匹配", "AKAZE特征匹配"])
-        # "default" ：默认查找方向（返回匹配度最高的）
-        # "left_to_right" ：从左到右查找
-        # "right_to_left" ：从右到左查找
-        # "top_to_bottom" ：从上到下查找
-        # "bottom_to_top" ：从下到上查找
         self.direction_combo = self.add_combobox("查找方向", ["默认", "从左到右", "从右到左", "从上到下", "从下到上"])
 
         wait_layout = QHBoxLayout()
@@ -138,10 +111,7 @@ class ImageFindPanel(StepConfigPanel):
         self.wait_timeout_spin = QSpinBox()
         self.wait_timeout_spin.setRange(1, 300)
         self.wait_timeout_spin.setValue(10)
-        self.wait_timeout_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.wait_timeout_spin.setStyleSheet(Styles.spin_box())
         wait_layout.addWidget(self.wait_timeout_spin)
         wait_layout.addWidget(QLabel("秒"))
         wait_layout.addStretch()
@@ -243,15 +213,9 @@ class ImageClickPanel(StepConfigPanel):
         file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
-        self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.image_path_edit.setStyleSheet(Styles.small_line_edit())
         browse_btn = QPushButton("浏览")
-        browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
+        browse_btn.setStyleSheet(Styles.browse_btn())
 
         def browse_image():
             file_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
@@ -261,11 +225,7 @@ class ImageClickPanel(StepConfigPanel):
         browse_btn.clicked.connect(browse_image)
         
         screenshot_btn = QPushButton("截图")
-        screenshot_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
-                          background-color: #3498db; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #2980b9; }
-        """)
+        screenshot_btn.setStyleSheet(Styles.btn_primary("4px 12px"))
         
         def capture_screenshot():
             def on_screenshot_taken(image_path):
@@ -284,11 +244,7 @@ class ImageClickPanel(StepConfigPanel):
         region_layout = QHBoxLayout()
         region_layout.setSpacing(8)
         region_select_btn = QPushButton("选择区域")
-        region_select_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #e74c3c; 
-                          background-color: #e74c3c; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #c0392b; }
-        """)
+        region_select_btn.setStyleSheet(Styles.btn_danger("4px 12px"))
         
         def select_region():
             def on_region_selected(x, y, width, height):
@@ -299,7 +255,7 @@ class ImageClickPanel(StepConfigPanel):
         region_select_btn.clicked.connect(select_region)
         
         self.region_label = QLabel("未选择区域")
-        self.region_label.setStyleSheet("color: #666; font-size: 12px;")
+        self.region_label.setStyleSheet(Styles.LABEL_SECONDARY)
         
         region_layout.addWidget(region_select_btn)
         region_layout.addWidget(self.region_label)
@@ -317,7 +273,7 @@ class ImageClickPanel(StepConfigPanel):
         self.similarity_slider.setTickInterval(10)
         self.similarity_value_label = QLabel("0.90")
         self.similarity_value_label.setAlignment(Qt.AlignCenter)
-        self.similarity_value_label.setStyleSheet("color: #27ae60; font-weight: bold;")
+        self.similarity_value_label.setStyleSheet(Styles.slider_value_label())
         self.similarity_slider.valueChanged.connect(
             lambda val: self.similarity_value_label.setText(f"{val / 100:.2f}")
         )
@@ -352,17 +308,11 @@ class ImageClickPanel(StepConfigPanel):
         self.offset_x_spin = QSpinBox()
         self.offset_x_spin.setRange(-1000, 1000)
         self.offset_x_spin.setValue(0)
-        self.offset_x_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.offset_x_spin.setStyleSheet(Styles.spin_box())
         self.offset_y_spin = QSpinBox()
         self.offset_y_spin.setRange(-1000, 1000)
         self.offset_y_spin.setValue(0)
-        self.offset_y_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.offset_y_spin.setStyleSheet(Styles.spin_box())
         offset_layout.addWidget(QLabel("X"))
         offset_layout.addWidget(self.offset_x_spin)
         offset_layout.addWidget(QLabel("Y"))
@@ -378,10 +328,7 @@ class ImageClickPanel(StepConfigPanel):
         self.random_range_spin = QSpinBox()
         self.random_range_spin.setRange(1, 50)
         self.random_range_spin.setValue(5)
-        self.random_range_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.random_range_spin.setStyleSheet(Styles.spin_box())
         random_layout.addWidget(self.random_range_spin)
         random_layout.addWidget(QLabel("像素"))
         random_layout.addStretch()
@@ -395,10 +342,7 @@ class ImageClickPanel(StepConfigPanel):
         self.wait_timeout_spin = QSpinBox()
         self.wait_timeout_spin.setRange(1, 300)
         self.wait_timeout_spin.setValue(10)
-        self.wait_timeout_spin.setStyleSheet("""
-            QSpinBox { padding: 5px; border: 1px solid #ddd; border-radius: 4px; min-width: 80px; }
-            QSpinBox:focus { border-color: #3498db; }
-        """)
+        self.wait_timeout_spin.setStyleSheet(Styles.spin_box())
         wait_layout.addWidget(self.wait_timeout_spin)
         wait_layout.addWidget(QLabel("秒"))
         wait_layout.addStretch()
@@ -511,15 +455,9 @@ class ImageExistsPanel(StepConfigPanel):
         file_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         file_layout.addWidget(file_label)
         self.image_path_edit = QLineEdit()
-        self.image_path_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.image_path_edit.setStyleSheet(Styles.small_line_edit())
         browse_btn = QPushButton("浏览")
-        browse_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #ccc; background-color: #ffffff; }
-            QPushButton:hover { background-color: #f0f0f0; }
-        """)
+        browse_btn.setStyleSheet(Styles.browse_btn())
 
         def browse_image():
             file_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
@@ -529,11 +467,7 @@ class ImageExistsPanel(StepConfigPanel):
         browse_btn.clicked.connect(browse_image)
         
         screenshot_btn = QPushButton("截图")
-        screenshot_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #3498db; 
-                          background-color: #3498db; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #2980b9; }
-        """)
+        screenshot_btn.setStyleSheet(Styles.btn_primary("4px 12px"))
         
         def capture_screenshot():
             def on_screenshot_taken(image_path):
@@ -552,11 +486,7 @@ class ImageExistsPanel(StepConfigPanel):
         region_layout = QHBoxLayout()
         region_layout.setSpacing(8)
         region_select_btn = QPushButton("选择区域")
-        region_select_btn.setStyleSheet("""
-            QPushButton { padding: 4px 12px; border-radius: 4px; border: 1px solid #e74c3c; 
-                          background-color: #e74c3c; color: white; font-size: 12px; }
-            QPushButton:hover { background-color: #c0392b; }
-        """)
+        region_select_btn.setStyleSheet(Styles.btn_danger("4px 12px"))
         
         def select_region():
             def on_region_selected(x, y, width, height):
@@ -567,7 +497,7 @@ class ImageExistsPanel(StepConfigPanel):
         region_select_btn.clicked.connect(select_region)
         
         self.region_label = QLabel("未选择区域")
-        self.region_label.setStyleSheet("color: #666; font-size: 12px;")
+        self.region_label.setStyleSheet(Styles.LABEL_SECONDARY)
         
         region_layout.addWidget(region_select_btn)
         region_layout.addWidget(self.region_label)
@@ -585,7 +515,7 @@ class ImageExistsPanel(StepConfigPanel):
         self.similarity_slider.setTickInterval(10)
         self.similarity_value_label = QLabel("0.90")
         self.similarity_value_label.setAlignment(Qt.AlignCenter)
-        self.similarity_value_label.setStyleSheet("color: #27ae60; font-weight: bold;")
+        self.similarity_value_label.setStyleSheet(Styles.slider_value_label())
         self.similarity_slider.valueChanged.connect(
             lambda val: self.similarity_value_label.setText(f"{val / 100:.2f}")
         )
@@ -611,10 +541,7 @@ class ImageExistsPanel(StepConfigPanel):
         jump_layout.addWidget(jump_label)
         self.jump_mark_edit = QLineEdit()
         self.jump_mark_edit.setPlaceholderText("标记名称")
-        self.jump_mark_edit.setStyleSheet("""
-            QLineEdit { padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
-            QLineEdit:focus { border-color: #3498db; }
-        """)
+        self.jump_mark_edit.setStyleSheet(Styles.small_line_edit())
         jump_layout.addWidget(self.jump_mark_edit)
         jump_layout.addStretch()
         self.main_layout.addLayout(jump_layout)
