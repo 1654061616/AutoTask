@@ -1,0 +1,87 @@
+/* 全局背景 */
+QMainWindow {
+    background-color: #f5f7fa;
+}
+
+/* GroupBox 全局默认 */
+QGroupBox {
+    font-weight: bold;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-top: 6px;
+    padding-top: 10px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 2px;
+    padding: 0 2px 0 2px;
+}
+
+/* 默认按钮样式 */
+QPushButton {
+    padding: 5px 15px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #ffffff;
+}
+QPushButton:hover {
+    background-color: #f0f0f0;
+}
+
+/* QTreeWidget */
+QTreeWidget {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    alternate-background-color: #f9f9f9;
+    show-decoration-selected: 1;
+}
+QTreeWidget::item {
+    padding: 6px 4px;
+    height: 28px;
+}
+QTreeWidget::item:edit {
+    background-color: #ffffff;
+    color: #000000;
+}
+QTreeWidget::item:selected {
+    background-color: #3498db;
+    color: white;
+}
+QTreeWidget::item:selected:edit {
+    background-color: #ffffff;
+    color: #000000;
+}
+QTreeWidget QLineEdit {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #3498db;
+    padding: 2px;
+    margin: 1px;
+}
+
+/* QHeaderView */
+QHeaderView::section {
+    background-color: #f8f9fa;
+    padding: 5px;
+    border: 1px solid #ddd;
+}
+
+/* 日志 QTextEdit（代码编辑器风格） */
+QTextEdit {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+}
+
+/* 输入控件全局默认 */
+QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus {
+    border-color: #3498db;
+}
