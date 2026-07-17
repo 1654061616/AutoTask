@@ -5,7 +5,7 @@ NODE_TYPES = {
     "mouse_move": {"name": "鼠标移动", "icon": "↔️", "color": "#2196f3", "category": "mouse"},
     "mouse_drag": {"name": "鼠标拖拽", "icon": "✋", "color": "#2196f3", "category": "mouse"},
     "mouse_scroll": {"name": "鼠标滚动", "icon": "🖲️", "color": "#2196f3", "category": "mouse"},
-    "keyboard_type": {"name": "键盘输入", "icon": "⌨️", "color": "#2196f3", "category": "keyboard"},
+    "keyboard_type": {"name": "键盘输入（支持Excel/变量）", "icon": "⌨️", "color": "#2196f3", "category": "keyboard"},
     "keyboard_press": {"name": "按键操作", "icon": "🔑", "color": "#2196f3", "category": "keyboard"},
     "keyboard_hotkey": {"name": "快捷键", "icon": "⚡", "color": "#2196f3", "category": "keyboard"},
     "image_find": {"name": "找图", "icon": "🔍", "color": "#ff9800", "category": "image"},
