@@ -2,6 +2,7 @@
 
 import os
 from PySide6.QtWidgets import QWidget
+from utils.resource_path import get_resource_path
 
 
 class ThemeManager:
@@ -23,8 +24,7 @@ class ThemeManager:
         return self._current_theme
 
     def _theme_path(self, theme: str) -> str:
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        return os.path.join(base_dir, "resources", "themes", f"{theme}.qss")
+        return get_resource_path(f"themes/{theme}.qss")
 
     def load_qss(self, theme: str = "light") -> str:
         path = self._theme_path(theme)

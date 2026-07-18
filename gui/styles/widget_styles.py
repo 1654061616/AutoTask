@@ -14,7 +14,7 @@ class Styles:
     @staticmethod
     def main_window_qss():
         """加载 light.qss 作为主窗口全局样式"""
-        qss_path = get_resource_path("resources/themes/light.qss")
+        qss_path = get_resource_path("themes/light.qss")
         try:
             with open(qss_path, "r", encoding="utf-8") as f:
                 return f.read()
