@@ -26,7 +26,7 @@ class TaskManagerMixin:
                     task = {
                         "id": flow_data.get("id", str(uuid.uuid4())[:8]),
                         "name": flow_data.get("name", os.path.splitext(filename)[0]),
-                        "status": flow_data.get("status", "已停止"),
+                        "status": "已停止",
                         "nodes": flow_data.get("nodes", []),
                         "edges": flow_data.get("edges", []),
                         "schedule": flow_data.get("schedule", {}),
