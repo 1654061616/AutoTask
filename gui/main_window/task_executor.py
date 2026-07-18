@@ -2,6 +2,7 @@
 
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import Qt, Slot
+from gui.styles import Styles, Colors
 
 
 class TaskExecutorMixin:
@@ -29,7 +30,7 @@ class TaskExecutorMixin:
         self._update_status_widget(item, "执行中")
 
         self.task_status_label.setText("执行中")
-        self.task_status_label.setStyleSheet("color: #27ae60; font-weight: bold;")
+        self.task_status_label.setStyleSheet(Styles.status_label(Colors.SUCCESS))
         self.status_label.setText("运行中...")
         self.log_panel.append(f"开始执行任务: {task['name']}")
 
@@ -75,7 +76,7 @@ class TaskExecutorMixin:
                 current_item.setData(0, Qt.UserRole, self.current_flow)
                 self._update_status_widget(current_item, "已停止")
                 self.task_status_label.setText("已停止")
-                self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+                self.task_status_label.setStyleSheet(Styles.status_label("#e74c3c"))
 
         if success:
             self.status_label.setText("任务执行完成")
@@ -107,7 +108,7 @@ class TaskExecutorMixin:
         self._update_status_widget(item, "已停止")
 
         self.task_status_label.setText("已停止")
-        self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+        self.task_status_label.setStyleSheet(Styles.status_label("#e74c3c"))
         self.status_label.setText("已停止")
         self.log_panel.append(f"停止任务: {task['name']}")
 
