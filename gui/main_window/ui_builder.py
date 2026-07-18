@@ -6,8 +6,8 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                                QSpinBox, QDoubleSpinBox, QCheckBox,
                                QFileDialog, QMessageBox, QProgressBar,
                                QInputDialog, QHeaderView, QDialog, QApplication)
-from PySide6.QtGui import QIcon, QAction, QFont, QPainter
-from PySide6.QtCore import Qt, QSize, Signal, Slot
+from PySide6.QtGui import QIcon, QAction, QFont, QPainter, QPixmap, QColor, QPen, QBrush, QPainterPath
+from PySide6.QtCore import Qt, QSize, Signal, Slot, QPointF
 
 from ..node_graph import GraphScene, GraphView, NodeToolbar
 
@@ -28,6 +28,7 @@ class UIBuilderMixin:
 
     def create_menu_bar(self):
         menu_bar = self.menuBar()
+        menu_bar.setFixedHeight(25)
         file_menu = menu_bar.addMenu("文件(&F)")
 
         new_action = QAction("新建任务", self)
@@ -48,12 +49,12 @@ class UIBuilderMixin:
         save_action.triggered.connect(lambda checked: self.on_save_flow())
         exit_action.triggered.connect(self.close)
 
-        self.theme_btn = QPushButton("☀")
-        self.theme_btn.setFixedSize(30, 28)
-        self.theme_btn.setStyleSheet(
-            "QPushButton { border: 1px solid #ccc; border-radius: 4px; background: #fff; font-size: 14px; }"
-            "QPushButton:hover { background: #e8e8e8; }"
-        )
+        self.theme_btn = QPushButton()
+        self.theme_btn.setFixedSize(22, 22)
+        self.theme_btn.setIcon(self._create_theme_icon("light"))
+        self.theme_btn.setIconSize(QSize(18, 18))
+        self.theme_btn.setStyleSheet(Styles.theme_btn())
+        self.theme_btn.setCursor(Qt.PointingHandCursor)
         self.theme_btn.clicked.connect(self._on_theme_changed)
         menu_bar.setCornerWidget(self.theme_btn, Qt.TopRightCorner)
 
@@ -228,9 +229,48 @@ class UIBuilderMixin:
     def apply_stylesheet(self):
         self.setStyleSheet(Styles.main_window_qss())
 
+    def _create_theme_icon(self, theme="light"):
+        import math
+        size = 18
+        pixmap = QPixmap(size, size)
+        pixmap.fill(Qt.transparent)
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        color = QColor("#ff8c00")
+
+        if theme == "light":
+            # 太阳：中心圆 + 8 条射线
+            cx, cy, r = size / 2, size / 2, 4
+            painter.setPen(QPen(color, 1.5))
+            painter.setBrush(QBrush(color))
+            painter.drawEllipse(QPointF(cx, cy), r, r)
+            painter.setPen(QPen(color, 2))
+            painter.setBrush(Qt.NoBrush)
+            for i in range(8):
+                rad = (i * 45) * math.pi / 180
+                x1 = cx + (r + 2) * math.cos(rad)
+                y1 = cy + (r + 2) * math.sin(rad)
+                x2 = cx + (r + 4) * math.cos(rad)
+                y2 = cy + (r + 4) * math.sin(rad)
+                painter.drawLine(QPointF(x1, y1), QPointF(x2, y2))
+        else:
+            # 月亮：月牙形（用 QPainterPath 差集）
+            painter.setPen(QPen(color, 1.5))
+            painter.setBrush(QBrush(color))
+            outer = QPainterPath()
+            outer.addEllipse(QPointF(size / 2, size / 2), 5, 5)
+            inner = QPainterPath()
+            inner.addEllipse(QPointF(size / 2 + 2.5, size / 2 - 2.5), 4, 4)
+            crescent = outer.subtracted(inner)
+            painter.drawPath(crescent)
+
+        painter.end()
+        return QIcon(pixmap)
+
     def _on_theme_changed(self):
         current = ThemeManager.instance().current_theme
         theme = "dark" if current == "light" else "light"
         ThemeManager.instance().switch_theme(theme)
         self.setStyleSheet(Styles.main_window_qss())
-        self.theme_btn.setText("☀" if theme == "light" else "🌙")
+        self.theme_btn.setStyleSheet(Styles.theme_btn(theme))
+        self.theme_btn.setIcon(self._create_theme_icon(theme))

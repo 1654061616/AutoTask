@@ -724,3 +724,18 @@ class Styles:
                 border-color: {color};
             }}
         """
+
+    # ========== 主题切换按钮 ==========
+
+    @staticmethod
+    def theme_btn(theme="light"):
+        if theme == "light":
+            return (
+                "QPushButton { border: none; border-radius: 4px; background: transparent; color: #ff8c00; font-size: 18px; }"
+                "QPushButton:hover { background: rgba(255, 140, 0, 0.1); }"
+            )
+        else:
+            return (
+                "QPushButton { border: none; border-radius: 4px; background: transparent; color: #ff8c00; font-size: 18px; }"
+                "QPushButton:hover { background: rgba(255, 140, 0, 0.2); }"
+            )
