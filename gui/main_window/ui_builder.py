@@ -14,6 +14,7 @@ from ..node_graph import GraphScene, GraphView, NodeToolbar
 from core.engine import FlowEngine
 from utils.resource_path import get_resource_path, get_resources_dir, ensure_resources_dir
 from .schedule_panel import SchedulePanel
+from gui.styles import Styles
 
 
 class UIBuilderMixin:
@@ -94,15 +95,15 @@ class UIBuilderMixin:
         btn_style = "background-color: #27ae60; color: white; font-weight: bold; padding: 4px 8px; border-radius: 4px;"
 
         self.new_task_btn = QPushButton("新建")
-        self.new_task_btn.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold; padding: 4px 12px; border-radius: 4px;")
+        self.new_task_btn.setStyleSheet(Styles.btn_toolbar_success())
         self.open_task_btn = QPushButton("导入")
-        self.open_task_btn.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold; padding: 4px 12px; border-radius: 4px;")
+        self.open_task_btn.setStyleSheet(Styles.btn_toolbar_success())
         self.save_task_btn = QPushButton("保存")
-        self.save_task_btn.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold; padding: 4px 8px; border-radius: 4px;")
+        self.save_task_btn.setStyleSheet(Styles.btn_toolbar_success())
         self.copy_task_btn = QPushButton("复制")
-        self.copy_task_btn.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold; padding: 4px 8px; border-radius: 4px;")
+        self.copy_task_btn.setStyleSheet(Styles.btn_toolbar_success())
         self.delete_task_btn = QPushButton("删除")
-        self.delete_task_btn.setStyleSheet("background-color: #e74c3c; color: white; font-weight: bold; padding: 4px 8px; border-radius: 4px;")
+        self.delete_task_btn.setStyleSheet(Styles.btn_toolbar_danger())
 
         self.task_list_group = QGroupBox("任务列表")
         task_list_layout = QVBoxLayout(self.task_list_group)
@@ -150,7 +151,7 @@ class UIBuilderMixin:
         task_info_layout.addRow("任务名称:", self.task_name_edit)
 
         self.task_status_label = QLabel("已停止")
-        self.task_status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+        self.task_status_label.setStyleSheet(Styles.status_label("#e74c3c"))
         task_info_layout.addRow("当前状态:", self.task_status_label)
         right_layout.addWidget(self.task_info_group)
 
@@ -175,60 +176,16 @@ class UIBuilderMixin:
         action_btn_layout.addStretch()
 
         self.start_task_btn = QPushButton("开始当前任务")
-        self.start_task_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #27ae60;
-                color: white;
-                font-weight: bold;
-                padding: 8px 20px;
-                border: none;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #2ecc71;
-            }
-            QPushButton:disabled {
-                background-color: #7ed6a4;
-                color: rgba(255,255,255,0.7);
-                font-weight: bold;
-            }
-        """)
+        self.start_task_btn.setStyleSheet(Styles.btn_success("8px 20px"))
 
         self.stop_task_btn = QPushButton("停止当前任务")
-        self.stop_task_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #e74c3c;
-                color: white;
-                font-weight: bold;
-                padding: 8px 20px;
-                border: none;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #ec7063;
-            }
-            QPushButton:disabled {
-                background-color: #f0a0a0;
-                color: rgba(255,255,255,0.7);
-                font-weight: bold;
-            }
-        """)
+        self.stop_task_btn.setStyleSheet(Styles.btn_danger("8px 20px"))
         self.stop_task_btn.setEnabled(False)
 
         self.edit_steps_btn = QPushButton("编辑执行步骤")
-        self.edit_steps_btn.setStyleSheet("""
-            QPushButton { background-color: #3498db; color: white; font-weight: bold; padding: 8px 20px; border: none; border-radius: 4px; }
-            QPushButton:hover { background-color: #2980b9; }
-            QPushButton:pressed { background-color: #1c6ea4; }
-            QPushButton:disabled { background-color: #7ab8e4; color: rgba(255,255,255,0.7); }
-        """)
+        self.edit_steps_btn.setStyleSheet(Styles.btn_primary("8px 20px"))
         self.save_config_btn = QPushButton("保存配置")
-        self.save_config_btn.setStyleSheet("""
-            QPushButton { background-color: #3498db; color: white; font-weight: bold; padding: 8px 20px; border: none; border-radius: 4px; }
-            QPushButton:hover { background-color: #2980b9; }
-            QPushButton:pressed { background-color: #1c6ea4; }
-            QPushButton:disabled { background-color: #7ab8e4; color: rgba(255,255,255,0.7); }
-        """)
+        self.save_config_btn.setStyleSheet(Styles.btn_primary("8px 20px"))
 
         action_btn_layout.addWidget(self.start_task_btn)
         action_btn_layout.addWidget(self.stop_task_btn)
@@ -260,79 +217,4 @@ class UIBuilderMixin:
         self.load_default_tasks()
 
     def apply_stylesheet(self):
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #f5f7fa;
-            }
-            QGroupBox {
-                font-weight: bold;
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                margin-top: 6px;
-                padding-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 2px;
-                padding: 0 2px 0 2px;
-            }
-            QPushButton {
-                padding: 5px 15px;
-                border-radius: 4px;
-                border: 1px solid #ccc;
-                background-color: #ffffff;
-            }
-            QPushButton:hover {
-                background-color: #f0f0f0;
-            }
-            QTreeWidget {
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                alternate-background-color: #f9f9f9;
-                show-decoration-selected: 1;
-            }
-            QTreeWidget::item {
-                padding: 6px 4px;
-                height: 28px;
-            }
-            QTreeWidget::item:edit {
-                background-color: #ffffff;
-                color: #000000;
-            }
-            QTreeWidget::item:selected {
-                background-color: #3498db;
-                color: white;
-            }
-            QTreeWidget::item:selected:edit {
-                background-color: #ffffff;
-                color: #000000;
-            }
-            QTreeWidget QLineEdit {
-                background-color: #ffffff;
-                color: #000000;
-                border: 1px solid #3498db;
-                padding: 2px;
-                margin: 1px;
-            }
-            QHeaderView::section {
-                background-color: #f8f9fa;
-                padding: 5px;
-                border: 1px solid #ddd;
-            }
-            QTextEdit {
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                background-color: #1e1e1e;
-                color: #d4d4d4;
-                font-family: Consolas, Monaco, monospace;
-                font-size: 12px;
-            }
-            QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {
-                padding: 5px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-            }
-            QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus {
-                border-color: #3498db;
-            }
-        """)
+        self.setStyleSheet(Styles.main_window_qss())
