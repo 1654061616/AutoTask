@@ -62,6 +62,19 @@ class TaskManagerMixin:
         status_btn.setStyleSheet(Styles.task_tree_icon_btn("#3498db", "#e8f4fd"))
         status_btn.clicked.connect(lambda checked, t=task: self.on_toggle_task(t))
 
+        # 定时按钮
+        schedule_btn = QPushButton()
+        schedule_btn.setFixedSize(28, 28)
+        schedule_active = task.get("schedule_active", False)
+        if schedule_active:
+            schedule_btn.setIcon(ThemeManager.load_icon("定时执行.svg", "media-play"))
+            schedule_btn.setToolTip("点击暂停定时任务")
+        else:
+            schedule_btn.setIcon(ThemeManager.load_icon("定时暂停.svg", "media-pause"))
+            schedule_btn.setToolTip("点击启动定时任务")
+        schedule_btn.setStyleSheet(Styles.task_tree_icon_btn("#3498db", "#e8f4fd"))
+        schedule_btn.clicked.connect(lambda checked, t=task: self.on_toggle_schedule(t))
+
         # 保存按钮
         save_btn = QPushButton()
         save_btn.setFixedSize(28, 28)
@@ -87,6 +100,7 @@ class TaskManagerMixin:
         delete_btn.clicked.connect(lambda checked, t=task: self.on_delete_task(t))
 
         widget_layout.addWidget(status_btn)
+        widget_layout.addWidget(schedule_btn)
         widget_layout.addWidget(save_btn)
         widget_layout.addWidget(save_as_btn)
         widget_layout.addWidget(delete_btn)
@@ -404,3 +418,43 @@ class TaskManagerMixin:
             self.log_panel.append(f"停止执行任务: {task['name']}")
         else:
             self._start_task(task, item)
+
+    @Slot()
+    def on_toggle_schedule(self, task):
+        item = None
+        for i in range(self.task_tree.topLevelItemCount()):
+            tree_item = self.task_tree.topLevelItem(i)
+            if tree_item.data(0, Qt.UserRole) == task:
+                item = tree_item
+                break
+        if not item:
+            return
+
+        schedule_active = task.get("schedule_active", False)
+        if schedule_active:
+            task["schedule_active"] = False
+            item.setData(0, Qt.UserRole, task)
+            self._update_schedule_widget(item, False)
+            self._on_stop_scheduled()
+            self.log_panel.append(f"暂停定时任务: {task['name']}")
+        else:
+            self.task_tree.setCurrentItem(item)
+            self.current_flow = task
+            task["schedule_active"] = True
+            item.setData(0, Qt.UserRole, task)
+            self._update_schedule_widget(item, True)
+            self.schedule_panel.start_scheduled.emit()
+            self.log_panel.append(f"启动定时任务: {task['name']}")
+
+    def _update_schedule_widget(self, item, active):
+        widget = self.task_tree.itemWidget(item, 1)
+        if widget:
+            buttons = widget.findChildren(QPushButton)
+            if len(buttons) >= 2:
+                schedule_btn = buttons[1]
+                if active:
+                    schedule_btn.setIcon(ThemeManager.load_icon("定时执行.svg", "media-play"))
+                    schedule_btn.setToolTip("点击暂停定时任务")
+                else:
+                    schedule_btn.setIcon(ThemeManager.load_icon("定时暂停.svg", "media-pause"))
+                    schedule_btn.setToolTip("点击启动定时任务")
