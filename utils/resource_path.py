@@ -8,11 +8,11 @@ def get_resource_path(relative_path):
     except Exception:
         base_path = os.path.abspath(".")
     
-    resource_path = os.path.join(base_path, "resources", relative_path)
+    resource_path = os.path.join(base_path, "gui", "styles", "resources", relative_path)
     
     if not os.path.exists(resource_path):
         alternative_base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        resource_path = os.path.join(alternative_base, "resources", relative_path)
+        resource_path = os.path.join(alternative_base, "gui", "styles", "resources", relative_path)
     
     return resource_path
 
