@@ -133,7 +133,7 @@ class StepConfigPanel(QWidget):
         label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         row_layout.addWidget(label)
 
-        widget.setStyleSheet("QWidget { font-size: 13px; }")
+        widget.setStyleSheet(Styles.widget_font())
         row_layout.addWidget(widget, 1)
 
         self.main_layout.addLayout(row_layout)
@@ -213,7 +213,7 @@ class StepConfigPanel(QWidget):
         slider_layout.setSpacing(3)
 
         label = QLabel(f"{label_text}:")
-        label.setStyleSheet("color: #555; font-size: 13px;")
+        label.setStyleSheet(Styles.LABEL_SECONDARY)
         slider_layout.addWidget(label)
 
         slider = QSlider(Qt.Horizontal)
@@ -238,7 +238,7 @@ class StepConfigPanel(QWidget):
         file_layout.setSpacing(4)
 
         label = QLabel(f"{label_text}:")
-        label.setStyleSheet("color: #555; font-size: 13px;")
+        label.setStyleSheet(Styles.LABEL_SECTION)
         label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         file_layout.addWidget(label)
 

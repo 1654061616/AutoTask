@@ -22,6 +22,10 @@ class Styles:
             return ""
 
     @staticmethod
+    def widget_font():
+        return "QWidget { font-size: 13px; }"
+
+    @staticmethod
     def input_field():
         return f"""
             QLineEdit {{
