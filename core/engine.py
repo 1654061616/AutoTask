@@ -397,6 +397,10 @@ class FlowEngine:
                 self.logger.info(f"查找图片超时({wait_timeout}秒)")
                 break
             
+            if not self.is_running:
+                self.logger.info("用户停止，中断查找图片")
+                break
+            
             time.sleep(0.5)
         
         self.logger.info("未找到图片")
@@ -439,6 +443,10 @@ class FlowEngine:
                 self.logger.info(f"点击图片超时({wait_timeout}秒)")
                 break
             
+            if not self.is_running:
+                self.logger.info("用户停止，中断点击图片")
+                break
+            
             time.sleep(0.5)
         
         self.logger.info("未找到图片，跳过点击")
@@ -475,6 +483,10 @@ class FlowEngine:
             elapsed_time = time.time() - start_time
             if elapsed_time >= wait_timeout:
                 self.logger.info(f"判断图片存在超时({wait_timeout}秒)")
+                break
+            
+            if not self.is_running:
+                self.logger.info("用户停止，中断判断图片存在")
                 break
             
             time.sleep(0.5)
