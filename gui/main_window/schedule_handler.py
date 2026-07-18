@@ -2,6 +2,7 @@
 
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import Slot
+from gui.styles import Styles
 
 
 class ScheduleHandlerMixin:
@@ -45,15 +46,7 @@ class ScheduleHandlerMixin:
 
         self.start_scheduled_btn = self.schedule_panel.start_scheduled_btn
         self.start_scheduled_btn.setText("■ 停止定时")
-        self.start_scheduled_btn.setStyleSheet(
-            "QPushButton {"
-            "  background-color: #ff4d4f; color: white; border: none;"
-            "  border-radius: 4px; padding: 4px 14px; font-size: 13px;"
-            "  font-weight: bold;"
-            "}"
-            "QPushButton:hover { background-color: #ff7875; }"
-            "QPushButton:pressed { background-color: #d9363e; }"
-        )
+        self.start_scheduled_btn.setStyleSheet(Styles.schedule_btn_stop())
         self.start_scheduled_btn.clicked.disconnect()
         self.start_scheduled_btn.clicked.connect(self._on_stop_scheduled)
 
@@ -66,14 +59,6 @@ class ScheduleHandlerMixin:
 
         self.start_scheduled_btn = self.schedule_panel.start_scheduled_btn
         self.start_scheduled_btn.setText("▶ 开始定时")
-        self.start_scheduled_btn.setStyleSheet(
-            "QPushButton {"
-            "  background-color: #1890ff; color: white; border: none;"
-            "  border-radius: 4px; padding: 4px 14px; font-size: 13px;"
-            "  font-weight: bold;"
-            "}"
-            "QPushButton:hover { background-color: #40a9ff; }"
-            "QPushButton:pressed { background-color: #096dd9; }"
-        )
+        self.start_scheduled_btn.setStyleSheet(Styles.schedule_btn_start())
         self.start_scheduled_btn.clicked.disconnect()
         self.start_scheduled_btn.clicked.connect(lambda: self.schedule_panel.start_scheduled.emit())

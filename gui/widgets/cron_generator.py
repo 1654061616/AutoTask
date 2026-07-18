@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt, Signal
 from croniter import croniter
 from datetime import datetime
+from gui.styles import Styles
 
 
 TAB_CONFIGS = [
@@ -197,10 +198,7 @@ class CronGeneratorDialog(QDialog):
         expr_layout = QHBoxLayout()
         expr_layout.addWidget(QLabel("CRON 表达式:"))
         self.expression_label = QLabel("0 0 9 * * * *")
-        self.expression_label.setStyleSheet(
-            "font-weight: bold; font-size: 15px; color: #27ae60; "
-            "background: #f0f0f0; padding: 4px 12px; border-radius: 4px;"
-        )
+        self.expression_label.setStyleSheet(Styles.cron_expression_label())
         expr_layout.addWidget(self.expression_label)
         expr_layout.addStretch()
         layout.addLayout(expr_layout)
