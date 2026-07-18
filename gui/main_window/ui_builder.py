@@ -21,7 +21,7 @@ class UIBuilderMixin:
     """界面构建 Mixin：菜单栏、状态栏、中央区域、样式表"""
 
     def init_ui(self):
-        self.create_menu_bar()
+        # self.create_menu_bar()
         self.create_status_bar()
         self.create_central_widget()
         self.apply_stylesheet()
@@ -50,33 +50,30 @@ class UIBuilderMixin:
         save_action.triggered.connect(lambda checked: self.on_save_flow())
         exit_action.triggered.connect(self.close)
 
-        self.theme_btn = QPushButton()
-        self.theme_btn.setFixedSize(22, 22)
-        self.theme_btn.setIcon(self._create_theme_icon("light"))
-        self.theme_btn.setIconSize(QSize(18, 18))
-        self.theme_btn.setStyleSheet(Styles.theme_btn())
-        self.theme_btn.setCursor(Qt.PointingHandCursor)
-        self.theme_btn.clicked.connect(self._on_theme_changed)
-        menu_bar.setCornerWidget(self.theme_btn, Qt.TopRightCorner)
 
     def create_tool_bar(self):
         tool_bar = QToolBar("主工具栏")
-        tool_bar.setIconSize(QSize(24, 24))
+        tool_bar.setIconSize(QSize(20, 20))
         self.addToolBar(tool_bar)
 
         # 从 Iconfont 下载的 SVG 图标，放在 gui/styles/resources/icons/ 目录
         new_icon = ThemeManager.load_icon("新建.svg", "document-new")
         open_icon = ThemeManager.load_icon("打开.svg", "document-open")
-        save_icon = ThemeManager.load_icon("保存.svg", "document-save")
-        run_icon = ThemeManager.load_icon("运行.svg", "media-play")
-        stop_icon = ThemeManager.load_icon("停止.svg", "media-stop")
+        # save_icon = ThemeManager.load_icon("保存.svg", "document-save")
+        # run_icon = ThemeManager.load_icon("运行.svg", "media-play")
+        # stop_icon = ThemeManager.load_icon("停止.svg", "media-stop")
+        dark_icon = ThemeManager.load_icon("夜间.svg", "media-stop")
+        light_icon = ThemeManager.load_icon("太阳.svg", "media-stop")
 
         tool_bar.addAction(new_icon, "新建", self.on_new_flow)
         tool_bar.addAction(open_icon, "打开", self.on_open_flow)
-        tool_bar.addAction(save_icon, "保存", lambda checked: self.on_save_flow())
+        # tool_bar.addAction(save_icon, "保存", lambda checked: self.on_save_flow())
+        # tool_bar.addSeparator()
+        # tool_bar.addAction(run_icon, "运行", self.on_run_flow)
+        # tool_bar.addAction(stop_icon, "停止", self.on_stop_flow)
         tool_bar.addSeparator()
-        tool_bar.addAction(run_icon, "运行", self.on_run_flow)
-        tool_bar.addAction(stop_icon, "停止", self.on_stop_flow)
+        tool_bar.addAction(dark_icon, "夜间", lambda: self._on_theme_changed("dark"))
+        tool_bar.addAction(light_icon, "太阳", lambda: self._on_theme_changed("light"))
 
     def create_status_bar(self):
         self.status_bar = QStatusBar()
@@ -105,25 +102,25 @@ class UIBuilderMixin:
         left_layout = QVBoxLayout(left_panel)
 
 
-        self.new_task_btn = QPushButton("新建")
-        self.new_task_btn.setStyleSheet(Styles.btn_toolbar_success())
-        self.open_task_btn = QPushButton("导入")
-        self.open_task_btn.setStyleSheet(Styles.btn_toolbar_success())
-        self.save_task_btn = QPushButton("保存")
-        self.save_task_btn.setStyleSheet(Styles.btn_toolbar_success())
-        self.copy_task_btn = QPushButton("复制")
-        self.copy_task_btn.setStyleSheet(Styles.btn_toolbar_success())
-        self.delete_task_btn = QPushButton("删除")
-        self.delete_task_btn.setStyleSheet(Styles.btn_toolbar_danger())
+        # self.new_task_btn = QPushButton("新建")
+        # self.new_task_btn.setStyleSheet(Styles.btn_toolbar_success())
+        # self.open_task_btn = QPushButton("导入")
+        # self.open_task_btn.setStyleSheet(Styles.btn_toolbar_success())
+        # self.save_task_btn = QPushButton("保存")
+        # self.save_task_btn.setStyleSheet(Styles.btn_toolbar_success())
+        # self.copy_task_btn = QPushButton("复制")
+        # self.copy_task_btn.setStyleSheet(Styles.btn_toolbar_success())
+        # self.delete_task_btn = QPushButton("删除")
+        # self.delete_task_btn.setStyleSheet(Styles.btn_toolbar_danger())
 
         self.task_list_group = QGroupBox("任务列表")
         task_list_layout = QVBoxLayout(self.task_list_group)
 
-        btn_layout = QHBoxLayout()
-        btn_layout.addWidget(self.new_task_btn)
-        btn_layout.addWidget(self.open_task_btn)
-        btn_layout.addWidget(self.copy_task_btn)
-        task_list_layout.addLayout(btn_layout)
+        # btn_layout = QHBoxLayout()
+        # btn_layout.addWidget(self.new_task_btn)
+        # btn_layout.addWidget(self.open_task_btn)
+        # btn_layout.addWidget(self.copy_task_btn)
+        # task_list_layout.addLayout(btn_layout)
 
         self.task_tree = QTreeWidget()
         self.task_tree.setHeaderLabels(["任务名称", "任务状态"])
@@ -213,11 +210,11 @@ class UIBuilderMixin:
         main_layout.addWidget(self.splitter)
 
         # ==================== 信号与槽连接 ====================
-        self.new_task_btn.clicked.connect(self.on_new_flow)
-        self.open_task_btn.clicked.connect(self.on_open_flow)
-        self.save_task_btn.clicked.connect(lambda checked: self.on_save_flow())
-        self.copy_task_btn.clicked.connect(self.on_copy_task)
-        self.delete_task_btn.clicked.connect(self.on_delete_task)
+        # self.new_task_btn.clicked.connect(self.on_new_flow)
+        # self.open_task_btn.clicked.connect(self.on_open_flow)
+        # self.save_task_btn.clicked.connect(lambda checked: self.on_save_flow())
+        # self.copy_task_btn.clicked.connect(self.on_copy_task)
+        # self.delete_task_btn.clicked.connect(self.on_delete_task)
         self.clear_log_btn.clicked.connect(self.on_clear_log)
 
         self.task_tree.itemClicked.connect(self.on_task_selected)
@@ -233,48 +230,10 @@ class UIBuilderMixin:
     def apply_stylesheet(self):
         self.setStyleSheet(Styles.main_window_qss())
 
-    def _create_theme_icon(self, theme="light"):
-        import math
-        size = 18
-        pixmap = QPixmap(size, size)
-        pixmap.fill(Qt.transparent)
-        painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.Antialiasing)
-        color = QColor("#ff8c00")
 
-        if theme == "light":
-            # 太阳：中心圆 + 8 条射线
-            cx, cy, r = size / 2, size / 2, 4
-            painter.setPen(QPen(color, 1.5))
-            painter.setBrush(QBrush(color))
-            painter.drawEllipse(QPointF(cx, cy), r, r)
-            painter.setPen(QPen(color, 2))
-            painter.setBrush(Qt.NoBrush)
-            for i in range(8):
-                rad = (i * 45) * math.pi / 180
-                x1 = cx + (r + 2) * math.cos(rad)
-                y1 = cy + (r + 2) * math.sin(rad)
-                x2 = cx + (r + 4) * math.cos(rad)
-                y2 = cy + (r + 4) * math.sin(rad)
-                painter.drawLine(QPointF(x1, y1), QPointF(x2, y2))
-        else:
-            # 月亮：月牙形（用 QPainterPath 差集）
-            painter.setPen(QPen(color, 1.5))
-            painter.setBrush(QBrush(color))
-            outer = QPainterPath()
-            outer.addEllipse(QPointF(size / 2, size / 2), 5, 5)
-            inner = QPainterPath()
-            inner.addEllipse(QPointF(size / 2 + 2.5, size / 2 - 2.5), 4, 4)
-            crescent = outer.subtracted(inner)
-            painter.drawPath(crescent)
 
-        painter.end()
-        return QIcon(pixmap)
-
-    def _on_theme_changed(self):
+    def _on_theme_changed(self, theme="light"):
         current = ThemeManager.instance().current_theme
-        theme = "dark" if current == "light" else "light"
-        ThemeManager.instance().switch_theme(theme)
-        self.setStyleSheet(Styles.main_window_qss())
-        self.theme_btn.setStyleSheet(Styles.theme_btn(theme))
-        self.theme_btn.setIcon(self._create_theme_icon(theme))
+        if theme != current:
+            ThemeManager.instance().switch_theme(theme)
+            self.setStyleSheet(Styles.main_window_qss())
