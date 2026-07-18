@@ -625,6 +625,10 @@ class Styles:
             "background: #f0f0f0; padding: 4px 12px; border-radius: 4px;"
         )
 
+    @staticmethod
+    def cron_preview_label():
+        return "color: #555; font-family: monospace;"
+
     # ========== 主窗口任务列表按钮 ==========
 
     @staticmethod

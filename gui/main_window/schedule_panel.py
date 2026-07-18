@@ -8,6 +8,7 @@ from croniter import croniter
 from datetime import datetime
 
 from ..widgets.cron_generator import CronGeneratorDialog
+from gui.styles import Styles
 
 
 class SchedulePanel(QWidget):
@@ -30,15 +31,7 @@ class SchedulePanel(QWidget):
         self.trigger_combo.currentIndexChanged.connect(self._on_trigger_changed)
         trigger_layout.addWidget(self.trigger_combo)
         self.start_scheduled_btn = QPushButton("▶ 开始定时")
-        self.start_scheduled_btn.setStyleSheet(
-            "QPushButton {"
-            "  background-color: #1890ff; color: white; border: none;"
-            "  border-radius: 4px; padding: 4px 14px; font-size: 13px;"
-            "  font-weight: bold;"
-            "}"
-            "QPushButton:hover { background-color: #40a9ff; }"
-            "QPushButton:pressed { background-color: #096dd9; }"
-        )
+        self.start_scheduled_btn.setStyleSheet(Styles.schedule_btn_start())
         self.start_scheduled_btn.clicked.connect(lambda: self.start_scheduled.emit())
         trigger_layout.addWidget(self.start_scheduled_btn)
         trigger_layout.addStretch()
@@ -94,7 +87,7 @@ class SchedulePanel(QWidget):
         cron_time_layout = QHBoxLayout()
         cron_time_layout.addWidget(QLabel("最近执行时间:"))
         self.cron_preview_label = QLabel()
-        self.cron_preview_label.setStyleSheet("color: #555; font-family: monospace;")
+        self.cron_preview_label.setStyleSheet(Styles.cron_preview_label())
         cron_time_layout.addWidget(self.cron_preview_label)
         cron_time_layout.addStretch()
         cron_layout.addLayout(cron_time_layout)
