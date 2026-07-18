@@ -2,7 +2,6 @@
 
 from PySide6.QtGui import QColor
 from .colors import Colors
-from utils.resource_path import get_resource_path
 
 
 class Styles:
@@ -13,13 +12,10 @@ class Styles:
 
     @staticmethod
     def main_window_qss():
-        """加载 light.qss 作为主窗口全局样式"""
-        qss_path = get_resource_path("themes/light.qss")
-        try:
-            with open(qss_path, "r", encoding="utf-8") as f:
-                return f.read()
-        except Exception:
-            return ""
+        """加载当前主题的 QSS 作为主窗口全局样式"""
+        from .theme_manager import ThemeManager
+        theme = ThemeManager.instance().current_theme
+        return ThemeManager.instance().load_qss(theme)
 
     @staticmethod
     def widget_font():

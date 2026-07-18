@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                                QPushButton, QToolBar, QStatusBar, QSplitter,
                                QTreeWidget, QTreeWidgetItem,
-                               QTextEdit, QLabel, QComboBox,
+                               QTextEdit, QLabel,
                                QLineEdit, QGroupBox, QGridLayout, QFormLayout,
                                QSpinBox, QDoubleSpinBox, QCheckBox,
                                QFileDialog, QMessageBox, QProgressBar,
@@ -14,7 +14,7 @@ from ..node_graph import GraphScene, GraphView, NodeToolbar
 from core.engine import FlowEngine
 from utils.resource_path import get_resource_path, get_resources_dir, ensure_resources_dir
 from .schedule_panel import SchedulePanel
-from gui.styles import Styles
+from gui.styles import Styles, ThemeManager
 
 
 class UIBuilderMixin:
@@ -47,6 +47,15 @@ class UIBuilderMixin:
         open_action.triggered.connect(self.on_open_flow)
         save_action.triggered.connect(lambda checked: self.on_save_flow())
         exit_action.triggered.connect(self.close)
+
+        self.theme_btn = QPushButton("☀")
+        self.theme_btn.setFixedSize(30, 28)
+        self.theme_btn.setStyleSheet(
+            "QPushButton { border: 1px solid #ccc; border-radius: 4px; background: #fff; font-size: 14px; }"
+            "QPushButton:hover { background: #e8e8e8; }"
+        )
+        self.theme_btn.clicked.connect(self._on_theme_changed)
+        menu_bar.setCornerWidget(self.theme_btn, Qt.TopRightCorner)
 
     def create_tool_bar(self):
         tool_bar = QToolBar("主工具栏")
@@ -218,3 +227,10 @@ class UIBuilderMixin:
 
     def apply_stylesheet(self):
         self.setStyleSheet(Styles.main_window_qss())
+
+    def _on_theme_changed(self):
+        current = ThemeManager.instance().current_theme
+        theme = "dark" if current == "light" else "light"
+        ThemeManager.instance().switch_theme(theme)
+        self.setStyleSheet(Styles.main_window_qss())
+        self.theme_btn.setText("☀" if theme == "light" else "🌙")
