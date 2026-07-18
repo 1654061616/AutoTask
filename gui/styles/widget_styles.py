@@ -536,6 +536,29 @@ class Styles:
         """
 
     @staticmethod
+    def config_title():
+        return """
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #333;
+                padding-bottom: 8px;
+                border-bottom: 2px solid #27ae60;
+            }
+        """
+
+    @staticmethod
+    def empty_label():
+        return """
+            QLabel {
+                font-size: 14px;
+                color: #999;
+                text-align: center;
+                padding: 40px 20px;
+            }
+        """
+
+    @staticmethod
     def toggle_btn():
         return """
             QToolButton {
@@ -553,10 +576,21 @@ class Styles:
         """
 
     @staticmethod
-    def scroll_area_transparent():
+    def scroll_area():
         return """
             QScrollArea {
                 border: none;
+            }
+        """
+
+    @staticmethod
+    def unsupported_msg():
+        return """
+            QLabel {
+                font-size: 14px;
+                color: #e74c3c;
+                text-align: center;
+                padding: 40px 20px;
             }
         """
 

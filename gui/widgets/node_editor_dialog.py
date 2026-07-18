@@ -7,6 +7,7 @@ import warnings
 
 from ..node_graph import GraphScene, GraphView, NodeToolbar
 from ..step_panels import PANEL_MAP, get_panel_class
+from gui.styles import Styles
 
 
 class NodeEditorDialog(QDialog):
@@ -55,11 +56,7 @@ class NodeEditorDialog(QDialog):
         self.config_panel.setMinimumWidth(200)
         self.config_panel.setMaximumWidth(600)
         self.config_panel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        self.config_panel.setStyleSheet("""
-            QWidget {
-                background-color: #f8f9fa;
-            }
-        """)
+        self.config_panel.setStyleSheet(Styles.panel_bg())
         self._init_config_panel()
         self.splitter.addWidget(self.config_panel)
 
@@ -73,15 +70,7 @@ class NodeEditorDialog(QDialog):
 
         self.layout().addWidget(self.splitter)
 
-        btn_style = """
-            QToolButton {
-                border: none; border-radius: 2px; font-size: 20px; font-weight: bold;
-                color: #27ae60; background: transparent;
-            }
-            QToolButton:hover {
-                color: #2ecc71; background: rgba(0,0,0,0.08);
-            }
-        """
+        btn_style = Styles.toggle_btn()
         self.toggle_left_btn = QToolButton(self)
         self.toggle_left_btn.setText("◀")
         self.toggle_left_btn.setToolTip("隐藏节点栏")
@@ -108,15 +97,7 @@ class NodeEditorDialog(QDialog):
         layout.setSpacing(8)
 
         self.title_label = QLabel("节点配置")
-        self.title_label.setStyleSheet("""
-            QLabel {
-                font-size: 16px;
-                font-weight: bold;
-                color: #333;
-                padding-bottom: 8px;
-                border-bottom: 2px solid #27ae60;
-            }
-        """)
+        self.title_label.setStyleSheet(Styles.config_title())
         layout.addWidget(self.title_label)
 
         self.content_widget = QWidget()
@@ -125,14 +106,7 @@ class NodeEditorDialog(QDialog):
         self.content_layout.setSpacing(0)
 
         self.empty_label = QLabel("请点击节点查看配置")
-        self.empty_label.setStyleSheet("""
-            QLabel {
-                font-size: 14px;
-                color: #999;
-                text-align: center;
-                padding: 40px 20px;
-            }
-        """)
+        self.empty_label.setStyleSheet(Styles.empty_label())
         self.empty_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.content_layout.addWidget(self.empty_label)
 
@@ -143,56 +117,17 @@ class NodeEditorDialog(QDialog):
         layout.addWidget(self.content_widget, 1)
 
         self.save_btn = QPushButton("保存配置")
-        self.save_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #3498db;
-                color: white;
-                font-weight: bold;
-                padding: 6px 20px;
-                border-radius: 4px;
-                border: none;
-            }
-            QPushButton:hover {
-                background-color: #2980b9;
-            }
-            QPushButton:disabled {
-                background-color: #bdc3c7;
-            }
-        """)
+        self.save_btn.setStyleSheet(Styles.btn_primary("6px 20px"))
         self.save_btn.clicked.connect(self._on_save_config)
         self.save_btn.setEnabled(False)
         layout.addWidget(self.save_btn)
 
         self.ok_btn = QPushButton("确定")
-        self.ok_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #27ae60;
-                color: white;
-                font-weight: bold;
-                padding: 8px 30px;
-                border-radius: 4px;
-                border: none;
-            }
-            QPushButton:hover {
-                background-color: #2ecc71;
-            }
-        """)
+        self.ok_btn.setStyleSheet(Styles.btn_success("8px 30px"))
         layout.addWidget(self.ok_btn)
 
         self.cancel_btn = QPushButton("取消")
-        self.cancel_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #e74c3c;
-                color: white;
-                font-weight: bold;
-                padding: 8px 30px;
-                border-radius: 4px;
-                border: none;
-            }
-            QPushButton:hover {
-                background-color: #c0392b;
-            }
-        """)
+        self.cancel_btn.setStyleSheet(Styles.btn_danger("8px 30px"))
         layout.addWidget(self.cancel_btn)
 
         self._setup_node_selection()
@@ -277,11 +212,7 @@ class NodeEditorDialog(QDialog):
             scroll_area = QScrollArea()
             scroll_area.setWidget(panel)
             scroll_area.setWidgetResizable(True)
-            scroll_area.setStyleSheet("""
-                QScrollArea {
-                    border: none;
-                }
-            """)
+            scroll_area.setStyleSheet(Styles.scroll_area())
             scroll_area.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
             self.panel_container.addWidget(scroll_area)
@@ -299,14 +230,7 @@ class NodeEditorDialog(QDialog):
         self._clear_current_panel()
 
         msg_label = QLabel(f"节点类型 '{node.node_type}' 暂无配置面板")
-        msg_label.setStyleSheet("""
-            QLabel {
-                font-size: 14px;
-                color: #e74c3c;
-                text-align: center;
-                padding: 40px 20px;
-            }
-        """)
+        msg_label.setStyleSheet(Styles.unsupported_msg())
         msg_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self._current_panel = msg_label
         self.panel_container.addWidget(msg_label)
