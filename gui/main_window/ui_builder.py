@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt, QSize, Signal, Slot, QPointF
 from ..node_graph import GraphScene, GraphView, NodeToolbar
 
 from core.engine import FlowEngine
-from utils.resource_path import get_resource_path, get_resources_dir, ensure_resources_dir
+from utils.resource_path import get_resources_dir, ensure_resources_dir
 from .schedule_panel import SchedulePanel
 from gui.styles import Styles, ThemeManager
 
@@ -25,7 +25,8 @@ class UIBuilderMixin:
         self.create_status_bar()
         self.create_central_widget()
         self.apply_stylesheet()
-
+        self.create_tool_bar()
+    # 菜单栏
     def create_menu_bar(self):
         menu_bar = self.menuBar()
         menu_bar.setFixedHeight(25)
@@ -63,11 +64,12 @@ class UIBuilderMixin:
         tool_bar.setIconSize(QSize(24, 24))
         self.addToolBar(tool_bar)
 
-        new_icon = QIcon.fromTheme("document-new")
-        open_icon = QIcon.fromTheme("document-open")
-        save_icon = QIcon.fromTheme("document-save")
-        run_icon = QIcon.fromTheme("media-play")
-        stop_icon = QIcon.fromTheme("media-stop")
+        # 从 Iconfont 下载的 SVG 图标，放在 gui/styles/resources/icons/ 目录
+        new_icon = ThemeManager.load_icon("新建.svg", "document-new")
+        open_icon = ThemeManager.load_icon("打开.svg", "document-open")
+        save_icon = ThemeManager.load_icon("保存.svg", "document-save")
+        run_icon = ThemeManager.load_icon("运行.svg", "media-play")
+        stop_icon = ThemeManager.load_icon("停止.svg", "media-stop")
 
         tool_bar.addAction(new_icon, "新建", self.on_new_flow)
         tool_bar.addAction(open_icon, "打开", self.on_open_flow)
@@ -102,7 +104,6 @@ class UIBuilderMixin:
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
 
-        btn_style = "background-color: #27ae60; color: white; font-weight: bold; padding: 4px 8px; border-radius: 4px;"
 
         self.new_task_btn = QPushButton("新建")
         self.new_task_btn.setStyleSheet(Styles.btn_toolbar_success())
@@ -126,6 +127,9 @@ class UIBuilderMixin:
 
         self.task_tree = QTreeWidget()
         self.task_tree.setHeaderLabels(["任务名称", "任务状态"])
+        self.task_tree.setHeaderHidden(True)
+        # 去掉了 QTreeWidget 默认的树形缩进，任务名称左侧的空白会消失
+        self.task_tree.setIndentation(0)
         self.task_tree.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.task_tree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         task_list_layout.addWidget(self.task_tree)

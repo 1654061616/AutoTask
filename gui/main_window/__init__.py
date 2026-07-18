@@ -50,7 +50,7 @@ class MainWindow(QMainWindow,
         
         self.setWindowTitle("AutoFlow")
         
-        icon_path = get_resource_path("icons/Icon.png")
+        icon_path = get_resource_path("icons/icon.svg")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
         

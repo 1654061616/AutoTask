@@ -2,6 +2,7 @@
 
 import os
 from PySide6.QtWidgets import QWidget
+from PySide6.QtGui import QIcon
 from utils.resource_path import get_resource_path
 
 
@@ -58,3 +59,11 @@ class ThemeManager:
                 widget.setStyleSheet(qss)
             except Exception as e:
                 print(f"[ThemeManager] 切换主题失败: {e}")
+
+    @staticmethod
+    def load_icon(svg_filename, fallback_theme_name):
+        """加载 SVG 图标，失败时回退到系统主题图标"""
+        icon_path = get_resource_path(f"icons/{svg_filename}")
+        if os.path.exists(icon_path):
+            return QIcon(icon_path)
+        return QIcon.fromTheme(fallback_theme_name)

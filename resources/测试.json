@@ -1,6 +1,6 @@
 {
   "id": "e8d59afc",
-  "name": "测试",
+  "name": "测试-------------------------------------------------------------------------",
   "version": "1.0",
   "status": "已停止",
   "nodes": [
@@ -176,9 +176,7 @@
     }
   ],
   "schedule": {
-    "trigger_type": "cron",
-    "params": {
-      "cron_expression": "0 9,18 * * *"
-    }
+    "trigger_type": "immediate",
+    "params": {}
   }
 }

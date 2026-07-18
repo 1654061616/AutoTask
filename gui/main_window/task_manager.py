@@ -5,11 +5,11 @@ import json
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                                QPushButton, QTreeWidgetItem,
                                QFileDialog, QMessageBox, QInputDialog)
-from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, Slot
 
 from utils.resource_path import ensure_resources_dir
 from gui.styles import Styles, Colors
+from gui.styles.theme_manager import ThemeManager
 
 
 class TaskManagerMixin:
@@ -47,35 +47,48 @@ class TaskManagerMixin:
         widget = QWidget()
         widget_layout = QHBoxLayout(widget)
         widget_layout.setContentsMargins(2, 2, 2, 2)
-        widget_layout.setSpacing(2)
+        widget_layout.setSpacing(4)
+        widget_layout.addStretch()
 
         # 状态按钮
         status_btn = QPushButton()
-        status_btn.setFixedSize(20, 20)
+        status_btn.setFixedSize(28, 28)
         if "执行中" in status:
-            status_btn.setStyleSheet(Styles.task_tree_status_btn("#4caf50"))
+            status_btn.setIcon(ThemeManager.load_icon("停止.svg", "media-stop"))
             status_btn.setToolTip("点击停止任务")
         else:
-            status_btn.setStyleSheet(Styles.task_tree_status_btn("#e74c3c"))
+            status_btn.setIcon(ThemeManager.load_icon("运行.svg", "media-play"))
             status_btn.setToolTip("点击执行任务")
+        status_btn.setStyleSheet(Styles.task_tree_icon_btn("#3498db", "#e8f4fd"))
         status_btn.clicked.connect(lambda checked, t=task: self.on_toggle_task(t))
 
         # 保存按钮
         save_btn = QPushButton()
-        save_btn.setIcon(QIcon.fromTheme("document-save", QIcon()))
+        save_btn.setFixedSize(28, 28)
+        save_btn.setIcon(ThemeManager.load_icon("保存.svg", "document-save"))
         save_btn.setStyleSheet(Styles.task_tree_icon_btn("#3498db", "#e8f4fd"))
         save_btn.setToolTip("保存任务")
         save_btn.clicked.connect(lambda checked, t=task: self.on_save_flow(t))
 
+        # 另存为按钮
+        save_as_btn = QPushButton()
+        save_as_btn.setFixedSize(28, 28)
+        save_as_btn.setIcon(ThemeManager.load_icon("另存为.svg", "document-save-as"))
+        save_as_btn.setStyleSheet(Styles.task_tree_icon_btn("#3498db", "#e8f4fd"))
+        save_as_btn.setToolTip("另存为")
+        save_as_btn.clicked.connect(lambda checked, t=task: self.on_save_as_flow(t))
+
         # 删除按钮
         delete_btn = QPushButton()
-        delete_btn.setIcon(QIcon.fromTheme("edit-delete", QIcon()))
+        delete_btn.setFixedSize(28, 28)
+        delete_btn.setIcon(ThemeManager.load_icon("删除.svg", "edit-delete"))
         delete_btn.setStyleSheet(Styles.task_tree_icon_btn("#e74c3c", "#fce4ec"))
         delete_btn.setToolTip("删除任务")
         delete_btn.clicked.connect(lambda checked, t=task: self.on_delete_task(t))
 
         widget_layout.addWidget(status_btn)
         widget_layout.addWidget(save_btn)
+        widget_layout.addWidget(save_as_btn)
         widget_layout.addWidget(delete_btn)
         self.task_tree.setItemWidget(item, 1, widget)
 
@@ -263,6 +276,73 @@ class TaskManagerMixin:
                 QMessageBox.warning(self, "保存失败", f"无法保存任务文件: {str(e)}")
 
     @Slot()
+    def on_save_as_flow(self, task=None):
+        if task is None:
+            current_item = self.task_tree.currentItem()
+            if not current_item:
+                QMessageBox.warning(self, "另存失败", "请先选择一个任务")
+                return
+            task = current_item.data(0, Qt.UserRole)
+
+        if not task:
+            QMessageBox.warning(self, "另存失败", "未找到任务数据")
+            return
+
+        resources_dir = ensure_resources_dir()
+        default_name = task.get("name", "未命名任务")
+        default_path = os.path.join(resources_dir, f"{default_name}.json")
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "另存为", default_path, "JSON文件 (*.json)"
+        )
+
+        if file_path:
+            try:
+                nodes = []
+                edges = []
+                if hasattr(self, 'graph_scene') and self.graph_scene:
+                    graph_data = self.graph_scene.to_json()
+                    if isinstance(graph_data, dict):
+                        nodes = graph_data.get("nodes", [])
+                        edges = graph_data.get("edges", [])
+                if not nodes:
+                    nodes = task.get("nodes", [])
+                if not edges:
+                    edges = task.get("edges", [])
+
+                save_name = os.path.splitext(os.path.basename(file_path))[0]
+                save_data = {
+                    "id": str(uuid.uuid4())[:8],
+                    "name": save_name,
+                    "version": "1.0",
+                    "status": "已停止",
+                    "nodes": nodes,
+                    "edges": edges,
+                    "schedule": self.schedule_panel.get_config() if hasattr(self, 'schedule_panel') else {}
+                }
+
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(save_data, f, indent=2, ensure_ascii=False)
+
+                new_task = {
+                    "id": save_data["id"],
+                    "name": save_name,
+                    "status": "已停止",
+                    "nodes": save_data["nodes"],
+                    "edges": save_data["edges"],
+                    "schedule": save_data["schedule"],
+                    "file_path": file_path
+                }
+                self.add_task_to_tree(new_task)
+                self.task_tree.setCurrentItem(
+                    self.task_tree.topLevelItem(self.task_tree.topLevelItemCount() - 1)
+                )
+                self.task_name_edit.setText(save_name)
+                self.status_label.setText(f"已另存为: {os.path.basename(file_path)}")
+                self.log_panel.append(f"另存为: {save_name}")
+            except Exception as e:
+                QMessageBox.warning(self, "另存失败", f"无法保存任务文件: {str(e)}")
+
+    @Slot()
     def on_task_name_changed(self, item, column):
         if column == 0:
             task = item.data(0, Qt.UserRole)
@@ -299,10 +379,10 @@ class TaskManagerMixin:
             btn = widget.findChild(QPushButton)
             if btn:
                 if "执行中" in status:
-                    btn.setStyleSheet(Styles.task_tree_status_btn("#4caf50"))
+                    btn.setIcon(ThemeManager.load_icon("停止.svg", "media-stop"))
                     btn.setToolTip("点击停止任务")
                 else:
-                    btn.setStyleSheet(Styles.task_tree_status_btn("#e74c3c"))
+                    btn.setIcon(ThemeManager.load_icon("运行.svg", "media-play"))
                     btn.setToolTip("点击执行任务")
 
     @Slot()
