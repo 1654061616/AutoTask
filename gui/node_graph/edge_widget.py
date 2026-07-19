@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QGraphicsPathItem
+from PySide6.QtWidgets import QGraphicsPathItem, QStyle
 from PySide6.QtCore import Qt, QPointF
-from PySide6.QtGui import QColor, QPen, QBrush, QPainterPath
+from PySide6.QtGui import QColor, QPen, QBrush, QPainterPath, QPainterPathStroker
 
 class EdgeWidget(QGraphicsPathItem):
     def __init__(self, source_port, target_port, parent=None):
@@ -10,7 +10,6 @@ class EdgeWidget(QGraphicsPathItem):
         self.source_node = source_port.parent_node
         self.target_node = target_port.parent_node
         
-        self._is_selected = False
         self._init_style()
         
         self.setFlag(QGraphicsPathItem.ItemIsSelectable, True)
@@ -47,17 +46,26 @@ class EdgeWidget(QGraphicsPathItem):
             pass
 
     def set_selected(self, selected):
-        self._is_selected = selected
-        if selected:
-            self.setPen(QPen(QColor("#00d4ff"), 3))
-            self.setZValue(10)
-        else:
-            self.setPen(QPen(QColor("#5a5aff"), 2))
-            self.setZValue(0)
+        self.setSelected(selected)
 
-    def mousePressEvent(self, event):
-        self.set_selected(True)
-        super().mousePressEvent(event)
+    def itemChange(self, change, value):
+        if change == QGraphicsPathItem.ItemSelectedChange:
+            if value:
+                self.setPen(QPen(QColor("#00d4ff"), 3))
+                self.setZValue(10)
+            else:
+                self.setPen(QPen(QColor("#5a5aff"), 2))
+                self.setZValue(0)
+        return super().itemChange(change, value)
+
+    def shape(self):
+        stroker = QPainterPathStroker()
+        stroker.setWidth(10)
+        return stroker.createStroke(self.path())
+
+    def paint(self, painter, option, widget=None):
+        option.state &= ~QStyle.State_Selected
+        super().paint(painter, option, widget)
 
     def to_json(self):
         return {

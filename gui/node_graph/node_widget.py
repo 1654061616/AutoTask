@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QGraphicsObject, QGraphicsRectItem, QGraphicsTextItem
+from PySide6.QtWidgets import QGraphicsObject, QGraphicsRectItem, QGraphicsTextItem, QStyle
 from PySide6.QtCore import Qt, QRectF, QSizeF, Signal
 from PySide6.QtGui import QColor, QBrush, QPen, QFont
 import uuid
@@ -17,7 +17,6 @@ class NodeWidget(QGraphicsObject):
         self.node_type = node_type
         self.node_id = str(uuid.uuid4())
         self.config = config or {}
-        self._is_selected = False
         self._is_deleted = False
 
         self.input_ports = []
@@ -149,11 +148,7 @@ class NodeWidget(QGraphicsObject):
         return None
 
     def set_selected(self, selected):
-        self._is_selected = selected
-        if selected:
-            self.body.setPen(QPen(QColor("#00d4ff"), 2))
-        else:
-            self.body.setPen(QPen(QColor("#4a4a6e"), 1))
+        self.setSelected(selected)
 
     def boundingRect(self):
         return QRectF(-PortWidget.PORT_SIZE, 0, 
@@ -161,11 +156,10 @@ class NodeWidget(QGraphicsObject):
                       self.node_height)
 
     def paint(self, painter, option, widget=None):
-        pass
+        option.state &= ~QStyle.State_Selected
 
     def mousePressEvent(self, event):
         self.node_selected.emit(self)
-        self.set_selected(True)
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event):
@@ -175,7 +169,12 @@ class NodeWidget(QGraphicsObject):
     def itemChange(self, change, value):
         if getattr(self, '_is_deleted', False):
             return super().itemChange(change, value)
-        if change == QGraphicsObject.ItemPositionChange:
+        if change == QGraphicsObject.ItemSelectedChange:
+            if value:
+                self.body.setPen(QPen(QColor("#00d4ff"), 2))
+            else:
+                self.body.setPen(QPen(QColor("#4a4a6e"), 1))
+        elif change == QGraphicsObject.ItemPositionChange:
             try:
                 self.node_moved.emit(self)
                 for port in self.input_ports + self.output_ports:
