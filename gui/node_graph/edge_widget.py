@@ -22,7 +22,7 @@ class EdgeWidget(QGraphicsPathItem):
     def _init_style(self):
         self.setPen(QPen(QColor("#5a5aff"), 2))
         self.setBrush(Qt.NoBrush)
-        self.setZValue(0)
+        self.setZValue(-1)
 
     def update_path(self):
         try:
@@ -52,10 +52,10 @@ class EdgeWidget(QGraphicsPathItem):
         if change == QGraphicsPathItem.ItemSelectedChange:
             if value:
                 self.setPen(QPen(QColor("#00d4ff"), 3))
-                self.setZValue(10)
+                self.setZValue(5)
             else:
                 self.setPen(QPen(QColor("#5a5aff"), 2))
-                self.setZValue(0)
+                self.setZValue(-1)
         return super().itemChange(change, value)
 
     def shape(self):

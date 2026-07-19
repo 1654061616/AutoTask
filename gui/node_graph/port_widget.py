@@ -1,12 +1,13 @@
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsEllipseItem, QGraphicsTextItem
 from PySide6.QtCore import Qt, QRectF, Signal
-from PySide6.QtGui import QColor, QBrush, QPen, QFont
+from PySide6.QtGui import QColor, QBrush, QPen, QFont, QPainterPath
 
 
 class PortWidget(QGraphicsObject):
     port_clicked = Signal(object)
 
     PORT_SIZE = 16
+    PORT_MARGIN = 4
 
     def __init__(self, port_type: str, label: str, parent_node, parent=None):
         super().__init__(parent)
@@ -19,6 +20,7 @@ class PortWidget(QGraphicsObject):
 
     def _init_style(self):
         self.ellipse = QGraphicsEllipseItem(0, 0, self.PORT_SIZE, self.PORT_SIZE, self)
+        self.setZValue(20)
 
         if self.port_type == "in":
             fill_color = QColor("#ff9800")
@@ -87,7 +89,14 @@ class PortWidget(QGraphicsObject):
         return f"{self.parent_node.node_id}_{self.port_type}_{self.label}"
 
     def boundingRect(self):
-        return QRectF(0, 0, self.PORT_SIZE, self.PORT_SIZE)
+        m = self.PORT_MARGIN
+        total = self.PORT_SIZE + 2 * m
+        return QRectF(-m, -m, total, total)
+
+    def shape(self):
+        path = QPainterPath()
+        path.addEllipse(self.boundingRect())
+        return path
 
     def paint(self, painter, option, widget=None):
         pass
