@@ -164,19 +164,21 @@
     },
     {
       "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
-      "source_port": "True",
+      "source_port": "False",
       "target_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
       "target_port": "输入"
     },
     {
       "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
-      "source_port": "False",
+      "source_port": "True",
       "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "target_port": "输入"
     }
   ],
   "schedule": {
-    "trigger_type": "immediate",
-    "params": {}
+    "trigger_type": "interval",
+    "params": {
+      "interval": 3660
+    }
   }
 }
