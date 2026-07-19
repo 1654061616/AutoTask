@@ -32,3 +32,11 @@ def test_node_to_json():
 def test_if_else_has_two_outputs():
     node = NodeWidget("if_else", {})
     assert len(node.output_ports) == 2
+
+
+def test_loop_has_two_outputs():
+    node = NodeWidget("loop", {})
+    assert len(node.output_ports) == 2
+    labels = [p.label for p in node.output_ports]
+    assert "True" in labels
+    assert "False" in labels

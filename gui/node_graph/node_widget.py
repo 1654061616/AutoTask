@@ -64,7 +64,7 @@ class NodeWidget(QGraphicsObject):
         if len(params) > 25:
             lines = (len(params) // 25) + 1
         base_height = 75
-        if self.node_type in ("image_find", "image_click", "image_exists", "if_else"):
+        if self.node_type in ("image_find", "image_click", "image_exists", "if_else", "loop"):
             base_height = 105
         self.node_height = base_height + (lines - 1) * 18
 
@@ -76,7 +76,7 @@ class NodeWidget(QGraphicsObject):
             in_port.setPos(port_offset, 40)
             self.input_ports.append(in_port)
 
-        if self.node_type == "if_else":
+        if self.node_type in ("if_else", "loop"):
             true_port = PortWidget("out", "True", self, self)
             true_port.setPos(self.node_width + port_offset, 32)
             self.output_ports.append(true_port)
@@ -85,7 +85,7 @@ class NodeWidget(QGraphicsObject):
             false_port.setPos(self.node_width + port_offset, 88)
             self.output_ports.append(false_port)
 
-        if self.node_type in ("image_find", "image_click", "image_exists"):
+        elif self.node_type in ("image_find", "image_click", "image_exists"):
             true_port = PortWidget("out", "True", self, self)
             true_port.setPos(self.node_width + port_offset, 32)
             self.output_ports.append(true_port)
