@@ -27,11 +27,6 @@ class ScheduleHandlerMixin:
         trigger_type = config["trigger_type"]
         params = config["params"]
 
-        if trigger_type == "immediate":
-            QMessageBox.information(self, "定时任务", "立即执行任务已启动")
-            self.on_run_flow()
-            return
-
         self.scheduler = TaskScheduler()
         self.scheduler.add_task(
             task_id=self.current_flow.get("id", "scheduled"),

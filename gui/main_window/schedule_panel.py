@@ -28,7 +28,7 @@ class SchedulePanel(QWidget):
         trigger_layout = QHBoxLayout()
         trigger_layout.addWidget(QLabel("触发类型:"))
         self.trigger_combo = QComboBox()
-        self.trigger_combo.addItems(["立即执行1次", "间隔执行", "CRON定时", "指定时间"])
+        self.trigger_combo.addItems(["间隔执行", "CRON定时", "指定时间"])
         self.trigger_combo.currentIndexChanged.connect(self._on_trigger_changed)
         trigger_layout.addWidget(self.trigger_combo)
         self.start_scheduled_btn = QPushButton("▶ 开始定时")
@@ -44,13 +44,6 @@ class SchedulePanel(QWidget):
         layout.addLayout(trigger_layout)
 
         self.stack = QStackedWidget()
-
-        immediate_widget = QWidget()
-        immediate_layout = QVBoxLayout(immediate_widget)
-        immediate_layout.setContentsMargins(0, 5, 0, 0)
-        immediate_layout.addWidget(QLabel("任务启动后立即执行一次"))
-        immediate_layout.addStretch()
-        self.stack.addWidget(immediate_widget)
 
         interval_widget = QWidget()
         interval_layout = QHBoxLayout(interval_widget)
@@ -150,7 +143,7 @@ class SchedulePanel(QWidget):
 
     def get_config(self) -> dict:
         index = self.trigger_combo.currentIndex()
-        trigger_types = ["immediate", "interval", "cron", "date"]
+        trigger_types = ["interval", "cron", "date"]
         trigger_type = trigger_types[index]
 
         params = {}
@@ -172,10 +165,10 @@ class SchedulePanel(QWidget):
             self.trigger_combo.setCurrentIndex(0)
             return
 
-        trigger_type = config.get("trigger_type", "immediate")
+        trigger_type = config.get("trigger_type", "interval")
         params = config.get("params", {})
 
-        type_index = {"immediate": 0, "interval": 1, "cron": 2, "date": 3}
+        type_index = {"interval": 0, "cron": 1, "date": 2}
         self.trigger_combo.setCurrentIndex(type_index.get(trigger_type, 0))
 
         if trigger_type == "interval":
