@@ -29,7 +29,8 @@ class TaskExecutorMixin:
         item.setData(0, Qt.UserRole, task)
         self._update_status_widget(item, "执行中")
 
-        self.task_status_label.setText("执行中")
+        self._is_manual_executing = True
+        self._update_task_status_label()
         self.task_status_label.setStyleSheet(Styles.status_label(Colors.SUCCESS))
         self.status_label.setText("运行中...")
         self.log_panel.append(f"开始执行任务: {task['name']}")
@@ -63,6 +64,8 @@ class TaskExecutorMixin:
 
     @Slot(bool, str)
     def _on_task_completed_slot(self, success: bool, error_message: str):
+        self._is_manual_executing = False
+
         if self.current_flow:
             current_item = None
             for i in range(self.task_tree.topLevelItemCount()):
@@ -75,7 +78,7 @@ class TaskExecutorMixin:
                 self.current_flow["status"] = "已停止"
                 current_item.setData(0, Qt.UserRole, self.current_flow)
                 self._update_status_widget(current_item, "已停止")
-                self.task_status_label.setText("已停止")
+                self._update_task_status_label()
                 self.task_status_label.setStyleSheet(Styles.status_label("#e74c3c"))
 
         if success:
@@ -85,9 +88,13 @@ class TaskExecutorMixin:
             self.status_label.setText("任务执行异常")
             self.log_panel.append(f"任务执行异常: {error_message}")
 
-        self.start_task_btn.setEnabled(True)
+        if not getattr(self, '_is_scheduled_executing', False):
+            self.start_task_btn.setEnabled(True)
         self.stop_task_btn.setEnabled(False)
         self.flow_stopped.emit()
+
+        if getattr(self, '_is_scheduled_executing', False):
+            self._on_scheduled_task_completed()
 
     @Slot()
     def on_stop_flow(self):
@@ -102,17 +109,19 @@ class TaskExecutorMixin:
             if not item:
                 return
 
+        self._is_manual_executing = False
         self.engine.stop()
         task["status"] = "已停止"
         item.setData(0, Qt.UserRole, task)
         self._update_status_widget(item, "已停止")
 
-        self.task_status_label.setText("已停止")
+        self._update_task_status_label()
         self.task_status_label.setStyleSheet(Styles.status_label("#e74c3c"))
         self.status_label.setText("已停止")
         self.log_panel.append(f"停止任务: {task['name']}")
 
-        self.start_task_btn.setEnabled(True)
+        if not getattr(self, '_is_scheduled_executing', False):
+            self.start_task_btn.setEnabled(True)
         self.stop_task_btn.setEnabled(False)
         self.flow_stopped.emit()
 
