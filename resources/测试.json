@@ -83,13 +83,30 @@
       "x": 1028.9755226018945,
       "y": 865.2437821998512,
       "config": {
-        "loop_type": "count",
-        "loop_interval": 0.5,
-        "delay": 0,
         "count": 16,
+        "delay": 0,
+        "loop_interval": 0.5,
+        "loop_type": "count",
         "loop_var": "",
         "start_value": 0,
         "step": 1
+      }
+    },
+    {
+      "id": "6f4a9bde-c1a7-4e7f-b25f-4636eadb9c64",
+      "type": "keyboard_type",
+      "x": 963.7373653462473,
+      "y": 405.85566964481296,
+      "config": {
+        "data_source": "manual",
+        "input_method": "typing",
+        "interval": 0.05,
+        "random_interval": false,
+        "random_min_interval": 0.02,
+        "random_max_interval": 0.15,
+        "human_input": false,
+        "delay": 0,
+        "input_text": ""
       }
     }
   ],
