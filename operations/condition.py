@@ -1,8 +1,70 @@
-from typing import Any, Callable
+from typing import Any, Callable, Dict
+
 
 class ConditionEvaluator:
     def __init__(self):
-        pass
+        self._image = None
+        self._window = None
+
+    def set_image_ops(self, image_ops):
+        self._image = image_ops
+
+    def set_window_ops(self, window_ops):
+        self._window = window_ops
+
+    def evaluate_from_config(self, config: Dict[str, Any], variable_manager) -> bool:
+        condition_type = config.get("condition_type", "value_compare")
+
+        if condition_type == "value_compare":
+            var_name = config.get("var_name", "")
+            compare_op = config.get("compare_op", "==")
+            compare_value = config.get("compare_value", "")
+            var_value = variable_manager.get_variable(var_name)
+            return self._compare_values(var_value, compare_op, compare_value)
+
+        elif condition_type == "image_exists":
+            image_path = variable_manager.resolve_expression(config.get("image_path", ""))
+            similarity = config.get("similarity", 0.9)
+            if self._image:
+                return self._image.image_exists(image_path, threshold=similarity)
+            return False
+
+        elif condition_type == "text_exists":
+            return False
+
+        elif condition_type == "window_exists":
+            window_title = variable_manager.resolve_expression(config.get("window_title", ""))
+            if self._window:
+                return self._window.find_window(window_title) is not None
+            return False
+
+        return False
+
+    @staticmethod
+    def _compare_values(var_value, compare_op, compare_value):
+        try:
+            num_var = float(var_value)
+            num_cmp = float(compare_value)
+            if compare_op == "==":
+                return num_var == num_cmp
+            elif compare_op == "!=":
+                return num_var != num_cmp
+            elif compare_op == ">":
+                return num_var > num_cmp
+            elif compare_op == "<":
+                return num_var < num_cmp
+            elif compare_op == ">=":
+                return num_var >= num_cmp
+            elif compare_op == "<=":
+                return num_var <= num_cmp
+        except (ValueError, TypeError):
+            var_str = str(var_value) if var_value is not None else ""
+            cmp_str = str(compare_value)
+            if compare_op == "==":
+                return var_str == cmp_str
+            elif compare_op == "!=":
+                return var_str != cmp_str
+        return False
     
     def evaluate(self, condition_type: str, left: Any, right: Any, operator: str = "==") -> bool:
         if condition_type == "value":

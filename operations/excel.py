@@ -70,3 +70,43 @@ class ExcelOperations:
             return 0
         sheet = self.workbook[sheet_name]
         return sheet.max_column
+
+    def read_from_config(self, config: Dict[str, Any], variable_manager) -> Any:
+        file_path = variable_manager.resolve_expression(config.get("file_path", ""))
+        sheet = config.get("sheet", "Sheet1")
+        read_range = config.get("read_range", "cell")
+        output_variable = config.get("output_variable", "")
+        var_format = config.get("var_format", "string")
+
+        variable_manager.load_excel(file_path)
+
+        if read_range == "cell":
+            cell_address = config.get("cell_address", "A1")
+            value = variable_manager.get_excel_value(sheet, cell_address)
+        elif read_range == "row":
+            row_number = config.get("row_number", 1)
+            value = variable_manager.get_excel_value(sheet, f"{row_number}:{row_number}")
+        elif read_range == "column":
+            column_number = config.get("column_number", 1)
+            col_letter = get_column_letter(column_number)
+            value = variable_manager.get_excel_value(sheet, f"{col_letter}:{col_letter}")
+        elif read_range == "range":
+            start_cell = config.get("start_cell", "A1")
+            end_cell = config.get("end_cell", "A1")
+            value = variable_manager.get_excel_value(sheet, f"{start_cell}:{end_cell}")
+        else:
+            return None
+
+        if var_format == "number":
+            try:
+                value = float(value)
+            except (ValueError, TypeError):
+                pass
+        elif var_format == "list":
+            if not isinstance(value, list):
+                value = [value]
+
+        if output_variable:
+            variable_manager.set_variable(output_variable, value)
+
+        return value

@@ -35,17 +35,31 @@ class FlowEngine:
             from operations.keyboard import KeyboardOperations
             from operations.image_recognition import ImageRecognition
             from operations.window import WindowOperations
-            
+            from operations.condition import ConditionEvaluator
+            from operations.loop import LoopController
+            from operations.excel import ExcelOperations
+            from operations.control import FlowControl
+
             self.mouse = MouseOperations()
             self.keyboard = KeyboardOperations()
             self.image_recognition = ImageRecognition()
             self.window = WindowOperations()
+            self.condition = ConditionEvaluator()
+            self.condition.set_image_ops(self.image_recognition)
+            self.condition.set_window_ops(self.window)
+            self.loop = LoopController()
+            self.excel = ExcelOperations()
+            self.flow_control = FlowControl()
         except ImportError as e:
             self.logger.error(f"加载操作模块失败: {str(e)}")
             self.mouse = None
             self.keyboard = None
             self.image_recognition = None
             self.window = None
+            self.condition = None
+            self.loop = None
+            self.excel = None
+            self.flow_control = None
     
     def load_flow(self, flow: Dict[str, Any]):
         self.flow = self.parser.parse(flow)
@@ -86,7 +100,12 @@ class FlowEngine:
                     self.logger.error(f"步骤执行失败: {str(e)}")
                     success = False
                     error_message = str(e)
-                
+
+                if self.flow_control and self.flow_control.goto_target is not None:
+                    current_index = self.flow_control.goto_target
+                    self.flow_control.clear_goto()
+                    continue
+
                 # 判断是否需要走分支路径
                 true_step_id = step.get("true_step")
                 false_step_id = step.get("false_step")
@@ -182,6 +201,20 @@ class FlowEngine:
                 self._execute_window_close(config)
             elif step_type == "log":
                 self._execute_log(config)
+            elif step_type == "if_else":
+                step_result = self._execute_if_else(config)
+            elif step_type == "loop":
+                step_result = self._execute_loop(config, step["id"])
+            elif step_type == "set_variable":
+                self._execute_set_variable(config)
+            elif step_type == "get_variable":
+                self._execute_get_variable(config)
+            elif step_type == "excel_read":
+                self._execute_excel_read(config)
+            elif step_type == "goto":
+                self._execute_goto(config)
+            elif step_type == "label":
+                pass
             else:
                 self.logger.warning(f"未支持的步骤类型: {step_type}")
         except Exception as e:
@@ -561,6 +594,29 @@ class FlowEngine:
         else:
             self.logger.info(message)
     
+    def _execute_if_else(self, config):
+        return self.condition.evaluate_from_config(config, self.variable_manager)
+
+    def _execute_loop(self, config, step_id):
+        return self.loop.evaluate(config, step_id, self.variable_manager)
+
+    def _execute_set_variable(self, config):
+        name = config.get("name", "")
+        value = self.variable_manager.resolve_expression(str(config.get("value", "")))
+        self.variable_manager.set_variable(name, value)
+
+    def _execute_get_variable(self, config):
+        name = config.get("name", "")
+        value = self.variable_manager.get_variable(name)
+        self.logger.info(f"获取变量: {name} = {value}")
+
+    def _execute_excel_read(self, config):
+        self.excel.read_from_config(config, self.variable_manager)
+
+    def _execute_goto(self, config):
+        steps = self.flow.get("steps", [])
+        self.flow_control.goto(config, steps)
+
     def _execute_wait(self, wait_config):
         if isinstance(wait_config, dict):
             wait_type = wait_config.get("type", "fixed")
