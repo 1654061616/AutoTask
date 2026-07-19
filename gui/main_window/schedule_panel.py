@@ -14,6 +14,7 @@ from gui.styles import Styles
 class SchedulePanel(QWidget):
     schedule_changed = Signal()
     start_scheduled = Signal()
+    stop_scheduled = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -34,6 +35,11 @@ class SchedulePanel(QWidget):
         self.start_scheduled_btn.setStyleSheet(Styles.schedule_btn_start())
         self.start_scheduled_btn.clicked.connect(lambda: self.start_scheduled.emit())
         trigger_layout.addWidget(self.start_scheduled_btn)
+        self.stop_scheduled_btn = QPushButton("■ 停止定时")
+        self.stop_scheduled_btn.setStyleSheet(Styles.schedule_btn_stop())
+        self.stop_scheduled_btn.clicked.connect(lambda: self.stop_scheduled.emit())
+        self.stop_scheduled_btn.hide()
+        trigger_layout.addWidget(self.stop_scheduled_btn)
         trigger_layout.addStretch()
         layout.addLayout(trigger_layout)
 
@@ -133,6 +139,14 @@ class SchedulePanel(QWidget):
 
     def _on_cron_generated(self, expression):
         self.cron_edit.setText(expression)
+
+    def set_schedule_running(self):
+        self.start_scheduled_btn.hide()
+        self.stop_scheduled_btn.show()
+
+    def set_schedule_stopped(self):
+        self.stop_scheduled_btn.hide()
+        self.start_scheduled_btn.show()
 
     def get_config(self) -> dict:
         index = self.trigger_combo.currentIndex()
