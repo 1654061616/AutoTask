@@ -37,28 +37,54 @@ class ScheduleHandlerMixin:
             task_id=self.current_flow.get("id", "scheduled"),
             name=self.current_flow.get("name", "定时任务"),
             trigger_type=trigger_type,
-            func=lambda: self.on_run_flow(),
+            func=lambda: self._execute_scheduled_task(),
             **params
         )
         self.scheduler.start()
         self.log_panel.append(f"定时任务已启动: {trigger_type}")
-        self.task_status_label.setText("定时中")
+        self._update_task_status_label()
 
-        self.start_scheduled_btn = self.schedule_panel.start_scheduled_btn
-        self.start_scheduled_btn.setText("■ 停止定时")
-        self.start_scheduled_btn.setStyleSheet(Styles.schedule_btn_stop())
-        self.start_scheduled_btn.clicked.disconnect()
-        self.start_scheduled_btn.clicked.connect(self._on_stop_scheduled)
+        self.schedule_panel.set_schedule_running()
+
+    def _execute_scheduled_task(self):
+        self._is_scheduled_executing = True
+        self._update_task_status_label()
+
+        self.start_task_btn.setEnabled(False)
+        self.stop_task_btn.setEnabled(True)
+
+        self.on_run_flow()
+
+    def _on_scheduled_task_completed(self):
+        self._is_scheduled_executing = False
+        self._update_task_status_label()
+
+        if not self._is_manual_executing:
+            self.start_task_btn.setEnabled(True)
 
     def _on_stop_scheduled(self):
         if hasattr(self, 'scheduler') and self.scheduler:
             self.scheduler.stop()
             self.scheduler = None
         self.log_panel.append("定时任务已停止")
-        self.task_status_label.setText("已停止")
+        self._update_task_status_label()
 
-        self.start_scheduled_btn = self.schedule_panel.start_scheduled_btn
-        self.start_scheduled_btn.setText("▶ 开始定时")
-        self.start_scheduled_btn.setStyleSheet(Styles.schedule_btn_start())
-        self.start_scheduled_btn.clicked.disconnect()
-        self.start_scheduled_btn.clicked.connect(lambda: self.schedule_panel.start_scheduled.emit())
+        self.schedule_panel.set_schedule_stopped()
+
+    def _update_task_status_label(self):
+        is_scheduled = hasattr(self, 'scheduler') and self.scheduler is not None
+        is_scheduled_executing = getattr(self, '_is_scheduled_executing', False)
+        is_manual_executing = getattr(self, '_is_manual_executing', False)
+
+        if is_manual_executing and is_scheduled:
+            text = "定时中；手动执行中"
+        elif is_scheduled_executing:
+            text = "定时任务执行中"
+        elif is_manual_executing:
+            text = "执行中"
+        elif is_scheduled:
+            text = "定时中"
+        else:
+            text = "已停止"
+
+        self.task_status_label.setText(text)
