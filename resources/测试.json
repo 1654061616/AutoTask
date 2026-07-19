@@ -7,15 +7,15 @@
     {
       "id": "d8fd2311-5d3d-42ca-b183-4f48641a1f88",
       "type": "start",
-      "x": 62.5713396853306,
-      "y": 539.1912587317,
+      "x": 182.951519385119,
+      "y": 589.3496669399451,
       "config": {}
     },
     {
       "id": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
       "type": "mouse_click",
-      "x": 381.979637136918,
-      "y": 539.7781150247164,
+      "x": 412.074682061865,
+      "y": 601.9745412029406,
       "config": {
         "click_type": "left_single",
         "delay": 0,
@@ -29,30 +29,31 @@
     {
       "id": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "type": "end",
-      "x": 1236.040589885246,
-      "y": 702.87233296906,
+      "x": 1516.9276758514188,
+      "y": 799.1764767288906,
       "config": {}
     },
     {
       "id": "616c4b51-89f2-484c-a17e-3f6ed703106b",
       "type": "mouse_move",
-      "x": 1109.242486239542,
-      "y": 523.568722472223,
+      "x": 995.2583061208356,
+      "y": 1326.5759466430998,
       "config": {
         "delay": 0,
         "duration": 0.5,
         "move_type": "linear",
-        "position_type": "screen",
-        "smooth_curve": true,
-        "x": 1563,
-        "y": 832
+        "position_type": "relative",
+        "relative_base": "current",
+        "relative_x": 10,
+        "relative_y": 10,
+        "smooth_curve": true
       }
     },
     {
       "id": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
       "type": "image_click",
-      "x": 680.2724932834307,
-      "y": 547.5090248262668,
+      "x": 680.2724932834305,
+      "y": 573.5913970945544,
       "config": {
         "algorithm": "akaze",
         "click_position": "center",
@@ -73,73 +74,22 @@
         },
         "similarity": 0.9,
         "wait_find": true,
-        "wait_timeout": 15
+        "wait_timeout": 5
       }
     },
     {
-      "id": "2eb3e652-bdd4-49dc-8704-913dcfb3a893",
-      "type": "image_find",
-      "x": 595.5650730974622,
-      "y": 839.9579254539103,
+      "id": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
+      "type": "loop",
+      "x": 1028.9755226018945,
+      "y": 865.2437821998512,
       "config": {
-        "algorithm": "template",
+        "loop_type": "count",
+        "loop_interval": 0.5,
         "delay": 0,
-        "direction": "default",
-        "find_action": "continue",
-        "find_range": "全屏",
-        "grayscale_match": false,
-        "image_path": "",
-        "region": {},
-        "similarity": 0.9,
-        "wait_find": false,
-        "wait_timeout": 10
-      }
-    },
-    {
-      "id": "4da0ae36-fe0b-4cf7-bd45-417f17cb227b",
-      "type": "image_exists",
-      "x": 632.9567855778009,
-      "y": 1034.5725493019015,
-      "config": {
-        "algorithm": "template",
-        "delay": 0,
-        "direction": "default",
-        "exists_action": "continue",
-        "find_range": "全屏",
-        "image_path": "",
-        "jump_mark": "",
-        "not_exists_action": "continue",
-        "region": {},
-        "result_variable": "image_found",
-        "similarity": 0.9
-      }
-    },
-    {
-      "id": "9c62f357-a9fd-448e-a88c-f244a47c9fe5",
-      "type": "keyboard_type",
-      "x": 560.0,
-      "y": 220.0,
-      "config": {
-        "data_source": "excel",
-        "delay": 0,
-        "excel": {
-          "cell_address": "",
-          "column_number": 1,
-          "end_cell": "",
-          "file_path": "D:/Users/ming/Desktop/出勤统计.xlsx",
-          "read_mode": "sequential",
-          "read_range": "column",
-          "row_number": 1,
-          "sheet": "Sheet1",
-          "start_cell": "",
-          "var_format": "string"
-        },
-        "human_input": false,
-        "input_method": "clipboard",
-        "interval": 0.05,
-        "random_interval": false,
-        "random_max_interval": 0.15,
-        "random_min_interval": 0.02
+        "count": 16,
+        "loop_var": "",
+        "start_value": 0,
+        "step": 1
       }
     }
   ],
@@ -151,12 +101,6 @@
       "target_port": "输入"
     },
     {
-      "source_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
-      "source_port": "输出",
-      "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
-      "target_port": "输入"
-    },
-    {
       "source_node": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
       "source_port": "输出",
       "target_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
@@ -164,13 +108,31 @@
     },
     {
       "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
-      "source_port": "False",
-      "target_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
+      "source_port": "True",
+      "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "target_port": "输入"
     },
     {
       "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
+      "source_port": "False",
+      "target_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
+      "target_port": "输入"
+    },
+    {
+      "source_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
       "source_port": "True",
+      "target_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
+      "target_port": "输入"
+    },
+    {
+      "source_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
+      "source_port": "输出",
+      "target_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
+      "target_port": "输入"
+    },
+    {
+      "source_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
+      "source_port": "False",
       "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "target_port": "输入"
     }
