@@ -82,58 +82,43 @@ class FlowEngine:
         error_message = ""
         try:
             self.logger.info("开始执行流程: {}".format(self.flow.get("name", "Unknown")))
-            steps = self.flow.get("steps", [])
-            if not steps:
-                self.logger.warning("流程中没有步骤")
+            nodes = self.flow.get("nodes", [])
+            edges = self.flow.get("edges", [])
+            node_map = {n["id"]: n for n in nodes}
+
+            current_node_id = self._follow_edge_from_start(edges, node_map)
+            if not current_node_id:
+                self.logger.warning("流程中没有可执行的节点")
                 return
-            
-            current_index = 0
-            while current_index < len(steps) and self.is_running:
-                step = steps[current_index]
-                self.current_step = step
-                self.logger.info(f"执行步骤: {step.get('name', step.get('id'))}")
-                
+
+            while current_node_id and self.is_running:
+                node = node_map.get(current_node_id)
+                if not node or node.get("type") == "end":
+                    break
+
+                self.current_step = node
+                self.logger.info(f"执行节点: {node.get('type', node.get('id'))}")
+
                 step_result = None
                 try:
-                    step_result = self._execute_step(step)
+                    step_result = self._execute_step(node)
                 except Exception as e:
-                    self.logger.error(f"步骤执行失败: {str(e)}")
+                    self.logger.error(f"节点执行失败: {str(e)}")
                     success = False
                     error_message = str(e)
+                    break
 
                 if self.flow_control and self.flow_control.goto_target is not None:
-                    current_index = self.flow_control.goto_target
+                    current_node_id = self.flow_control.goto_target
                     self.flow_control.clear_goto()
                     continue
 
-                # 判断是否需要走分支路径
-                true_step_id = step.get("true_step")
-                false_step_id = step.get("false_step")
-                
-                if true_step_id is not None or false_step_id is not None:
-                    # 分支节点，根据执行结果决定走哪个分支
-                    if step_result:
-                        self.logger.info(f"执行结果为True，走True分支")
-                        if true_step_id:
-                            current_index = self._find_step_index(true_step_id)
-                        else:
-                            self.logger.info("True分支连接到end节点，流程结束")
-                            current_index = len(steps)
-                    else:
-                        self.logger.info(f"执行结果为False，走False分支")
-                        if false_step_id:
-                            current_index = self._find_step_index(false_step_id)
-                        else:
-                            self.logger.info("False分支连接到end节点，流程结束")
-                            current_index = len(steps)
-                else:
-                    # 线性执行
-                    next_step_id = step.get("next_step")
-                    if next_step_id:
-                        current_index = self._find_step_index(next_step_id)
-                    else:
-                        current_index += 1
-            
+                if step_result is True:
+                    step_result = "True"
+                elif step_result is False:
+                    step_result = "False"
+                current_node_id = self._follow_edge(current_node_id, step_result, edges, node_map)
+
             self.logger.info("流程执行完成")
         except Exception as e:
             self.logger.error(f"流程执行异常: {str(e)}")
@@ -147,6 +132,30 @@ class FlowEngine:
                     callback(success, error_message)
                 except Exception:
                     pass
+
+    def _follow_edge_from_start(self, edges, node_map):
+        """从 start 节点出发，沿第一条边找到第一个执行节点"""
+        start_node = next((n for n in node_map.values() if n["type"] == "start"), None)
+        if not start_node:
+            return None
+        return self._follow_edge(start_node["id"], None, edges, node_map)
+
+    def _follow_edge(self, source_id, source_port, edges, node_map):
+        """沿边找到下一个节点ID，遇 end 返回 None"""
+        for edge in edges:
+            if edge["source_node"] != source_id:
+                continue
+            if source_port is None:
+                if edge["source_port"] not in ("True", "False"):
+                    target_id = edge["target_node"]
+                    target = node_map.get(target_id, {})
+                    return target_id if target.get("type") != "end" else None
+            else:
+                if edge["source_port"] == source_port:
+                    target_id = edge["target_node"]
+                    target = node_map.get(target_id, {})
+                    return target_id if target.get("type") != "end" else None
+        return None
     
     def _execute_step(self, step: Dict[str, Any]):
         """
@@ -614,8 +623,8 @@ class FlowEngine:
         self.excel.read_from_config(config, self.variable_manager)
 
     def _execute_goto(self, config):
-        steps = self.flow.get("steps", [])
-        self.flow_control.goto(config, steps)
+        nodes = self.flow.get("nodes", [])
+        self.flow_control.goto(config, nodes)
 
     def _execute_wait(self, wait_config):
         if isinstance(wait_config, dict):
@@ -630,13 +639,6 @@ class FlowEngine:
         else:
             wait_time = wait_config
         time.sleep(wait_time)
-    
-    def _find_step_index(self, step_id: str) -> int:
-        steps = self.flow.get("steps", [])
-        for i, step in enumerate(steps):
-            if step["id"] == step_id:
-                return i
-        return -1
     
     def stop(self):
         self.is_running = False
