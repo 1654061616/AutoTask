@@ -171,6 +171,7 @@ class UIBuilderMixin:
         schedule_layout = QVBoxLayout(self.schedule_group)
         self.schedule_panel = SchedulePanel()
         self.schedule_panel.start_scheduled.connect(self._on_start_scheduled)
+        self.schedule_panel.stop_scheduled.connect(self._on_stop_scheduled)
         schedule_layout.addWidget(self.schedule_panel)
         right_layout.addWidget(self.schedule_group)
 
