@@ -1,7 +1,7 @@
 """定时任务 Mixin：定时启停、配置加载"""
 
 from PySide6.QtWidgets import QMessageBox
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Qt, Slot
 from gui.styles import Styles
 
 
@@ -41,6 +41,8 @@ class ScheduleHandlerMixin:
 
         self.schedule_panel.set_schedule_running()
 
+        self._set_task_schedule_active(True)
+
     def _execute_scheduled_task(self):
         self._is_scheduled_executing = True
         self._update_task_status_label()
@@ -66,6 +68,8 @@ class ScheduleHandlerMixin:
 
         self.schedule_panel.set_schedule_stopped()
 
+        self._set_task_schedule_active(False)
+
     def _update_task_status_label(self):
         is_scheduled = hasattr(self, 'scheduler') and self.scheduler is not None
         is_scheduled_executing = getattr(self, '_is_scheduled_executing', False)
@@ -83,3 +87,14 @@ class ScheduleHandlerMixin:
             text = "已停止"
 
         self.task_status_label.setText(text)
+
+    def _set_task_schedule_active(self, active):
+        if self.current_flow is None:
+            return
+        self.current_flow["schedule_active"] = active
+        for i in range(self.task_tree.topLevelItemCount()):
+            item = self.task_tree.topLevelItem(i)
+            if item.data(0, Qt.UserRole) == self.current_flow:
+                item.setData(0, Qt.UserRole, self.current_flow)
+                self._update_schedule_widget(item, active)
+                break
