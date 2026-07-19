@@ -13,14 +13,14 @@ class LoopController:
         state = self._loop_states[step_id]
 
         if loop_type == "count":
-            return self._evaluate_count(config, state, variable_manager)
+            return self._evaluate_count(config, state, variable_manager, step_id)
         elif loop_type == "condition":
             return self._evaluate_condition(config, state, variable_manager, step_id)
         elif loop_type == "iterate":
             return self._evaluate_iterate(config, state, variable_manager, step_id)
         return False
 
-    def _evaluate_count(self, config, state, variable_manager):
+    def _evaluate_count(self, config, state, variable_manager, step_id):
         max_count = config.get("count", 10)
         loop_var = config.get("loop_var", "")
         start_value = config.get("start_value", 0)
@@ -33,6 +33,7 @@ class LoopController:
                 variable_manager.set_variable(loop_var, current_value)
             state["iteration"] = current + 1
             return True
+        del self._loop_states[step_id]
         return False
 
     def _evaluate_condition(self, config, state, variable_manager, step_id):
