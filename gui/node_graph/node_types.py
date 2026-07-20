@@ -1,3 +1,7 @@
+"""
+节点类型定义 — 定义所有可用的节点类型及其分类
+"""
+
 NODE_TYPES = {
     "start": {"name": "开始", "icon": "▶", "color": "#4caf50", "category": "flow"},
     "end": {"name": "结束", "icon": "⏹", "color": "#f44336", "category": "flow"},

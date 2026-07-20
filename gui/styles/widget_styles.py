@@ -5,6 +5,7 @@ from .colors import Colors
 
 
 class Styles:
+    """样式工厂：动态生成需要运行时参数的控件样式"""
     INPUT_BASE = (
         "border: 1px solid #ddd; border-radius: 4px; padding: 4px 8px;"
         "background: white; color: #333;"

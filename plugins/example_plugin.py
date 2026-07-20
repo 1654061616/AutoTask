@@ -1,4 +1,7 @@
+"""示例插件 — 展示如何创建自定义操作插件"""
+
 def register():
+    """注册插件，返回插件元数据"""
     return {
         "name": "example_plugin",
         "display_name": "示例插件",
@@ -21,6 +24,7 @@ def register():
     }
 
 def execute_custom_hello(params):
+    """执行自定义问候操作"""
     message = params.get("message", "Hello")
     name = params.get("name", "World")
     print(f"{message}, {name}!")

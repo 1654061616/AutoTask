@@ -1,3 +1,4 @@
+"""节点图模块 — 可视化流程编辑器的场景、节点、端口、连线"""
 from .graph_scene import GraphScene
 from .graph_view import GraphView
 from .node_widget import NodeWidget

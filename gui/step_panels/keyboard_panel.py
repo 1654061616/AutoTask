@@ -1,3 +1,6 @@
+"""
+键盘步骤配置面板 — 文本输入、按键、热键
+"""
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QComboBox,
                                QCheckBox, QGroupBox, QTextEdit, QListView,
@@ -8,6 +11,7 @@ from gui.styles import Styles
 
 
 class KeyboardTypePanel(StepConfigPanel):
+    """键盘文本输入步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -327,6 +331,7 @@ class KeyboardTypePanel(StepConfigPanel):
 
 
 class KeyboardPressPanel(StepConfigPanel):
+    """键盘按键步骤配置面板"""
     KEYS = [
         "ENTER", "TAB", "SPACE", "BACKSPACE", "DELETE", "INSERT",
         "HOME", "END", "PAGE_UP", "PAGE_DOWN",
@@ -386,6 +391,7 @@ class KeyboardPressPanel(StepConfigPanel):
 
 
 class KeyboardHotkeyPanel(StepConfigPanel):
+    """键盘热键组合步骤配置面板"""
     MODIFIER_KEYS = ["Ctrl", "Alt", "Shift", "Win"]
     MAIN_KEYS = [
         "ENTER", "TAB", "SPACE", "BACKSPACE", "DELETE", "INSERT",

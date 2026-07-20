@@ -173,6 +173,7 @@ class CronTabWidget(QWidget):
 
 
 class CronGeneratorDialog(QDialog):
+    """Cron 表达式生成器：可视化配置定时规则"""
     cron_generated = Signal(str)
 
     def __init__(self, current_expression="0 0 9 * * * *", parent=None):

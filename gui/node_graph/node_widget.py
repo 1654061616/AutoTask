@@ -1,3 +1,6 @@
+"""
+节点控件 — 可拖拽的节点图形项，包含输入/输出端口
+"""
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsRectItem, QGraphicsTextItem, QStyle
 from PySide6.QtCore import Qt, QRectF, QSizeF, Signal
 from PySide6.QtGui import QColor, QBrush, QPen, QFont
@@ -8,6 +11,8 @@ from .port_widget import PortWidget
 
 
 class NodeWidget(QGraphicsObject):
+    """节点控件，支持拖拽、选中、高亮和端口管理"""
+
     node_selected = Signal(object)
     node_double_clicked = Signal(object)
     node_moved = Signal(object)

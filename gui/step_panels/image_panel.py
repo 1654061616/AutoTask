@@ -1,3 +1,6 @@
+"""
+图像识别步骤配置面板 — 查找图片、点击图片、判断图片存在
+"""
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QLineEdit,
                                QComboBox, QCheckBox, QRadioButton, QSlider,
@@ -10,6 +13,7 @@ import os
 
 
 class ImageFindPanel(StepConfigPanel):
+    """图像查找步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -201,6 +205,7 @@ class ImageFindPanel(StepConfigPanel):
 
 
 class ImageClickPanel(StepConfigPanel):
+    """图像点击步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -443,6 +448,7 @@ class ImageClickPanel(StepConfigPanel):
 
 
 class ImageExistsPanel(StepConfigPanel):
+    """图像存在判断步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()

@@ -1,3 +1,6 @@
+"""
+鼠标步骤配置面板 — 点击、移动、拖拽、滚动
+"""
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QDoubleSpinBox, QLineEdit,
                                QComboBox, QCheckBox, QRadioButton, QSlider,
@@ -9,6 +12,7 @@ from gui.styles import Styles
 
 
 class MouseClickPanel(StepConfigPanel):
+    """鼠标点击步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -178,6 +182,7 @@ class MouseClickPanel(StepConfigPanel):
 
 
 class MouseMovePanel(StepConfigPanel):
+    """鼠标移动步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -337,6 +342,7 @@ class MouseMovePanel(StepConfigPanel):
 
 
 class MouseDragPanel(StepConfigPanel):
+    """鼠标拖拽步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -516,6 +522,7 @@ class MouseDragPanel(StepConfigPanel):
 
 
 class MouseScrollPanel(StepConfigPanel):
+    """鼠标滚轮步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()

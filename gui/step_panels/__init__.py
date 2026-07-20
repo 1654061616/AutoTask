@@ -1,3 +1,6 @@
+"""
+步骤面板模块 — 步骤配置面板基类和坐标截图工具
+"""
 import os
 import ctypes
 import platform
@@ -32,6 +35,8 @@ VX, VY, VW, VH = get_virtual_screen_geometry()
 
 
 class StepConfigPanel(QWidget):
+    """步骤配置面板基类，提供通用的控件构建方法"""
+
     config_changed = Signal(dict)
 
     def __init__(self):
@@ -315,6 +320,7 @@ class StepConfigPanel(QWidget):
 
 
 class CoordOverlay(QDialog):
+    """坐标拾取覆盖层：全屏半透明覆盖，点击获取坐标"""
     coordinate_selected = Signal(int, int)
 
     def __init__(self, windows_to_restore=None):
@@ -367,6 +373,7 @@ class CoordOverlay(QDialog):
 
 
 class ScreenshotOverlay(QDialog):
+    """截图覆盖层：全屏覆盖，框选区域截图"""
     screenshot_taken = Signal(str)
 
     def __init__(self, windows_to_restore=None):
@@ -496,6 +503,7 @@ class ScreenshotOverlay(QDialog):
 
 
 class RegionOverlay(QDialog):
+    """区域选择覆盖层：全屏覆盖，框选区域获取坐标范围"""
     region_selected = Signal(int, int, int, int)
 
     def __init__(self, windows_to_restore=None):

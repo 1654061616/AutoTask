@@ -1,9 +1,14 @@
+"""
+端口控件 — 节点上的输入/输出端口，支持拖拽连线
+"""
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsEllipseItem, QGraphicsTextItem
 from PySide6.QtCore import Qt, QRectF, Signal, QPointF
 from PySide6.QtGui import QColor, QBrush, QPen, QFont, QPainterPath
 
 
 class PortWidget(QGraphicsObject):
+    """端口控件，支持点击连线和高亮显示"""
+
     port_clicked = Signal(object)
 
     PORT_SIZE = 16

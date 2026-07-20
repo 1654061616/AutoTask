@@ -1,9 +1,14 @@
+"""
+连线控件 — 节点之间的贝塞尔曲线连线
+"""
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsPathItem, QStyle
 from PySide6.QtCore import Qt, QPointF, QRectF
 from PySide6.QtGui import QColor, QPainter, QPen, QBrush, QPainterPath, QPainterPathStroker
 
 
 class ControlPointHandle(QGraphicsObject):
+    """连线控制点手柄，用于拖拽调整贝塞尔曲线"""
+
     SIZE = 10
     COLOR = QColor("#ffaa00")
 
@@ -46,6 +51,8 @@ class ControlPointHandle(QGraphicsObject):
 
 
 class EdgeWidget(QGraphicsPathItem):
+    """连线控件，用贝塞尔曲线连接两个端口"""
+
     def __init__(self, source_port, target_port, parent=None):
         super().__init__(parent)
         self.source_port = source_port

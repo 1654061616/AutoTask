@@ -1,3 +1,6 @@
+"""
+节点图场景 — 管理画布上的节点、连线和网格背景
+"""
 from PySide6.QtWidgets import QGraphicsScene
 from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtGui import QColor, QPen, QBrush, QPainterPath
@@ -5,6 +8,8 @@ import uuid
 
 
 class GraphScene(QGraphicsScene):
+    """节点图场景，管理节点和连线的添加、删除、拖拽及连线交互"""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.nodes = []
@@ -12,16 +17,17 @@ class GraphScene(QGraphicsScene):
         self.grid_size = 20
         self._init_style()
 
-        # 连线状态
         self._connecting = False
         self._source_port = None
         self._temp_edge_item = None
 
     def _init_style(self):
+        """初始化场景样式：深色背景和画布范围"""
         self.setBackgroundBrush(QBrush(QColor("#1a1a2e")))
         self.setSceneRect(0, 0, 2000, 2000)
 
     def drawBackground(self, painter, rect):
+        """绘制网格背景"""
         super().drawBackground(painter, rect)
 
         left = int(rect.left()) - (int(rect.left()) % self.grid_size)
@@ -40,6 +46,7 @@ class GraphScene(QGraphicsScene):
         painter.drawLines(grid_lines)
 
     def add_node(self, node_type: str, x: float, y: float, config: dict = None):
+        """添加节点到场景"""
         from .node_widget import NodeWidget
         node = NodeWidget(node_type, config or {})
         node.setPos(x, y)
@@ -52,6 +59,7 @@ class GraphScene(QGraphicsScene):
         return node
 
     def remove_node(self, node):
+        """删除节点及其关联的连线"""
         if node in self.nodes:
             try:
                 node._is_deleted = True
@@ -76,6 +84,7 @@ class GraphScene(QGraphicsScene):
             self.nodes.remove(node)
 
     def add_edge(self, source_port, target_port):
+        """添加连线"""
         from .edge_widget import EdgeWidget
         edge = EdgeWidget(source_port, target_port)
         self.addItem(edge)
@@ -83,13 +92,14 @@ class GraphScene(QGraphicsScene):
         return edge
 
     def remove_edge(self, edge):
+        """删除连线"""
         if edge in self.edges:
             edge.disconnect()
             self.removeItem(edge)
             self.edges.remove(edge)
 
     def _on_port_clicked(self, port):
-        """端口被点击时的处理"""
+        """端口点击处理：开始连线或完成连线"""
         if not self._connecting:
             # 开始连线
             self._start_connection(port)
@@ -98,7 +108,7 @@ class GraphScene(QGraphicsScene):
             self._finish_connection(port)
 
     def _start_connection(self, port):
-        """开始连线"""
+        """开始拖拽连线，显示虚线预览"""
         self._connecting = True
         self._source_port = port
         self._temp_edge_item = self.addPath(QPainterPath())
@@ -108,7 +118,7 @@ class GraphScene(QGraphicsScene):
         port.set_highlighted(True)
 
     def _finish_connection(self, target_port):
-        """完成连线"""
+        """完成连线连接"""
         if self._source_port and target_port:
             if self._source_port.can_connect(target_port):
                 if self._source_port.port_type == "out":
@@ -119,7 +129,7 @@ class GraphScene(QGraphicsScene):
         self._cancel_connection()
 
     def _cancel_connection(self):
-        """取消连线"""
+        """取消连线，恢复高亮状态"""
         if self._temp_edge_item:
             self.removeItem(self._temp_edge_item)
             self._temp_edge_item = None
@@ -135,6 +145,7 @@ class GraphScene(QGraphicsScene):
         self._source_port = None
 
     def mouseMoveEvent(self, event):
+        """鼠标移动：更新临时连线的贝塞尔曲线路径"""
         super().mouseMoveEvent(event)
 
         if self._connecting and self._source_port and self._temp_edge_item:
@@ -182,6 +193,7 @@ class GraphScene(QGraphicsScene):
                 self._cancel_connection()
 
     def clear_all(self):
+        """清空场景中所有节点和连线"""
         self._cancel_connection()
 
         for node in self.nodes[:]:
@@ -199,12 +211,15 @@ class GraphScene(QGraphicsScene):
             self.nodes.remove(node)
 
     def get_selected_nodes(self):
+        """获取选中的节点列表"""
         return [item for item in self.selectedItems() if item in self.nodes]
 
     def get_selected_edges(self):
+        """获取选中的连线列表"""
         return [item for item in self.selectedItems() if item in self.edges]
 
     def delete_selected(self):
+        """删除选中的节点和连线"""
         selected_nodes = self.get_selected_nodes()
         selected_edges = self.get_selected_edges()
 
@@ -215,6 +230,7 @@ class GraphScene(QGraphicsScene):
             self.remove_node(node)
 
     def to_json(self):
+        """将场景导出为 JSON 数据"""
         nodes_data = []
         for node in self.nodes:
             nodes_data.append(node.to_json())
@@ -229,6 +245,7 @@ class GraphScene(QGraphicsScene):
         }
 
     def from_json(self, data):
+        """从 JSON 数据加载场景"""
         self.clear_all()
 
         node_map = {}

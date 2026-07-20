@@ -1,25 +1,31 @@
+"""
+步骤执行器 — 负责执行流程中的每一个步骤，分发到具体的操作模块
+"""
 import time
 import random
 from typing import Any, Callable, Dict
 
 
 class StepExecutor:
+    """步骤执行器，将步骤类型分发到对应的操作方法"""
+
     def __init__(self, mouse, keyboard, image_recognition, window,
                  condition, loop, excel, flow_control,
                  variable_manager, logger):
-        self.mouse = mouse
-        self.keyboard = keyboard
-        self.image_recognition = image_recognition
-        self.window = window
-        self.condition = condition
-        self.loop = loop
-        self.excel = excel
-        self.flow_control = flow_control
-        self.variable_manager = variable_manager
-        self.logger = logger
+        self.mouse = mouse                       # 鼠标操作模块
+        self.keyboard = keyboard                 # 键盘操作模块
+        self.image_recognition = image_recognition  # 图像识别模块
+        self.window = window                     # 窗口操作模块
+        self.condition = condition               # 条件判断模块
+        self.loop = loop                         # 循环控制模块
+        self.excel = excel                       # Excel 操作模块
+        self.flow_control = flow_control         # 流程控制模块（goto/label）
+        self.variable_manager = variable_manager # 变量管理器
+        self.logger = logger                     # 日志记录器
 
     def execute(self, step: Dict[str, Any], is_running_func: Callable[[], bool],
                 excel_cursors: Dict[str, int], flow_nodes: list) -> Any:
+        """根据步骤类型分发到对应的执行方法"""
         step_type = step["type"]
         config = step.get("config", {})
         step_result = None
@@ -79,6 +85,7 @@ class StepExecutor:
         return step_result
 
     def _execute_mouse_click(self, config):
+        """执行鼠标点击操作"""
         if not self.mouse:
             self.logger.error("鼠标操作模块未加载")
             return
@@ -95,6 +102,7 @@ class StepExecutor:
             self.mouse.click(button=button, clicks=clicks, interval=interval)
 
     def _execute_mouse_move(self, config):
+        """执行鼠标移动操作"""
         if not self.mouse:
             self.logger.error("鼠标操作模块未加载")
             return
@@ -106,6 +114,7 @@ class StepExecutor:
             self.mouse.move(x, y, duration=duration)
 
     def _execute_mouse_drag(self, config):
+        """执行鼠标拖拽操作"""
         if not self.mouse:
             self.logger.error("鼠标操作模块未加载")
             return
@@ -119,6 +128,7 @@ class StepExecutor:
             self.mouse.drag(start_x, start_y, end_x, end_y, duration=duration)
 
     def _execute_mouse_scroll(self, config):
+        """执行鼠标滚轮操作"""
         if not self.mouse:
             self.logger.error("鼠标操作模块未加载")
             return
@@ -129,6 +139,7 @@ class StepExecutor:
         self.mouse.scroll(amount, x, y)
 
     def _execute_keyboard_type(self, config, excel_cursors):
+        """执行键盘输入操作，支持手动输入/Excel数据/变量三种数据源"""
         if not self.keyboard:
             self.logger.error("键盘操作模块未加载")
             return
@@ -146,6 +157,7 @@ class StepExecutor:
         self.keyboard.type(text, interval=interval)
 
     def _read_excel_for_keyboard(self, excel_config, excel_cursors):
+        """从 Excel 读取数据用于键盘输入"""
         import openpyxl
         file_path = excel_config.get("file_path", "")
         sheet = excel_config.get("sheet", "Sheet1")
@@ -168,6 +180,7 @@ class StepExecutor:
         return self._format_excel_value(value, var_format)
 
     def _read_excel_row_value(self, ws, row_num, read_range, config):
+        """根据读取模式从 Excel 行中获取值"""
         if read_range == "cell":
             addr = config.get("cell_address", "A1")
             col_letter = ''.join(c for c in addr if c.isalpha())
@@ -194,6 +207,7 @@ class StepExecutor:
         return None
 
     def _format_excel_value(self, value, var_format):
+        """根据格式类型格式化 Excel 值"""
         if var_format == "number":
             return str(value) if value is not None else "0"
         elif var_format == "list":
@@ -204,6 +218,7 @@ class StepExecutor:
             return str(value) if value is not None else ""
 
     def _execute_keyboard_press(self, config):
+        """执行按键操作"""
         if not self.keyboard:
             self.logger.error("键盘操作模块未加载")
             return
@@ -213,6 +228,7 @@ class StepExecutor:
         self.keyboard.press(key, presses=presses)
 
     def _execute_keyboard_hotkey(self, config):
+        """执行快捷键组合操作"""
         if not self.keyboard:
             self.logger.error("键盘操作模块未加载")
             return
@@ -221,6 +237,7 @@ class StepExecutor:
         self.keyboard.hotkey(*keys)
 
     def _execute_image_find(self, config, is_running_func):
+        """执行图像查找，支持等待模式"""
         if not self.image_recognition:
             self.logger.error("图像识别模块未加载")
             return False
@@ -255,6 +272,7 @@ class StepExecutor:
         return False
 
     def _execute_image_click(self, config, is_running_func):
+        """执行图像点击，找到图片后点击其位置"""
         if not self.image_recognition or not self.mouse:
             self.logger.error("图像识别或鼠标模块未加载")
             return False
@@ -290,6 +308,7 @@ class StepExecutor:
         return False
 
     def _execute_image_exists(self, config, is_running_func):
+        """判断图片是否存在，支持等待模式"""
         if not self.image_recognition:
             self.logger.error("图像识别模块未加载")
             return False
@@ -323,6 +342,7 @@ class StepExecutor:
         return False
 
     def _execute_window_find(self, config):
+        """查找窗口并将句柄存入变量"""
         if not self.window:
             self.logger.error("窗口操作模块未加载")
             return
@@ -336,6 +356,7 @@ class StepExecutor:
             self.logger.info("未找到窗口")
 
     def _execute_window_activate(self, config):
+        """激活（置顶）指定窗口"""
         if not self.window:
             self.logger.error("窗口操作模块未加载")
             return
@@ -350,6 +371,7 @@ class StepExecutor:
             self.logger.warning("未找到要激活的窗口")
 
     def _execute_window_close(self, config):
+        """关闭指定窗口"""
         if not self.window:
             self.logger.error("窗口操作模块未加载")
             return
@@ -364,6 +386,7 @@ class StepExecutor:
             self.logger.warning("未找到要关闭的窗口")
 
     def _execute_log(self, config):
+        """输出日志信息"""
         message = config.get("message", "")
         level = config.get("level", "info")
         if level == "error":
@@ -374,28 +397,35 @@ class StepExecutor:
             self.logger.info(message)
 
     def _execute_if_else(self, config):
+        """执行条件判断，返回 True/False"""
         return self.condition.evaluate_from_config(config, self.variable_manager)
 
     def _execute_loop(self, config, step_id):
+        """执行循环控制"""
         return self.loop.evaluate(config, step_id, self.variable_manager)
 
     def _execute_set_variable(self, config):
+        """设置变量值"""
         name = config.get("name", "")
         value = self.variable_manager.resolve_expression(str(config.get("value", "")))
         self.variable_manager.set_variable(name, value)
 
     def _execute_get_variable(self, config):
+        """获取变量值并打印日志"""
         name = config.get("name", "")
         value = self.variable_manager.get_variable(name)
         self.logger.info(f"获取变量: {name} = {value}")
 
     def _execute_excel_read(self, config):
+        """从 Excel 读取数据"""
         self.excel.read_from_config(config, self.variable_manager)
 
     def _execute_goto(self, config, flow_nodes):
+        """执行跳转操作"""
         self.flow_control.goto(config, flow_nodes)
 
     def _execute_wait(self, wait_config):
+        """等待指定时间，支持固定时长和随机时长"""
         if isinstance(wait_config, dict):
             wait_type = wait_config.get("type", "fixed")
             if wait_type == "random":
@@ -410,6 +440,7 @@ class StepExecutor:
 
 
 def create_step_executor(variable_manager, logger):
+    """工厂函数：创建 StepExecutor 实例并注入所有操作模块"""
     from operations.mouse import MouseOperations
     from operations.keyboard import KeyboardOperations
     from operations.image_recognition import ImageRecognition

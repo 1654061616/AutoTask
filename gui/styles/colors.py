@@ -2,6 +2,7 @@
 
 
 class Colors:
+    """颜色常量：主色、成功色、危险色、文字色、背景色"""
     PRIMARY = "#3498db"
     PRIMARY_HOVER = "#2980b9"
     PRIMARY_PRESSED = "#1c6ea4"

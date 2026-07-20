@@ -1,3 +1,6 @@
+"""
+流程控制步骤配置面板 — 等待、条件判断、循环、日志、标签、跳转
+"""
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QLineEdit, QTextEdit,
                                QComboBox, QCheckBox, QRadioButton, QSlider,
@@ -8,6 +11,7 @@ from gui.styles import Styles
 
 
 class WaitPanel(StepConfigPanel):
+    """等待步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -184,6 +188,7 @@ class WaitPanel(StepConfigPanel):
 
 
 class IfElsePanel(StepConfigPanel):
+    """条件判断步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -374,6 +379,7 @@ class IfElsePanel(StepConfigPanel):
 
 
 class LoopPanel(StepConfigPanel):
+    """循环步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -511,6 +517,7 @@ class LoopPanel(StepConfigPanel):
 
 
 class LogPanel(StepConfigPanel):
+    """日志输出步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -610,6 +617,7 @@ class LabelPanel(StepConfigPanel):
 
 
 class GotoPanel(StepConfigPanel):
+    """跳转步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()

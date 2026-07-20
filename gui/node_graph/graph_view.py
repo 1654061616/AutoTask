@@ -1,8 +1,12 @@
+"""
+节点图视图 — 支持缩放和平移的图形视图
+"""
 from PySide6.QtWidgets import QGraphicsView
 from PySide6.QtCore import Qt, QPointF, QRectF
 from PySide6.QtGui import QTransform, QPainter, QMouseEvent
 
 class GraphView(QGraphicsView):
+    """节点图视图，支持鼠标滚轮缩放和右键平移"""
     def __init__(self, scene, parent=None):
         super().__init__(scene, parent)
         self._init_style()

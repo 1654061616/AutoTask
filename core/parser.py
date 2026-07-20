@@ -1,11 +1,16 @@
+"""
+流程解析器 — 负责 JSON 流程文件的解析、验证和保存
+"""
 import json
 import os
 from typing import Dict, Any, List, Optional
 
 class FlowParser:
+    """流程解析器，验证步骤类型和必填字段，加载/保存 JSON 流程文件"""
+
     def __init__(self):
-        self.required_fields = ["id", "type", "name", "config"]
-        self.valid_step_types = [
+        self.required_fields = ["id", "type", "name", "config"]  # 步骤必填字段
+        self.valid_step_types = [                                 # 支持的步骤类型列表
             "mouse_click", "mouse_move", "mouse_drag", "mouse_scroll",
             "keyboard_type", "keyboard_press", "keyboard_hotkey",
             "wait", "image_find", "image_click", "image_exists",
@@ -18,12 +23,14 @@ class FlowParser:
         ]
 
     def parse(self, flow_data: Dict[str, Any]) -> Dict[str, Any]:
+        """解析流程数据，补充默认字段"""
         flow = flow_data.copy()
         flow["variables"] = flow.get("variables", {})
         flow["global_config"] = flow.get("global_config", {})
         return flow
 
     def validate_step(self, step: Dict[str, Any]) -> bool:
+        """验证步骤是否合法（必填字段 + 步骤类型）"""
         for field in self.required_fields:
             if field not in step:
                 return False
@@ -34,6 +41,7 @@ class FlowParser:
         return True
 
     def load_from_file(self, file_path: str) -> Optional[Dict[str, Any]]:
+        """从 JSON 文件加载流程数据"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -42,6 +50,7 @@ class FlowParser:
             return None
 
     def save_to_file(self, flow: Dict[str, Any], file_path: str) -> bool:
+        """保存流程数据到 JSON 文件"""
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(flow, f, indent=2, ensure_ascii=False)
@@ -50,6 +59,7 @@ class FlowParser:
             return False
 
     def get_step_by_id(self, flow: Dict[str, Any], step_id: str) -> Optional[Dict[str, Any]]:
+        """根据步骤 ID 从流程中查找步骤"""
         for step in flow.get("steps", []):
             if step["id"] == step_id:
                 return step

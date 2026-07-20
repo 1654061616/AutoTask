@@ -1,7 +1,11 @@
+"""
+变量步骤配置面板 — 设置变量、获取变量
+"""
 from . import StepConfigPanel
 
 
 class SetVariablePanel(StepConfigPanel):
+    """设置变量步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -37,6 +41,7 @@ class SetVariablePanel(StepConfigPanel):
 
 
 class GetVariablePanel(StepConfigPanel):
+    """获取变量步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()

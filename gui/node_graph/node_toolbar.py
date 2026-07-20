@@ -1,3 +1,6 @@
+"""
+节点工具栏 — 按分类展示可拖拽的节点类型
+"""
 from PySide6.QtWidgets import (QToolBar, QPushButton, QLabel, QWidget,
                                QVBoxLayout, QScrollArea, QGroupBox, QSizePolicy)
 from PySide6.QtGui import QFont, QColor
@@ -8,6 +11,8 @@ from gui.styles import Styles
 
 
 class NodeToolbar(QWidget):
+    """节点工具栏，按分类分组展示可拖拽到画布的节点按钮"""
+
     node_drag_started = Signal(str)
 
     def __init__(self, parent=None):

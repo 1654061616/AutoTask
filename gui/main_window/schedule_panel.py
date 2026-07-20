@@ -12,6 +12,8 @@ from gui.styles import Styles
 
 
 class SchedulePanel(QWidget):
+    """定时设置面板：立即执行、间隔执行、CRON 定时、指定时间"""
+
     schedule_changed = Signal()
     start_scheduled = Signal()
     stop_scheduled = Signal()

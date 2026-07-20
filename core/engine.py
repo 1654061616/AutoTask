@@ -1,3 +1,6 @@
+"""
+流程执行引擎 — 负责解析、调度和执行自动化流程任务
+"""
 from typing import Dict, Any, Optional, List, Callable
 import threading
 import time
@@ -7,28 +10,33 @@ from .logger import Logger
 
 
 class FlowEngine:
+    """流程执行引擎，负责加载流程定义并按节点图顺序执行各步骤"""
+
     def __init__(self):
-        self.flow: Optional[Dict[str, Any]] = None
-        self.variable_manager = VariableManager()
-        self.logger = Logger()
-        self.is_running = False
-        self.current_step = None
-        self.thread: Optional[threading.Thread] = None
-        self.parser = FlowParser()
-        self.step_executor = None
-        self._init_operations()
-        self.completed_callbacks: List[Callable[[bool, str], None]] = []
-        self._excel_cursors: Dict[str, int] = {}
+        self.flow: Optional[Dict[str, Any]] = None          # 当前加载的流程定义
+        self.variable_manager = VariableManager()            # 变量管理器
+        self.logger = Logger()                               # 日志记录器
+        self.is_running = False                              # 是否正在执行
+        self.current_step = None                             # 当前执行的步骤
+        self.thread: Optional[threading.Thread] = None       # 执行线程
+        self.parser = FlowParser()                           # 流程解析器
+        self.step_executor = None                            # 步骤执行器
+        self._init_operations()                              # 初始化操作模块
+        self.completed_callbacks: List[Callable[[bool, str], None]] = []  # 完成回调列表
+        self._excel_cursors: Dict[str, int] = {}             # Excel 读取游标
 
     def add_completed_callback(self, callback: Callable[[bool, str], None]):
+        """添加流程完成回调函数"""
         if callback not in self.completed_callbacks:
             self.completed_callbacks.append(callback)
 
     def remove_completed_callback(self, callback: Callable[[bool, str], None]):
+        """移除流程完成回调函数"""
         if callback in self.completed_callbacks:
             self.completed_callbacks.remove(callback)
 
     def _init_operations(self):
+        """初始化操作模块，创建 StepExecutor 实例"""
         try:
             from core.step_executor import create_step_executor
             self.step_executor = create_step_executor(self.variable_manager, self.logger)
@@ -37,15 +45,19 @@ class FlowEngine:
             self.step_executor = None
 
     def load_flow(self, flow: Dict[str, Any]):
+        """加载流程字典"""
         self.flow = self.parser.parse(flow)
 
     def load_flow_from_file(self, file_path: str):
+        """从 JSON 文件加载流程"""
         self.flow = self.parser.load_from_file(file_path)
 
     def set_excel_data(self, excel_path: str):
+        """加载 Excel 数据文件"""
         self.variable_manager.load_excel(excel_path)
 
     def run(self):
+        """在新线程中启动流程执行"""
         if not self.flow or self.is_running:
             return
         self.is_running = True
@@ -53,6 +65,7 @@ class FlowEngine:
         self.thread.start()
 
     def _execute_flow(self):
+        """执行流程的核心方法，按节点图顺序遍历执行"""
         success = True
         error_message = ""
         try:
@@ -109,12 +122,14 @@ class FlowEngine:
                     pass
 
     def _follow_edge_from_start(self, edges, node_map):
+        """从 start 节点出发，找到第一条边指向的下一个节点 ID"""
         start_node = next((n for n in node_map.values() if n["type"] == "start"), None)
         if not start_node:
             return None
         return self._follow_edge(start_node["id"], None, edges, node_map)
 
     def _follow_edge(self, source_id, source_port, edges, node_map):
+        """根据源节点和端口，查找下一条边指向的目标节点 ID"""
         for edge in edges:
             if edge["source_node"] != source_id:
                 continue
@@ -131,6 +146,7 @@ class FlowEngine:
         return None
 
     def _execute_step(self, step: Dict[str, Any]):
+        """执行单个步骤，处理 wait_before 和 wait_after"""
         if not self.step_executor:
             self.logger.error("步骤执行器未加载")
             return None
@@ -153,6 +169,7 @@ class FlowEngine:
         return step_result
 
     def _execute_wait(self, wait_config):
+        """执行等待操作，支持固定时长和随机时长"""
         import random
         if isinstance(wait_config, dict):
             wait_type = wait_config.get("type", "fixed")
@@ -167,11 +184,13 @@ class FlowEngine:
         time.sleep(wait_time)
 
     def stop(self):
+        """停止流程执行并等待线程结束"""
         self.is_running = False
         if self.thread:
             self.thread.join(timeout=5)
 
     def get_status(self) -> Dict[str, Any]:
+        """获取当前引擎运行状态"""
         return {
             "is_running": self.is_running,
             "current_step": self.current_step,

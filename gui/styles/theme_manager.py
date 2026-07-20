@@ -7,6 +7,7 @@ from utils.resource_path import get_resource_path
 
 
 class ThemeManager:
+    """主题管理器单例：加载 QSS、切换主题、热更新"""
     _instance = None
     _current_theme = "light"
     _watched_widgets: list[QWidget] = []

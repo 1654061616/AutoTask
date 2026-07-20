@@ -1,3 +1,6 @@
+"""
+窗口步骤配置面板 — 查找窗口、激活窗口、关闭窗口、设置窗口位置
+"""
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QLineEdit, QComboBox, QCheckBox,
                                QRadioButton, QGroupBox)
@@ -7,6 +10,7 @@ from gui.styles import Styles
 
 
 class WindowFindPanel(StepConfigPanel):
+    """窗口查找步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -75,6 +79,7 @@ class WindowFindPanel(StepConfigPanel):
 
 
 class WindowActivatePanel(StepConfigPanel):
+    """窗口激活步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -268,6 +273,7 @@ class WindowClosePanel(StepConfigPanel):
 
 
 class WindowPositionPanel(StepConfigPanel):
+    """窗口位置设置步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()

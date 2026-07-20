@@ -1,3 +1,6 @@
+"""
+Excel 步骤配置面板 — 读取 Excel 数据
+"""
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                                QLabel, QSpinBox, QLineEdit, QComboBox,
                                QRadioButton, QGroupBox)
@@ -7,6 +10,7 @@ from gui.styles import Styles
 
 
 class ExcelReadPanel(StepConfigPanel):
+    """Excel 读取步骤配置面板"""
     def __init__(self):
         super().__init__()
         self.init_ui()
