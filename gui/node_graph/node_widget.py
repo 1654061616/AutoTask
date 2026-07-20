@@ -240,3 +240,9 @@ class NodeWidget(QGraphicsObject):
             if port.label in ports_data:
                 pos = ports_data[port.label]
                 port.setPos(pos[0], pos[1])
+
+    def restore_ports_from_data(self, node_data):
+        """从节点数据中恢复端口位置（不触发 update_params，避免重建端口丢失信号连接）"""
+        ports_data = node_data.get("ports", {})
+        if ports_data:
+            self._restore_port_positions(ports_data)

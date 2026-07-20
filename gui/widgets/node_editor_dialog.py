@@ -285,6 +285,7 @@ class NodeEditorDialog(QDialog):
                 node_data.get("config", {})
             )
             node.set_node_id(node_data.get("id", str(uuid.uuid4())))
+            node.restore_ports_from_data(node_data)
             node_map[node_data.get("id", "")] = node
 
         for edge_data in edges:

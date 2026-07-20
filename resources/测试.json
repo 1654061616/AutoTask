@@ -9,7 +9,13 @@
       "type": "start",
       "x": 182.951519385119,
       "y": 589.3496669399451,
-      "config": {}
+      "config": {},
+      "ports": {
+        "输出": [
+          192.0,
+          40.0
+        ]
+      }
     },
     {
       "id": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
@@ -24,6 +30,16 @@
         "random_range": 5,
         "x": 2117,
         "y": 1570
+      },
+      "ports": {
+        "输入": [
+          -8.0,
+          40.0
+        ],
+        "输出": [
+          192.0,
+          40.0
+        ]
       }
     },
     {
@@ -31,13 +47,19 @@
       "type": "end",
       "x": 1516.9276758514188,
       "y": 799.1764767288906,
-      "config": {}
+      "config": {},
+      "ports": {
+        "输入": [
+          -8.0,
+          40.0
+        ]
+      }
     },
     {
       "id": "616c4b51-89f2-484c-a17e-3f6ed703106b",
       "type": "mouse_move",
-      "x": 995.2583061208356,
-      "y": 1326.5759466430998,
+      "x": 953.7893786225357,
+      "y": 1324.2721173376383,
       "config": {
         "delay": 0,
         "duration": 0.5,
@@ -47,6 +69,16 @@
         "relative_x": 10,
         "relative_y": 10,
         "smooth_curve": true
+      },
+      "ports": {
+        "输入": [
+          192.0,
+          40.0
+        ],
+        "输出": [
+          -8.0,
+          39.35404833446637
+        ]
       }
     },
     {
@@ -75,6 +107,20 @@
         "similarity": 0.9,
         "wait_find": true,
         "wait_timeout": 5
+      },
+      "ports": {
+        "输入": [
+          -8.0,
+          40.0
+        ],
+        "True": [
+          192.0,
+          32.0
+        ],
+        "False": [
+          192.0,
+          88.0
+        ]
       }
     },
     {
@@ -90,6 +136,20 @@
         "loop_var": "",
         "start_value": 0,
         "step": 1
+      },
+      "ports": {
+        "输入": [
+          -8.0,
+          40.0
+        ],
+        "True": [
+          153.26805138227905,
+          97.0
+        ],
+        "False": [
+          192.0,
+          69.56936555631091
+        ]
       }
     },
     {
@@ -99,14 +159,24 @@
       "y": 405.85566964481296,
       "config": {
         "data_source": "manual",
+        "delay": 0,
+        "human_input": false,
         "input_method": "typing",
+        "input_text": "",
         "interval": 0.05,
         "random_interval": false,
-        "random_min_interval": 0.02,
         "random_max_interval": 0.15,
-        "human_input": false,
-        "delay": 0,
-        "input_text": ""
+        "random_min_interval": 0.02
+      },
+      "ports": {
+        "输入": [
+          -8.0,
+          40.0
+        ],
+        "输出": [
+          192.0,
+          40.0
+        ]
       }
     }
   ],

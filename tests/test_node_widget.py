@@ -79,3 +79,28 @@ def test_node_bounding_rect_includes_top_bottom_ports():
     rect = node.boundingRect()
     assert rect.top() <= -PortWidget.PORT_SIZE
     assert rect.bottom() >= node.node_height + PortWidget.PORT_SIZE
+
+
+def test_restore_ports_from_data():
+    """restore_ports_from_data 应恢复端口位置（不触发 update_params）"""
+    node = NodeWidget("mouse_click", {})
+    node_data = {
+        "ports": {
+            "输入": [50, -8],
+            "输出": [192, 40]
+        }
+    }
+    node.restore_ports_from_data(node_data)
+    in_port = node.get_input_port("输入")
+    out_port = node.get_output_port("输出")
+    assert in_port.pos().x() == pytest.approx(50)
+    assert in_port.pos().y() == pytest.approx(-8)
+    assert out_port.pos().x() == pytest.approx(192)
+    assert out_port.pos().y() == pytest.approx(40)
+
+
+def test_restore_ports_from_data_empty():
+    """restore_ports_from_data 无 ports 数据时不应报错"""
+    node = NodeWidget("mouse_click", {})
+    node_data = {}
+    node.restore_ports_from_data(node_data)

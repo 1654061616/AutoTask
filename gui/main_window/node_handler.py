@@ -55,6 +55,7 @@ class NodeHandlerMixin:
                         node_data.get("config", {})
                     )
                     node.set_node_id(node_data.get("id", str(uuid.uuid4())))
+                    node.restore_ports_from_data(node_data)
                     node_map[node_data.get("id", "")] = node
                 except Exception as e:
                     print(f"加载节点失败: {e}")
