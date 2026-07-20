@@ -69,6 +69,7 @@ def test_control_points_persisted():
 
     edge._cp1_offset = (0.3, 0.1)
     edge._cp2_offset = (0.7, -0.1)
+    edge._cp_manually_adjusted = True
 
     data = edge.to_json()
     assert data["cp1"]["x"] == 0.3
@@ -84,11 +85,21 @@ def test_control_points_persisted():
 
 
 def test_control_points_default_offsets():
-    """EdgeWidget 创建时控制点偏移量为默认值"""
+    """EdgeWidget 创建时使用原始公式计算控制点（dx*0.5，上限100），默认未手动调整"""
     scene = GraphScene()
     node1 = scene.add_node("mouse_click", 100, 100)
     node2 = scene.add_node("mouse_click", 400, 100)
     edge = scene.add_edge(node1.get_output_port("输出"), node2.get_input_port("输入"))
 
-    assert edge._cp1_offset == (0.25, 0.0)
-    assert edge._cp2_offset == (0.75, 0.0)
+    start = edge.source_port.get_global_pos()
+    end = edge.target_port.get_global_pos()
+    dx = end.x() - start.x()
+    dy = end.y() - start.y()
+    denom = dx * dx + dy * dy
+    expected_control_offset = min(abs(dx) * 0.5, 100)
+    expected_u1 = (dx * expected_control_offset) / denom
+    expected_u2 = 1.0 - expected_u1
+
+    assert edge._cp1_offset == pytest.approx((expected_u1, 0.0), abs=1e-6)
+    assert edge._cp2_offset == pytest.approx((expected_u2, 0.0), abs=1e-6)
+    assert edge._cp_manually_adjusted is False

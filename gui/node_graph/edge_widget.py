@@ -62,9 +62,11 @@ class EdgeWidget(QGraphicsPathItem):
 
         self._cp1_offset = (0.25, 0.0)
         self._cp2_offset = (0.75, 0.0)
+        self._cp_manually_adjusted = False
 
         self._cp1_handle = ControlPointHandle(self, self)
         self._cp2_handle = ControlPointHandle(self, self)
+        self._updating_handles = False
 
         self.update_path()
 
@@ -83,14 +85,35 @@ class EdgeWidget(QGraphicsPathItem):
             dx = end_point.x() - start_point.x()
             dy = end_point.y() - start_point.y()
 
-            cp1 = QPointF(
-                start_point.x() + dx * self._cp1_offset[0] + dy * self._cp1_offset[1],
-                start_point.y() + dy * self._cp1_offset[0] - dx * self._cp1_offset[1]
-            )
-            cp2 = QPointF(
-                start_point.x() + dx * self._cp2_offset[0] + dy * self._cp2_offset[1],
-                start_point.y() + dy * self._cp2_offset[0] - dx * self._cp2_offset[1]
-            )
+            if not self._cp_manually_adjusted:
+                dx_abs = abs(dx)
+                control_offset = min(dx_abs * 0.5, 100)
+                cp1 = QPointF(start_point.x() + control_offset, start_point.y())
+                cp2 = QPointF(end_point.x() - control_offset, end_point.y())
+
+                denom = dx * dx + dy * dy
+                if denom > 0.001:
+                    delta1_x = cp1.x() - start_point.x()
+                    delta1_y = cp1.y() - start_point.y()
+                    self._cp1_offset = (
+                        (dx * delta1_x + dy * delta1_y) / denom,
+                        (dy * delta1_x - dx * delta1_y) / denom
+                    )
+                    delta2_x = cp2.x() - start_point.x()
+                    delta2_y = cp2.y() - start_point.y()
+                    self._cp2_offset = (
+                        (dx * delta2_x + dy * delta2_y) / denom,
+                        (dy * delta2_x - dx * delta2_y) / denom
+                    )
+            else:
+                cp1 = QPointF(
+                    start_point.x() + dx * self._cp1_offset[0] + dy * self._cp1_offset[1],
+                    start_point.y() + dy * self._cp1_offset[0] - dx * self._cp1_offset[1]
+                )
+                cp2 = QPointF(
+                    start_point.x() + dx * self._cp2_offset[0] + dy * self._cp2_offset[1],
+                    start_point.y() + dy * self._cp2_offset[0] - dx * self._cp2_offset[1]
+                )
 
             path = QPainterPath()
             path.moveTo(start_point)
@@ -119,12 +142,16 @@ class EdgeWidget(QGraphicsPathItem):
                 start_point.x() + dx * self._cp2_offset[0] + dy * self._cp2_offset[1],
                 start_point.y() + dy * self._cp2_offset[0] - dx * self._cp2_offset[1]
             )
+            self._updating_handles = True
             self._cp1_handle.setPos(cp1_pos)
             self._cp2_handle.setPos(cp2_pos)
+            self._updating_handles = False
         except Exception:
             pass
 
     def _on_handle_moved(self):
+        if self._updating_handles:
+            return
         try:
             start_point = self.source_port.get_global_pos()
             end_point = self.target_port.get_global_pos()
@@ -151,6 +178,7 @@ class EdgeWidget(QGraphicsPathItem):
                 (dy * delta2_x - dx * delta2_y) / denom
             )
 
+            self._cp_manually_adjusted = True
             self.update_path()
         except Exception:
             pass
@@ -185,7 +213,8 @@ class EdgeWidget(QGraphicsPathItem):
             "target_node": self.target_node.node_id,
             "target_port": self.target_port.label,
             "cp1": {"x": self._cp1_offset[0], "y": self._cp1_offset[1]},
-            "cp2": {"x": self._cp2_offset[0], "y": self._cp2_offset[1]}
+            "cp2": {"x": self._cp2_offset[0], "y": self._cp2_offset[1]},
+            "cp_manually_adjusted": self._cp_manually_adjusted
         }
 
     def from_json(self, data):
@@ -193,6 +222,7 @@ class EdgeWidget(QGraphicsPathItem):
         cp2 = data.get("cp2", {"x": 0.75, "y": 0.0})
         self._cp1_offset = (cp1.get("x", 0.25), cp1.get("y", 0.0))
         self._cp2_offset = (cp2.get("x", 0.75), cp2.get("y", 0.0))
+        self._cp_manually_adjusted = data.get("cp_manually_adjusted", False)
         self.update_path()
 
     def disconnect(self):

@@ -20,8 +20,8 @@
     {
       "id": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
       "type": "mouse_click",
-      "x": 412.074682061865,
-      "y": 601.9745412029406,
+      "x": 466.74413687072695,
+      "y": 536.6749146256888,
       "config": {
         "click_type": "left_single",
         "delay": 0,
@@ -45,8 +45,8 @@
     {
       "id": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "type": "end",
-      "x": 1516.9276758514188,
-      "y": 799.1764767288906,
+      "x": 1254.210573575499,
+      "y": 509.12464704854006,
       "config": {},
       "ports": {
         "输入": [
@@ -58,17 +58,17 @@
     {
       "id": "616c4b51-89f2-484c-a17e-3f6ed703106b",
       "type": "mouse_move",
-      "x": 953.7893786225357,
-      "y": 1324.2721173376383,
+      "x": 1017.9921411290898,
+      "y": 1033.3533497298163,
       "config": {
-        "delay": 0,
-        "duration": 0.5,
         "move_type": "linear",
+        "duration": 0.5,
         "position_type": "relative",
+        "smooth_curve": true,
+        "delay": 0,
         "relative_base": "current",
         "relative_x": 10,
-        "relative_y": 10,
-        "smooth_curve": true
+        "relative_y": 10
       },
       "ports": {
         "输入": [
@@ -84,8 +84,8 @@
     {
       "id": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
       "type": "image_click",
-      "x": 680.2724932834305,
-      "y": 573.5913970945544,
+      "x": 737.9791400261183,
+      "y": 638.8910236718061,
       "config": {
         "algorithm": "akaze",
         "click_position": "center",
@@ -126,8 +126,8 @@
     {
       "id": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
       "type": "loop",
-      "x": 1028.9755226018945,
-      "y": 865.2437821998512,
+      "x": 1051.7544621055868,
+      "y": 716.4213774423939,
       "config": {
         "count": 16,
         "delay": 0,
@@ -151,33 +151,6 @@
           69.56936555631091
         ]
       }
-    },
-    {
-      "id": "6f4a9bde-c1a7-4e7f-b25f-4636eadb9c64",
-      "type": "keyboard_type",
-      "x": 963.7373653462473,
-      "y": 405.85566964481296,
-      "config": {
-        "data_source": "manual",
-        "delay": 0,
-        "human_input": false,
-        "input_method": "typing",
-        "input_text": "",
-        "interval": 0.05,
-        "random_interval": false,
-        "random_max_interval": 0.15,
-        "random_min_interval": 0.02
-      },
-      "ports": {
-        "输入": [
-          -8.0,
-          40.0
-        ],
-        "输出": [
-          192.0,
-          40.0
-        ]
-      }
     }
   ],
   "edges": [
@@ -187,13 +160,14 @@
       "target_node": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
       "target_port": "输入",
       "cp1": {
-        "x": 0.25,
-        "y": 0.0
+        "x": 0.35837703969082213,
+        "y": -0.22528741036252778
       },
       "cp2": {
-        "x": 0.75,
-        "y": 0.0
-      }
+        "x": 0.641622960309178,
+        "y": 0.22528741036252778
+      },
+      "cp_manually_adjusted": false
     },
     {
       "source_node": "5edc80ae-5ffd-401b-93eb-b9c907c77e11",
@@ -201,27 +175,14 @@
       "target_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
       "target_port": "输入",
       "cp1": {
-        "x": 0.25,
-        "y": 0.0
+        "x": 0.16345326172596295,
+        "y": 0.23454138674043268
       },
       "cp2": {
-        "x": 0.75,
-        "y": 0.0
-      }
-    },
-    {
-      "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
-      "source_port": "True",
-      "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
-      "target_port": "输入",
-      "cp1": {
-        "x": 0.25,
-        "y": 0.0
+        "x": 0.8365467382740366,
+        "y": -0.23454138674043337
       },
-      "cp2": {
-        "x": 0.75,
-        "y": 0.0
-      }
+      "cp_manually_adjusted": false
     },
     {
       "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
@@ -229,27 +190,14 @@
       "target_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
       "target_port": "输入",
       "cp1": {
-        "x": 0.25,
-        "y": 0.0
+        "x": 0.46844285049015627,
+        "y": 0.12158421390022324
       },
       "cp2": {
-        "x": 0.75,
-        "y": 0.0
-      }
-    },
-    {
-      "source_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
-      "source_port": "True",
-      "target_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
-      "target_port": "输入",
-      "cp1": {
-        "x": 0.27250363538531147,
-        "y": 0.32788821184831074
+        "x": 0.5315571495098438,
+        "y": -0.12158421390022324
       },
-      "cp2": {
-        "x": 0.7449434359488759,
-        "y": 0.4398089676082716
-      }
+      "cp_manually_adjusted": false
     },
     {
       "source_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
@@ -257,13 +205,14 @@
       "target_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
       "target_port": "输入",
       "cp1": {
-        "x": 0.25,
-        "y": 0.0
+        "x": 0.2414777713549583,
+        "y": 0.3634464009611119
       },
       "cp2": {
-        "x": 0.6803872169999002,
-        "y": 0.318001058789324
-      }
+        "x": 0.9848777267215081,
+        "y": 0.07822910474048256
+      },
+      "cp_manually_adjusted": true
     },
     {
       "source_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
@@ -271,13 +220,44 @@
       "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "target_port": "输入",
       "cp1": {
-        "x": 0.25,
-        "y": 0.0
+        "x": 0.24109802771532335,
+        "y": -0.37453421870608605
       },
       "cp2": {
-        "x": 0.75,
-        "y": 0.0
-      }
+        "x": 0.5817714396458296,
+        "y": -0.47358091216366033
+      },
+      "cp_manually_adjusted": true
+    },
+    {
+      "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
+      "source_port": "True",
+      "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
+      "target_port": "输入",
+      "cp1": {
+        "x": 0.27539246574061904,
+        "y": -0.10604114311534985
+      },
+      "cp2": {
+        "x": 0.7246075342593808,
+        "y": 0.10604114311534987
+      },
+      "cp_manually_adjusted": false
+    },
+    {
+      "source_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
+      "source_port": "True",
+      "target_node": "616c4b51-89f2-484c-a17e-3f6ed703106b",
+      "target_port": "输入",
+      "cp1": {
+        "x": -0.04118895739621203,
+        "y": 0.14242031361356577
+      },
+      "cp2": {
+        "x": 0.7038617190608337,
+        "y": 0.35082414224977077
+      },
+      "cp_manually_adjusted": true
     }
   ],
   "schedule": {
