@@ -250,4 +250,5 @@ class GraphScene(QGraphicsScene):
                 source_port = source_node.get_output_port(edge_data["source_port"])
                 target_port = target_node.get_input_port(edge_data["target_port"])
                 if source_port and target_port:
-                    self.add_edge(source_port, target_port)
+                    edge = self.add_edge(source_port, target_port)
+                    edge.from_json(edge_data)

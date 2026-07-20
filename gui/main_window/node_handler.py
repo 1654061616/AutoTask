@@ -70,7 +70,8 @@ class NodeHandlerMixin:
                         target_port = target_node.get_input_port(edge_data["target_port"])
 
                         if source_port and target_port:
-                            self.graph_scene.add_edge(source_port, target_port)
+                            edge = self.graph_scene.add_edge(source_port, target_port)
+                            edge.from_json(edge_data)
                 except Exception as e:
                     print(f"加载连线失败: {e}")
         except Exception as e:

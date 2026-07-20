@@ -295,7 +295,8 @@ class NodeEditorDialog(QDialog):
                 source_port = source_node.get_output_port(edge_data.get("source_port", "输出"))
                 target_port = target_node.get_input_port(edge_data.get("target_port", "输入"))
                 if source_port and target_port:
-                    self.graph_scene.add_edge(source_port, target_port)
+                    edge = self.graph_scene.add_edge(source_port, target_port)
+                    edge.from_json(edge_data)
 
     def _on_node_drag_started(self, node_type):
         node_count = len(self.graph_scene.nodes)
