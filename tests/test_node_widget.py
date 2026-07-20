@@ -1,8 +1,7 @@
 import pytest
-import sys
 from PySide6.QtWidgets import QApplication
 
-app = QApplication(sys.argv)
+app = QApplication.instance() or QApplication([])
 
 from gui.node_graph.node_widget import NodeWidget
 from gui.node_graph.port_widget import PortWidget
