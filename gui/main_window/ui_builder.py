@@ -62,8 +62,8 @@ class UIBuilderMixin:
         # save_icon = ThemeManager.load_icon("保存.svg", "document-save")
         # run_icon = ThemeManager.load_icon("运行.svg", "media-play")
         # stop_icon = ThemeManager.load_icon("停止.svg", "media-stop")
-        dark_icon = ThemeManager.load_icon("夜间.svg", "media-stop")
-        light_icon = ThemeManager.load_icon("太阳.svg", "media-stop")
+        dark_icon = ThemeManager.load_icon("夜间.svg", "")
+        light_icon = ThemeManager.load_icon("太阳.svg", "")
 
         tool_bar.addAction(new_icon, "新建", self.on_new_flow)
         tool_bar.addAction(open_icon, "打开", self.on_open_flow)
