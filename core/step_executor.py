@@ -22,6 +22,8 @@ class StepExecutor:
         self.flow_control = flow_control         # 流程控制模块（goto/label）
         self.variable_manager = variable_manager # 变量管理器
         self.logger = logger                     # 日志记录器
+        self.last_click_pos = None               # 记录上一次点击位置
+        self.last_move_pos = None                # 记录上一次移动位置
 
     def execute(self, step: Dict[str, Any], is_running_func: Callable[[], bool],
                 excel_cursors: Dict[str, int], flow_nodes: list) -> Any:
@@ -84,34 +86,56 @@ class StepExecutor:
 
         return step_result
 
+    def _resolve_position(self, config):
+        """解析坐标，支持绝对坐标和相对坐标"""
+        position_type = config.get("position_type", "screen")
+        if position_type == "relative":
+            relative_base = config.get("relative_base", "current")
+            rel_x = config.get("relative_x", 0)
+            rel_y = config.get("relative_y", 0)
+            if relative_base == "last_click" and self.last_click_pos:
+                base_x, base_y = self.last_click_pos
+            elif relative_base == "last_move" and self.last_move_pos:
+                base_x, base_y = self.last_move_pos
+            else:
+                base_x, base_y = self.mouse.get_position()
+            x = base_x + rel_x
+            y = base_y + rel_y
+            self.logger.info(f"相对坐标: 基准({relative_base})=({base_x}, {base_y}), 偏移=({rel_x}, {rel_y}), 目标=({x}, {y})")
+            return x, y
+        else:
+            return config.get("x"), config.get("y")
+
     def _execute_mouse_click(self, config):
         """执行鼠标点击操作"""
         if not self.mouse:
             self.logger.error("鼠标操作模块未加载")
             return
-        x = config.get("x")
-        y = config.get("y")
+        x, y = self._resolve_position(config)
         button = config.get("button", "left")
         clicks = config.get("clicks", 1)
+        # 读取点击间隔，默认 0.2 秒，控制多次点击时每次点击之间的等待时间
         interval = config.get("interval", 0.2)
         if x is not None and y is not None:
             self.logger.info(f"鼠标点击: ({x}, {y}), 按钮: {button}, 次数: {clicks}")
             self.mouse.click(x=x, y=y, button=button, clicks=clicks, interval=interval)
+            self.last_click_pos = (x, y)
         else:
             self.logger.info(f"鼠标点击: 当前位置, 按钮: {button}, 次数: {clicks}")
             self.mouse.click(button=button, clicks=clicks, interval=interval)
+            self.last_click_pos = self.mouse.get_position()
 
     def _execute_mouse_move(self, config):
         """执行鼠标移动操作"""
         if not self.mouse:
             self.logger.error("鼠标操作模块未加载")
             return
-        x = config.get("x")
-        y = config.get("y")
+        x, y = self._resolve_position(config)
         duration = config.get("duration", 0.5)
         if x is not None and y is not None:
             self.logger.info(f"鼠标移动: ({x}, {y}), 耗时: {duration}秒")
             self.mouse.move(x, y, duration=duration)
+            self.last_move_pos = (x, y)
 
     def _execute_mouse_drag(self, config):
         """执行鼠标拖拽操作"""
