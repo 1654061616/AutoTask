@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QApplication
 app = QApplication(sys.argv)
 
 from gui.node_graph.node_widget import NodeWidget
+from gui.node_graph.port_widget import PortWidget
 
 
 def test_node_initialization():
@@ -40,3 +41,42 @@ def test_loop_has_two_outputs():
     labels = [p.label for p in node.output_ports]
     assert "True" in labels
     assert "False" in labels
+
+
+def test_node_to_json_includes_port_positions():
+    """to_json 应包含端口位置信息"""
+    node = NodeWidget("mouse_click", {})
+    data = node.to_json()
+    assert "ports" in data
+    assert len(data["ports"]) == 2
+
+
+def test_node_from_json_restores_port_positions():
+    """from_json 应恢复端口位置（位置会被吸附到边缘）"""
+    node = NodeWidget("mouse_click", {})
+    data = {
+        "id": node.node_id,
+        "type": "mouse_click",
+        "x": 100,
+        "y": 200,
+        "config": {},
+        "ports": {
+            "输入": [200, 50],
+            "输出": [-8, 40]
+        }
+    }
+    node.from_json(data)
+    in_port = node.get_input_port("输入")
+    out_port = node.get_output_port("输出")
+    assert in_port.pos().x() == pytest.approx(192)
+    assert in_port.pos().y() == pytest.approx(50)
+    assert out_port.pos().x() == pytest.approx(-8)
+    assert out_port.pos().y() == pytest.approx(40)
+
+
+def test_node_bounding_rect_includes_top_bottom_ports():
+    """boundingRect 应包含上下边缘的端口"""
+    node = NodeWidget("mouse_click", {})
+    rect = node.boundingRect()
+    assert rect.top() <= -PortWidget.PORT_SIZE
+    assert rect.bottom() >= node.node_height + PortWidget.PORT_SIZE

@@ -67,35 +67,61 @@ class NodeWidget(QGraphicsObject):
             base_height = 105
         self.node_height = base_height + (lines - 1) * 18
 
-    def _create_ports(self):
+    def _create_ports(self, saved_positions=None):
         port_offset = -PortWidget.PORT_SIZE / 2
+
+        if saved_positions is None:
+            saved_positions = {}
+            for port in self.input_ports + self.output_ports:
+                saved_positions[port.label] = (port.pos().x(), port.pos().y())
+
+        self.input_ports.clear()
+        self.output_ports.clear()
 
         if self.node_type != "start":
             in_port = PortWidget("in", "输入", self, self)
-            in_port.setPos(port_offset, 40)
+            if "输入" in saved_positions:
+                in_port.setPos(*saved_positions["输入"])
+            else:
+                in_port.setPos(port_offset, 40)
             self.input_ports.append(in_port)
 
         if self.node_type in ("if_else", "loop"):
             true_port = PortWidget("out", "True", self, self)
-            true_port.setPos(self.node_width + port_offset, 32)
+            if "True" in saved_positions:
+                true_port.setPos(*saved_positions["True"])
+            else:
+                true_port.setPos(self.node_width + port_offset, 32)
             self.output_ports.append(true_port)
 
             false_port = PortWidget("out", "False", self, self)
-            false_port.setPos(self.node_width + port_offset, 88)
+            if "False" in saved_positions:
+                false_port.setPos(*saved_positions["False"])
+            else:
+                false_port.setPos(self.node_width + port_offset, 88)
             self.output_ports.append(false_port)
 
         elif self.node_type in ("image_find", "image_click", "image_exists"):
             true_port = PortWidget("out", "True", self, self)
-            true_port.setPos(self.node_width + port_offset, 32)
+            if "True" in saved_positions:
+                true_port.setPos(*saved_positions["True"])
+            else:
+                true_port.setPos(self.node_width + port_offset, 32)
             self.output_ports.append(true_port)
 
             false_port = PortWidget("out", "False", self, self)
-            false_port.setPos(self.node_width + port_offset, 88)
+            if "False" in saved_positions:
+                false_port.setPos(*saved_positions["False"])
+            else:
+                false_port.setPos(self.node_width + port_offset, 88)
             self.output_ports.append(false_port)
 
         elif self.node_type != "end":
             out_port = PortWidget("out", "输出", self, self)
-            out_port.setPos(self.node_width + port_offset, 40)
+            if "输出" in saved_positions:
+                out_port.setPos(*saved_positions["输出"])
+            else:
+                out_port.setPos(self.node_width + port_offset, 40)
             self.output_ports.append(out_port)
 
     def _format_params(self):
@@ -151,9 +177,9 @@ class NodeWidget(QGraphicsObject):
         self.setSelected(selected)
 
     def boundingRect(self):
-        return QRectF(-PortWidget.PORT_SIZE, 0, 
-                      self.node_width + PortWidget.PORT_SIZE * 2, 
-                      self.node_height)
+        return QRectF(-PortWidget.PORT_SIZE, -PortWidget.PORT_SIZE,
+                      self.node_width + PortWidget.PORT_SIZE * 2,
+                      self.node_height + PortWidget.PORT_SIZE * 2)
 
     def paint(self, painter, option, widget=None):
         option.state &= ~QStyle.State_Selected
@@ -188,12 +214,16 @@ class NodeWidget(QGraphicsObject):
         return super().itemChange(change, value)
 
     def to_json(self):
+        ports_data = {}
+        for port in self.input_ports + self.output_ports:
+            ports_data[port.label] = [port.pos().x(), port.pos().y()]
         return {
             "id": self.node_id,
             "type": self.node_type,
             "x": self.x(),
             "y": self.y(),
-            "config": self.config
+            "config": self.config,
+            "ports": ports_data
         }
 
     def from_json(self, data):
@@ -201,3 +231,12 @@ class NodeWidget(QGraphicsObject):
         self.setPos(data.get("x", 0), data.get("y", 0))
         self.config = data.get("config", {})
         self.update_params(self.config)
+        ports_data = data.get("ports", {})
+        if ports_data:
+            self._restore_port_positions(ports_data)
+
+    def _restore_port_positions(self, ports_data):
+        for port in self.input_ports + self.output_ports:
+            if port.label in ports_data:
+                pos = ports_data[port.label]
+                port.setPos(pos[0], pos[1])
