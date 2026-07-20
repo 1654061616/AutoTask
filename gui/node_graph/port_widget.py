@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGraphicsObject, QGraphicsEllipseItem, QGraphicsTextItem
-from PySide6.QtCore import Qt, QRectF, Signal
+from PySide6.QtCore import Qt, QRectF, Signal, QPointF
 from PySide6.QtGui import QColor, QBrush, QPen, QFont, QPainterPath
 
 
@@ -8,6 +8,7 @@ class PortWidget(QGraphicsObject):
 
     PORT_SIZE = 16
     PORT_MARGIN = 4
+    DRAG_THRESHOLD = 3
 
     def __init__(self, port_type: str, label: str, parent_node, parent=None):
         super().__init__(parent)
@@ -16,7 +17,12 @@ class PortWidget(QGraphicsObject):
         self.parent_node = parent_node
         self.connected_edges = []
         self._is_highlighted = False
+        self._dragging = False
+        self._press_pos = None
         self._init_style()
+
+        self.setFlag(QGraphicsObject.ItemIsMovable, True)
+        self.setFlag(QGraphicsObject.ItemSendsGeometryChanges, True)
 
     def _init_style(self):
         self.ellipse = QGraphicsEllipseItem(0, 0, self.PORT_SIZE, self.PORT_SIZE, self)
@@ -78,9 +84,103 @@ class PortWidget(QGraphicsObject):
         return len(self.connected_edges) > 0
 
     def mousePressEvent(self, event):
-        self.port_clicked.emit(self)
+        self._press_pos = event.pos()
+        self._dragging = False
         event.accept()
         super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if self._press_pos is not None and not self._dragging:
+            delta = event.pos() - self._press_pos
+            if (abs(delta.x()) > self.DRAG_THRESHOLD or
+                    abs(delta.y()) > self.DRAG_THRESHOLD):
+                self._dragging = True
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if not self._dragging and self._press_pos is not None:
+            self.port_clicked.emit(self)
+        self._press_pos = None
+        self._dragging = False
+        super().mouseReleaseEvent(event)
+
+    def _update_connected_edges(self):
+        for edge in self.connected_edges[:]:
+            try:
+                edge.update_path()
+            except Exception:
+                pass
+
+    def _snap_to_nearest_edge(self):
+        if self.parent_node is None:
+            return
+        node_w = self.parent_node.node_width
+        node_h = self.parent_node.node_height
+        half = self.PORT_SIZE / 2
+
+        cx = self.pos().x() + half
+        cy = self.pos().y() + half
+
+        dist_left = abs(cx)
+        dist_right = abs(cx - node_w)
+        dist_top = abs(cy)
+        dist_bottom = abs(cy - node_h)
+
+        min_dist = min(dist_left, dist_right, dist_top, dist_bottom)
+
+        if min_dist == dist_left:
+            cx = 0
+            cy = max(0, min(cy, node_h))
+        elif min_dist == dist_right:
+            cx = node_w
+            cy = max(0, min(cy, node_h))
+        elif min_dist == dist_top:
+            cy = 0
+            cx = max(0, min(cx, node_w))
+        else:
+            cy = node_h
+            cx = max(0, min(cx, node_w))
+
+        self.setPos(cx - half, cy - half)
+
+    def _constrain_to_edge(self, pos):
+        if self.parent_node is None:
+            return pos
+        node_w = self.parent_node.node_width
+        node_h = self.parent_node.node_height
+        half = self.PORT_SIZE / 2
+
+        cx = pos.x() + half
+        cy = pos.y() + half
+
+        dist_left = abs(cx)
+        dist_right = abs(cx - node_w)
+        dist_top = abs(cy)
+        dist_bottom = abs(cy - node_h)
+
+        min_dist = min(dist_left, dist_right, dist_top, dist_bottom)
+
+        if min_dist == dist_left:
+            cx = 0
+            cy = max(0, min(cy, node_h))
+        elif min_dist == dist_right:
+            cx = node_w
+            cy = max(0, min(cy, node_h))
+        elif min_dist == dist_top:
+            cy = 0
+            cx = max(0, min(cx, node_w))
+        else:
+            cy = node_h
+            cx = max(0, min(cx, node_w))
+
+        return QPointF(cx - half, cy - half)
+
+    def itemChange(self, change, value):
+        if change == QGraphicsObject.ItemPositionChange:
+            value = self._constrain_to_edge(value)
+        elif change == QGraphicsObject.ItemPositionHasChanged:
+            self._update_connected_edges()
+        return super().itemChange(change, value)
 
     def get_global_pos(self):
         return self.mapToScene(self.boundingRect().center())
