@@ -2,12 +2,14 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
                                QLabel, QSplitter, QWidget, QStackedWidget,
                                QScrollArea, QSizePolicy, QToolButton)
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QIcon
 import uuid
 import warnings
 
 from ..node_graph import GraphScene, GraphView, NodeToolbar
 from ..step_panels import PANEL_MAP, get_panel_class
 from gui.styles import Styles
+from utils.resource_path import get_resource_path
 
 
 class NodeEditorDialog(QDialog):
@@ -72,7 +74,7 @@ class NodeEditorDialog(QDialog):
 
         btn_style = Styles.toggle_btn()
         self.toggle_left_btn = QToolButton(self)
-        self.toggle_left_btn.setText("◀")
+        self.toggle_left_btn.setIcon(QIcon(get_resource_path("icons/折叠按钮-Left.svg")))
         self.toggle_left_btn.setToolTip("隐藏节点栏")
         self.toggle_left_btn.setFixedSize(32, 28)
         self.toggle_left_btn.setStyleSheet(btn_style)
@@ -81,7 +83,7 @@ class NodeEditorDialog(QDialog):
         self.toggle_left_btn.raise_()
 
         self.toggle_right_btn = QToolButton(self)
-        self.toggle_right_btn.setText("▶")
+        self.toggle_right_btn.setIcon(QIcon(get_resource_path("icons/折叠按钮-Right.svg")))
         self.toggle_right_btn.setToolTip("隐藏配置面板")
         self.toggle_right_btn.setFixedSize(32, 28)
         self.toggle_right_btn.setStyleSheet(btn_style)
@@ -310,24 +312,24 @@ class NodeEditorDialog(QDialog):
         if self.node_toolbar.isVisible():
             self._left_width = self.splitter.sizes()[0]
             self.node_toolbar.setVisible(False)
-            self.toggle_left_btn.setText("▶")
+            self.toggle_left_btn.setIcon(QIcon(get_resource_path("icons/折叠按钮-Right.svg")))
             self.toggle_left_btn.setToolTip("显示节点栏")
         else:
             self.node_toolbar.setVisible(True)
             self.splitter.setSizes([self._left_width, self.splitter.sizes()[1] - self._left_width, self.splitter.sizes()[2]])
-            self.toggle_left_btn.setText("◀")
+            self.toggle_left_btn.setIcon(QIcon(get_resource_path("icons/折叠按钮-Left.svg")))
             self.toggle_left_btn.setToolTip("隐藏节点栏")
 
     def _toggle_right_panel(self):
         if self.config_panel.isVisible():
             self._right_width = self.splitter.sizes()[2]
             self.config_panel.setVisible(False)
-            self.toggle_right_btn.setText("◀")
+            self.toggle_right_btn.setIcon(QIcon(get_resource_path("icons/折叠按钮-Left.svg")))
             self.toggle_right_btn.setToolTip("显示配置面板")
         else:
             self.config_panel.setVisible(True)
             self.splitter.setSizes([self.splitter.sizes()[0], self.splitter.sizes()[1] - self._right_width, self._right_width])
-            self.toggle_right_btn.setText("▶")
+            self.toggle_right_btn.setIcon(QIcon(get_resource_path("icons/折叠按钮-Right.svg")))
             self.toggle_right_btn.setToolTip("隐藏配置面板")
 
     def get_graph_data(self):
