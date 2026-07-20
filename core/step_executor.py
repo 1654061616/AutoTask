@@ -407,3 +407,38 @@ class StepExecutor:
         else:
             wait_time = wait_config
         time.sleep(wait_time)
+
+
+def create_step_executor(variable_manager, logger):
+    from operations.mouse import MouseOperations
+    from operations.keyboard import KeyboardOperations
+    from operations.image_recognition import ImageRecognition
+    from operations.window import WindowOperations
+    from operations.condition import ConditionEvaluator
+    from operations.loop import LoopController
+    from operations.excel import ExcelOperations
+    from operations.control import FlowControl
+
+    mouse = MouseOperations()
+    keyboard = KeyboardOperations()
+    image_recognition = ImageRecognition()
+    window = WindowOperations()
+    condition = ConditionEvaluator()
+    condition.set_image_ops(image_recognition)
+    condition.set_window_ops(window)
+    loop = LoopController()
+    excel = ExcelOperations()
+    flow_control = FlowControl()
+
+    return StepExecutor(
+        mouse=mouse,
+        keyboard=keyboard,
+        image_recognition=image_recognition,
+        window=window,
+        condition=condition,
+        loop=loop,
+        excel=excel,
+        flow_control=flow_control,
+        variable_manager=variable_manager,
+        logger=logger,
+    )

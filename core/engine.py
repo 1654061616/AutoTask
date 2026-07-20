@@ -30,7 +30,7 @@ class FlowEngine:
 
     def _init_operations(self):
         try:
-            from operations import create_step_executor
+            from core.step_executor import create_step_executor
             self.step_executor = create_step_executor(self.variable_manager, self.logger)
         except ImportError as e:
             self.logger.error(f"加载操作模块失败: {str(e)}")
