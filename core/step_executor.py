@@ -132,9 +132,19 @@ class StepExecutor:
             return
         x, y = self._resolve_position(config)
         duration = config.get("duration", 0.5)
+        move_type = config.get("move_type", "ease")
         if x is not None and y is not None:
-            self.logger.info(f"鼠标移动: ({x}, {y}), 耗时: {duration}秒")
-            self.mouse.move(x, y, duration=duration)
+            self.logger.info(f"鼠标移动: ({x}, {y}), 耗时: {duration}秒, 方式: {move_type}")
+            if move_type == "linear":
+                # 线性移动，不使用平滑曲线(匀速直线移动)
+                self.mouse.move(x, y, duration=duration, easing=False)
+            elif move_type == "random":
+                offset_x = random.randint(-5, 5)
+                offset_y = random.randint(-5, 5)
+                self.mouse.move(x + offset_x, y + offset_y, duration=duration)
+            else:
+                # 使用默认的平滑曲线(贝塞尔曲线)
+                self.mouse.move(x, y, duration=duration)
             self.last_move_pos = (x, y)
 
     def _execute_mouse_drag(self, config):

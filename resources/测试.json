@@ -45,8 +45,8 @@
     {
       "id": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "type": "end",
-      "x": 1537.7647533114655,
-      "y": 531.5843840573298,
+      "x": 1743.0106535658942,
+      "y": 526.9721166358818,
       "config": {},
       "ports": {
         "输入": [
@@ -61,14 +61,14 @@
       "x": 1359.1996636331546,
       "y": 940.50640120241,
       "config": {
-        "delay": 0,
-        "duration": 0.5,
         "move_type": "linear",
+        "duration": 0.5,
         "position_type": "relative",
+        "smooth_curve": true,
+        "delay": 0,
         "relative_base": "current",
         "relative_x": 10,
-        "relative_y": 10,
-        "smooth_curve": true
+        "relative_y": 10
       },
       "ports": {
         "输入": [
@@ -84,20 +84,11 @@
     {
       "id": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
       "type": "image_click",
-      "x": 1088.4111973730787,
-      "y": 541.4318077229518,
+      "x": 890.083698250822,
+      "y": 536.819540301504,
       "config": {
-        "algorithm": "akaze",
-        "click_position": "center",
-        "click_type": "left_single",
-        "delay": 0,
-        "direction": "default",
-        "find_range": "自定义区域",
         "image_path": "e:\\A_PycharmProjects\\AutoTask\\resources\\image\\screenshot_1784193839.png",
-        "offset_x": 0,
-        "offset_y": 0,
-        "random_offset": false,
-        "random_range": 3,
+        "find_range": "自定义区域",
         "region": {
           "height": 228,
           "width": 505,
@@ -105,8 +96,17 @@
           "y": 17
         },
         "similarity": 0.9,
+        "algorithm": "akaze",
+        "direction": "default",
+        "click_type": "left_single",
+        "click_position": "center",
+        "offset_x": 0,
+        "offset_y": 0,
+        "random_offset": false,
+        "random_range": 3,
         "wait_find": true,
-        "wait_timeout": 5
+        "wait_timeout": 5,
+        "delay": 0
       },
       "ports": {
         "输入": [
@@ -155,10 +155,10 @@
     {
       "id": "61a6275b-e47f-4dce-9b3f-9475c8269eb4",
       "type": "mouse_move",
-      "x": 668.9013887933409,
-      "y": 536.8427185168513,
+      "x": 597.4112437608995,
+      "y": 539.148852227575,
       "config": {
-        "move_type": "ease",
+        "move_type": "linear",
         "duration": 0.5,
         "position_type": "relative",
         "smooth_curve": true,
@@ -231,12 +231,12 @@
       "target_node": "aad63f21-0ecf-4eaa-88dd-92b57f297884",
       "target_port": "输入",
       "cp1": {
-        "x": 0.4010149797773847,
-        "y": -0.002971060753963112
+        "x": 0.1531552627963787,
+        "y": -0.0004333450391370248
       },
       "cp2": {
-        "x": 0.5989850202226152,
-        "y": 0.002971060753963112
+        "x": 0.8468447372036212,
+        "y": 0.0004333450391370251
       },
       "cp_manually_adjusted": false
     },
@@ -261,12 +261,12 @@
       "target_node": "61a6275b-e47f-4dce-9b3f-9475c8269eb4",
       "target_port": "输入",
       "cp1": {
-        "x": 0.49992139493043425,
-        "y": -0.006268680564992488
+        "x": 0.49998050826631785,
+        "y": 0.0031217762433813634
       },
       "cp2": {
-        "x": 0.5000786050695657,
-        "y": 0.006268680564992488
+        "x": 0.5000194917336835,
+        "y": -0.0031217762433813534
       },
       "cp_manually_adjusted": false
     },
@@ -276,12 +276,27 @@
       "target_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
       "target_port": "输入",
       "cp1": {
-        "x": 0.455361486261856,
-        "y": 0.009519822804269322
+        "x": 0.49968431809478153,
+        "y": -0.012559510242985948
       },
       "cp2": {
-        "x": 0.5446385137381441,
-        "y": -0.009519822804269322
+        "x": 0.5003156819052174,
+        "y": 0.012559510242985978
+      },
+      "cp_manually_adjusted": false
+    },
+    {
+      "source_node": "821da7f6-dcd7-45cf-a7ff-1748f7593360",
+      "source_port": "False",
+      "target_node": "f1a0d41e-67b8-45e6-85af-1d470bfe49d8",
+      "target_port": "输入",
+      "cp1": {
+        "x": 0.261331150842566,
+        "y": 0.17554909436908617
+      },
+      "cp2": {
+        "x": 0.738668849157434,
+        "y": -0.17554909436908617
       },
       "cp_manually_adjusted": false
     }

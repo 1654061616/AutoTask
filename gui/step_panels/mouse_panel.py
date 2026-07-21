@@ -267,8 +267,6 @@ class MouseMovePanel(StepConfigPanel):
         relative_layout.addLayout(rel_offset_layout)
         self.main_layout.addWidget(self.relative_group)
 
-        self.smooth_curve_check = self.add_checkbox("平滑曲线移动", checked=True)
-
         self.add_separator()
         self.add_delay_section()
 
@@ -303,7 +301,6 @@ class MouseMovePanel(StepConfigPanel):
             "move_type": ["linear", "ease", "random"][self.move_type_combo.currentIndex()],
             "duration": self.duration_spin.value(),
             "position_type": position_types[position_type],
-            "smooth_curve": self.smooth_curve_check.isChecked(),
             "delay": self.delay_spin.value()
         }
 
@@ -327,7 +324,6 @@ class MouseMovePanel(StepConfigPanel):
         position_type = position_type_map.get(config.get("position_type", "screen"), 0)
         self.position_radios[position_type].setChecked(True)
 
-        self.smooth_curve_check.setChecked(config.get("smooth_curve", True))
         self.delay_spin.setValue(config.get("delay", 0))
 
         self.screen_x_spin.setValue(config.get("x", 0))
