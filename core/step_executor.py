@@ -114,8 +114,14 @@ class StepExecutor:
         x, y = self._resolve_position(config)
         button = config.get("button", "left")
         clicks = config.get("clicks", 1)
-        # 读取点击间隔，默认 0.2 秒，控制多次点击时每次点击之间的等待时间
         interval = config.get("interval", 0.2)
+        # 随机偏移：在目标坐标周围随机偏移，避免被检测为脚本
+        if config.get("random_offset", False) and x is not None and y is not None:
+            offset_range = config.get("random_range", 5)
+            offset_x = random.randint(-offset_range, offset_range)
+            offset_y = random.randint(-offset_range, offset_range)
+            x += offset_x
+            y += offset_y
         if x is not None and y is not None:
             self.logger.info(f"鼠标点击: ({x}, {y}), 按钮: {button}, 次数: {clicks}")
             self.mouse.click(x=x, y=y, button=button, clicks=clicks, interval=interval)

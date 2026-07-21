@@ -96,7 +96,8 @@ class MouseClickPanel(StepConfigPanel):
         relative_layout.addLayout(rel_offset_layout)
         self.main_layout.addWidget(self.relative_group)
 
-        random_layout = QHBoxLayout()
+        self.random_offset_group = QGroupBox("随机偏移")
+        random_layout = QHBoxLayout(self.random_offset_group)
         random_layout.setSpacing(8)
         self.random_offset_check = QCheckBox("随机偏移")
         random_layout.addWidget(self.random_offset_check)
@@ -108,7 +109,7 @@ class MouseClickPanel(StepConfigPanel):
         random_layout.addWidget(self.random_range_spin)
         random_layout.addWidget(QLabel("像素"))
         random_layout.addStretch()
-        self.main_layout.addLayout(random_layout)
+        self.main_layout.addWidget(self.random_offset_group)
 
         self.add_separator()
         self.add_delay_section()
@@ -129,6 +130,7 @@ class MouseClickPanel(StepConfigPanel):
 
         self.screen_coord_group.setVisible(selected_index == 1)
         self.relative_group.setVisible(selected_index == 2)
+        self.random_offset_group.setVisible(selected_index != 0)
 
     def _select_screen_coordinate(self):
         def on_coordinate_selected(x, y):

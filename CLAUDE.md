@@ -142,3 +142,7 @@ python setup.py sdist bdist_wheel
 - 图标资源位于 `gui/styles/resources/icons/`
 - 主题 QSS 文件位于 `gui/styles/resources/themes/`
 - Windows 平台特殊处理：DPI 感知设置（`main.py`）
+- 所有函数和类都必须有中文注释
+- 所有变量都必须有中文注释
+- 提交代码前，不用对比resources/下的所有文件
+- 不允许自动提交代码
