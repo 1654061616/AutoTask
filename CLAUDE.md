@@ -146,3 +146,4 @@ python setup.py sdist bdist_wheel
 - 所有变量都必须有中文注释
 - 提交代码前，不用对比resources/下的所有文件
 - 不允许自动提交代码
+- 注意PowerShell引号问题，用标准引号

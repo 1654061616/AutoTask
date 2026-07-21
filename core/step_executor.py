@@ -3,6 +3,7 @@
 """
 import time
 import random
+import math
 from typing import Any, Callable, Dict
 
 
@@ -145,13 +146,49 @@ class StepExecutor:
                 # 线性移动，不使用平滑曲线(匀速直线移动)
                 self.mouse.move(x, y, duration=duration, easing=False)
             elif move_type == "random":
-                offset_x = random.randint(-5, 5)
-                offset_y = random.randint(-5, 5)
-                self.mouse.move(x + offset_x, y + offset_y, duration=duration)
+                start_x, start_y = self.mouse.get_position()
+                num_waypoints = config.get("random_waypoints", 3)
+                rand_offset = config.get("random_offset", 30)
+                time_dist = config.get("random_time_dist", "equal")
+                self._move_random_path(start_x, start_y, x, y, duration, num_waypoints, rand_offset, time_dist)
             else:
                 # 使用默认的平滑曲线(贝塞尔曲线)
                 self.mouse.move(x, y, duration=duration)
             self.last_move_pos = (x, y)
+
+    def _move_random_path(self, start_x, start_y, target_x, target_y, duration,
+                          num_waypoints, rand_offset, time_dist):
+        """随机路径移动：经过多个随机途经点，最后到达终点"""
+        dist_x = target_x - start_x
+        dist_y = target_y - start_y
+        total_segments = num_waypoints + 1
+
+        # 根据时间分配策略计算每段耗时
+        if time_dist == "fast_to_slow":
+            # 先快后慢：权重递减
+            weights = [total_segments - i for i in range(total_segments)]
+        elif time_dist == "slow_to_fast":
+            # 先慢后快：权重递增
+            weights = [i + 1 for i in range(total_segments)]
+        else:
+            # 平均分配
+            weights = [1] * total_segments
+        weight_sum = sum(weights)
+        segment_durations = [duration * w / weight_sum for w in weights]
+
+        for i in range(num_waypoints):
+            t = (i + 1) / total_segments
+            # 沿路径方向插值
+            wx = start_x + dist_x * t
+            wy = start_y + dist_y * t
+            # 垂直方向随机偏移
+            angle = random.uniform(0, 2 * math.pi)
+            wx += random.uniform(0, rand_offset) * math.cos(angle)
+            wy += random.uniform(0, rand_offset) * math.sin(angle)
+            self.mouse.move(int(wx), int(wy), duration=segment_durations[i])
+
+        # 最后到达终点
+        self.mouse.move(target_x, target_y, duration=segment_durations[-1])
 
     def _execute_mouse_drag(self, config):
         """执行鼠标拖拽操作"""

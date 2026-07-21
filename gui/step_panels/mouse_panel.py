@@ -269,6 +269,48 @@ class MouseMovePanel(StepConfigPanel):
         relative_layout.addLayout(rel_offset_layout)
         self.main_layout.addWidget(self.relative_group)
 
+        self.random_path_group = QGroupBox("随机路径参数")
+        random_path_layout = QVBoxLayout(self.random_path_group)
+
+        waypoints_layout = QHBoxLayout()
+        waypoints_layout.setSpacing(8)
+        waypoints_layout.addWidget(QLabel("途经点数量:"))
+        self.random_waypoints_spin = QSpinBox()
+        self.random_waypoints_spin.setRange(1, 10)
+        self.random_waypoints_spin.setValue(3)
+        self.random_waypoints_spin.setStyleSheet(Styles.spin_box())
+        waypoints_layout.addWidget(self.random_waypoints_spin)
+        waypoints_layout.addWidget(QLabel("个"))
+        waypoints_layout.addStretch()
+        random_path_layout.addLayout(waypoints_layout)
+
+        offset_layout = QHBoxLayout()
+        offset_layout.setSpacing(8)
+        offset_layout.addWidget(QLabel("偏移幅度:"))
+        self.random_offset_spin = QSpinBox()
+        self.random_offset_spin.setRange(5, 200)
+        self.random_offset_spin.setValue(30)
+        self.random_offset_spin.setStyleSheet(Styles.spin_box())
+        offset_layout.addWidget(self.random_offset_spin)
+        offset_layout.addWidget(QLabel("像素"))
+        offset_layout.addStretch()
+        random_path_layout.addLayout(offset_layout)
+
+        time_dist_layout = QHBoxLayout()
+        time_dist_layout.setSpacing(8)
+        time_dist_layout.addWidget(QLabel("时间分配:"))
+        self.random_time_dist_combo = QComboBox()
+        self.random_time_dist_combo.addItems(["平均分配", "先快后慢", "先慢后快"])
+        self.random_time_dist_combo.setStyleSheet(Styles.combo_box())
+        time_dist_view = QListView()
+        time_dist_view.setStyleSheet(Styles.combo_view())
+        self.random_time_dist_combo.setView(time_dist_view)
+        time_dist_layout.addWidget(self.random_time_dist_combo)
+        time_dist_layout.addStretch()
+        random_path_layout.addLayout(time_dist_layout)
+
+        self.main_layout.addWidget(self.random_path_group)
+
         self.add_separator()
         self.add_delay_section()
 
@@ -278,6 +320,7 @@ class MouseMovePanel(StepConfigPanel):
     def _connect_signals(self):
         for radio in self.position_radios:
             radio.toggled.connect(self._update_position_visibility)
+        self.move_type_combo.currentIndexChanged.connect(self._update_position_visibility)
 
     def _update_position_visibility(self):
         selected_index = -1
@@ -288,6 +331,7 @@ class MouseMovePanel(StepConfigPanel):
 
         self.screen_coord_group.setVisible(selected_index == 0)
         self.relative_group.setVisible(selected_index == 1)
+        self.random_path_group.setVisible(self.move_type_combo.currentIndex() == 2)
 
     def _select_screen_coordinate(self):
         def on_coordinate_selected(x, y):
@@ -303,6 +347,9 @@ class MouseMovePanel(StepConfigPanel):
             "move_type": ["linear", "ease", "random"][self.move_type_combo.currentIndex()],
             "duration": self.duration_spin.value(),
             "position_type": position_types[position_type],
+            "random_waypoints": self.random_waypoints_spin.value(),
+            "random_offset": self.random_offset_spin.value(),
+            "random_time_dist": ["equal", "fast_to_slow", "slow_to_fast"][self.random_time_dist_combo.currentIndex()],
             "delay": self.delay_spin.value()
         }
 
@@ -325,6 +372,11 @@ class MouseMovePanel(StepConfigPanel):
         position_type_map = {"screen": 0, "relative": 1}
         position_type = position_type_map.get(config.get("position_type", "screen"), 0)
         self.position_radios[position_type].setChecked(True)
+
+        self.random_waypoints_spin.setValue(config.get("random_waypoints", 3))
+        self.random_offset_spin.setValue(config.get("random_offset", 30))
+        time_dist_map = {"equal": 0, "fast_to_slow": 1, "slow_to_fast": 2}
+        self.random_time_dist_combo.setCurrentIndex(time_dist_map.get(config.get("random_time_dist", "equal"), 0))
 
         self.delay_spin.setValue(config.get("delay", 0))
 
