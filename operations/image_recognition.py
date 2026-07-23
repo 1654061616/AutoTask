@@ -159,6 +159,16 @@ class ImageRecognition:
         """判断图片是否存在"""
         return self.find_image(template_path, region=region, threshold=threshold, method=method, direction=direction) is not None
 
+    @staticmethod
+    def get_image_size(image_path: str):
+        """获取图片尺寸，返回 (width, height)，失败返回 (None, None)"""
+        if not os.path.exists(image_path):
+            return None, None
+        img = cv2.imread(image_path)
+        if img is None:
+            return None, None
+        return img.shape[1], img.shape[0]
+
     def get_screen_size(self) -> Tuple[int, int]:
         """获取屏幕分辨率"""
         return (self.monitor["width"], self.monitor["height"])

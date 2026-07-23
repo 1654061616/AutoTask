@@ -319,7 +319,7 @@ class StepExecutor:
             self.logger.error("图像识别模块未加载")
             return False
         image_path = config.get("image_path", "")
-        region = config.get("region")
+        region = self._parse_region(config.get("region"))
         similarity = config.get("similarity", 0.8)
         algorithm = config.get("algorithm", "template")
         direction = config.get("direction", "default")
@@ -354,6 +354,8 @@ class StepExecutor:
             self.logger.error("图像识别或鼠标模块未加载")
             return False
         image_path = config.get("image_path", "")
+        click_position = config.get("click_position", "center")
+        click_type = config.get("click_type", "left_single")
         offset_x = config.get("offset_x", 0)
         offset_y = config.get("offset_y", 0)
         similarity = config.get("similarity", 0.8)
@@ -361,15 +363,27 @@ class StepExecutor:
         direction = config.get("direction", "default")
         wait_find = config.get("wait_find", False)
         wait_timeout = config.get("wait_timeout", 5)
-        self.logger.info(f"点击图片: {image_path}, 相似度: {similarity}, 算法: {algorithm}, 方向: {direction}, 超时: {wait_timeout}秒")
+        random_offset = config.get("random_offset", False)
+        random_range = config.get("random_range", 5)
+        region = self._parse_region(config.get("region"))
+        self.logger.info(f"点击图片: {image_path}, 相似度: {similarity}, 算法: {algorithm}, "
+                         f"方向: {direction}, 点击位置: {click_position}, 超时: {wait_timeout}秒")
         start_time = time.time()
-        result = None
         while True:
-            result = self.image_recognition.find_image(image_path, threshold=similarity, method=algorithm, direction=direction)
+            result = self.image_recognition.find_image(image_path, threshold=similarity,
+                                                       method=algorithm, direction=direction,
+                                                       region=region)
             if result:
-                x, y = result
-                self.mouse.click(x + offset_x, y + offset_y)
-                self.logger.info(f"点击位置: ({x + offset_x}, {y + offset_y})")
+                x, y = self._calc_image_click_pos(result, image_path, click_position)
+                x += offset_x
+                y += offset_y
+                if random_offset:
+                    x += random.randint(-random_range, random_range)
+                    y += random.randint(-random_range, random_range)
+                button = "left" if "left" in click_type else "right"
+                clicks = 2 if "double" in click_type else 1
+                self.mouse.click(x, y, button=button, clicks=clicks)
+                self.logger.info(f"点击位置: ({x}, {y}), 按钮: {button}, 次数: {clicks}")
                 return True
             if not wait_find:
                 break
@@ -383,6 +397,37 @@ class StepExecutor:
             time.sleep(0.5)
         self.logger.info("未找到图片，跳过点击")
         return False
+
+    def _calc_image_click_pos(self, find_result, image_path, click_position):
+        """根据 click_position 计算实际点击坐标"""
+        center_x, center_y = find_result
+        if click_position == "center":
+            return center_x, center_y
+        w, h = self.image_recognition.get_image_size(image_path)
+        if w is None or h is None:
+            return center_x, center_y
+        offset_map = {
+            "top_left": (-w // 2, -h // 2),
+            "top_right": (w // 2, -h // 2),
+            "bottom_left": (-w // 2, h // 2),
+            "bottom_right": (w // 2, h // 2),
+            "custom": (0, 0),
+        }
+        dx, dy = offset_map.get(click_position, (0, 0))
+        return center_x + dx, center_y + dy
+
+    @staticmethod
+    def _parse_region(region):
+        """将 GUI 传来的 region dict 转为 find_image 所需的 (x1, y1, x2, y2) 元组"""
+        if not region or not isinstance(region, dict):
+            return None
+        x = region.get("x", 0)
+        y = region.get("y", 0)
+        w = region.get("width", 0)
+        h = region.get("height", 0)
+        if w <= 0 or h <= 0:
+            return None
+        return (x, y, x + w, y + h)
 
     def _execute_image_exists(self, config, is_running_func):
         """判断图片是否存在，支持等待模式"""
