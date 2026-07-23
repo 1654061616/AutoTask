@@ -1,8 +1,9 @@
 """
 Excel 操作模块 — 基于 openpyxl 的 Excel 读写与流程配置驱动
 """
+import random
 from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
+from openpyxl.utils import get_column_letter, column_index_from_string
 from typing import Dict, Any, List, Optional
 
 class ExcelOperations:
@@ -126,3 +127,63 @@ class ExcelOperations:
             variable_manager.set_variable(output_variable, value)
 
         return value
+
+    def read_for_keyboard(self, excel_config: Dict[str, Any], excel_cursors: Dict[str, int]) -> str:
+        """从 Excel 读取数据用于键盘输入，支持顺序和随机两种读取模式"""
+        file_path = excel_config.get("file_path", "")
+        sheet = excel_config.get("sheet", "Sheet1")
+        read_mode = excel_config.get("read_mode", "sequential")
+        read_range = excel_config.get("read_range", "cell")
+        var_format = excel_config.get("var_format", "string")
+        wb = load_workbook(file_path, data_only=True)
+        ws = wb[sheet]
+        if read_mode == "sequential":
+            cursor_key = f"{file_path}:{sheet}"
+            current_row = excel_cursors.get(cursor_key, 1)
+            if current_row > ws.max_row:
+                current_row = 1
+            value = self._read_row_value(ws, current_row, read_range, excel_config)
+            excel_cursors[cursor_key] = current_row + 1
+        else:
+            current_row = random.randint(1, ws.max_row)
+            value = self._read_row_value(ws, current_row, read_range, excel_config)
+        wb.close()
+        return self._format_value(value, var_format)
+
+    def _read_row_value(self, ws, row_num: int, read_range: str, config: Dict[str, Any]):
+        """根据读取模式从 Excel 行中获取值"""
+        if read_range == "cell":
+            addr = config.get("cell_address", "A1")
+            col_letter = ''.join(c for c in addr if c.isalpha())
+            return ws[f"{col_letter}{row_num}"].value
+        elif read_range == "row":
+            return [ws.cell(row=row_num, column=c).value for c in range(1, ws.max_column + 1)]
+        elif read_range == "column":
+            col_num = config.get("column_number", 1)
+            return ws.cell(row=row_num, column=col_num).value
+        elif read_range == "range":
+            start_cell = config.get("start_cell", "A1")
+            end_cell = config.get("end_cell", "A1")
+            start_col = column_index_from_string(
+                ''.join(c for c in start_cell if c.isalpha()))
+            start_row = int(''.join(c for c in start_cell if c.isdigit()))
+            end_col = column_index_from_string(
+                ''.join(c for c in end_cell if c.isalpha()))
+            end_row = int(''.join(c for c in end_cell if c.isdigit()))
+            total_rows = end_row - start_row + 1
+            offset = (row_num - 1) % total_rows
+            actual_row = start_row + offset
+            return [ws.cell(row=actual_row, column=c).value for c in range(start_col, end_col + 1)]
+        return None
+
+    @staticmethod
+    def _format_value(value, var_format: str) -> str:
+        """根据格式类型格式化 Excel 值"""
+        if var_format == "number":
+            return str(value) if value is not None else "0"
+        elif var_format == "list":
+            if isinstance(value, list):
+                return ", ".join(str(v) if v is not None else "" for v in value)
+            return str(value) if value is not None else ""
+        else:
+            return str(value) if value is not None else ""

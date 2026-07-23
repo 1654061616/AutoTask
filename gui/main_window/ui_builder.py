@@ -7,7 +7,9 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                                QFileDialog, QMessageBox, QProgressBar,
                                QInputDialog, QHeaderView, QDialog, QApplication)
 from PySide6.QtGui import QIcon, QAction, QFont, QPainter, QPixmap, QColor, QPen, QBrush, QPainterPath
-from PySide6.QtCore import Qt, QSize, Signal, Slot, QPointF
+from PySide6.QtCore import Qt, QSize, Signal, Slot, QPointF, QMetaObject
+
+import keyboard
 
 from ..node_graph import GraphScene, GraphView, NodeToolbar
 
@@ -223,10 +225,7 @@ class UIBuilderMixin:
 
         self.start_task_btn.clicked.connect(self.on_run_flow)
         self.stop_task_btn.clicked.connect(self.on_stop_flow)
-        stop_action = QAction("停止任务", self)
-        stop_action.setShortcut("F9")
-        stop_action.triggered.connect(self.on_stop_flow)
-        self.addAction(stop_action)
+        keyboard.add_hotkey('f9', lambda: QMetaObject.invokeMethod(self, "on_stop_flow", Qt.QueuedConnection))
         self.edit_steps_btn.clicked.connect(self.on_edit_steps)
         self.save_config_btn.clicked.connect(lambda checked: self.on_save_flow())
 

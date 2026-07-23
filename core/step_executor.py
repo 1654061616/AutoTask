@@ -222,7 +222,7 @@ class StepExecutor:
             return
         data_source = config.get("data_source", "manual")
         if data_source == "excel":
-            text = self._read_excel_for_keyboard(config.get("excel", {}), excel_cursors)
+            text = self.excel.read_for_keyboard(config.get("excel", {}), excel_cursors)
         elif data_source == "variable":
             var_name = config.get("variable_name", "")
             text = str(self.variable_manager.get_variable(var_name) or "")
@@ -232,67 +232,6 @@ class StepExecutor:
         interval = config.get("interval", 0.05)
         self.logger.info(f"键盘输入: {text}")
         self.keyboard.type(text, interval=interval)
-
-    def _read_excel_for_keyboard(self, excel_config, excel_cursors):
-        """从 Excel 读取数据用于键盘输入"""
-        import openpyxl
-        file_path = excel_config.get("file_path", "")
-        sheet = excel_config.get("sheet", "Sheet1")
-        read_mode = excel_config.get("read_mode", "sequential")
-        read_range = excel_config.get("read_range", "cell")
-        var_format = excel_config.get("var_format", "string")
-        wb = openpyxl.load_workbook(file_path, data_only=True)
-        ws = wb[sheet]
-        if read_mode == "sequential":
-            cursor_key = f"{file_path}:{sheet}"
-            current_row = excel_cursors.get(cursor_key, 1)
-            if current_row > ws.max_row:
-                current_row = 1
-            value = self._read_excel_row_value(ws, current_row, read_range, excel_config)
-            excel_cursors[cursor_key] = current_row + 1
-        else:
-            current_row = random.randint(1, ws.max_row)
-            value = self._read_excel_row_value(ws, current_row, read_range, excel_config)
-        wb.close()
-        return self._format_excel_value(value, var_format)
-
-    def _read_excel_row_value(self, ws, row_num, read_range, config):
-        """根据读取模式从 Excel 行中获取值"""
-        if read_range == "cell":
-            addr = config.get("cell_address", "A1")
-            col_letter = ''.join(c for c in addr if c.isalpha())
-            return ws[f"{col_letter}{row_num}"].value
-        elif read_range == "row":
-            return [ws.cell(row=row_num, column=c).value for c in range(1, ws.max_column + 1)]
-        elif read_range == "column":
-            col_num = config.get("column_number", 1)
-            return ws.cell(row=row_num, column=col_num).value
-        elif read_range == "range":
-            import openpyxl.utils
-            start_cell = config.get("start_cell", "A1")
-            end_cell = config.get("end_cell", "A1")
-            start_col = openpyxl.utils.column_index_from_string(
-                ''.join(c for c in start_cell if c.isalpha()))
-            start_row = int(''.join(c for c in start_cell if c.isdigit()))
-            end_col = openpyxl.utils.column_index_from_string(
-                ''.join(c for c in end_cell if c.isalpha()))
-            end_row = int(''.join(c for c in end_cell if c.isdigit()))
-            total_rows = end_row - start_row + 1
-            offset = (row_num - 1) % total_rows
-            actual_row = start_row + offset
-            return [ws.cell(row=actual_row, column=c).value for c in range(start_col, end_col + 1)]
-        return None
-
-    def _format_excel_value(self, value, var_format):
-        """根据格式类型格式化 Excel 值"""
-        if var_format == "number":
-            return str(value) if value is not None else "0"
-        elif var_format == "list":
-            if isinstance(value, list):
-                return ", ".join(str(v) if v is not None else "" for v in value)
-            return str(value) if value is not None else ""
-        else:
-            return str(value) if value is not None else ""
 
     def _execute_keyboard_press(self, config):
         """执行按键操作"""

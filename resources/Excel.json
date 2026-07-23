@@ -1,0 +1,287 @@
+{
+  "id": "87852fbc",
+  "name": "Excel",
+  "version": "1.0",
+  "status": "已停止",
+  "nodes": [
+    {
+      "id": "601fc6bf-2114-49a6-b96f-9aee6ce6fc8b",
+      "type": "start",
+      "x": 325.55265392056947,
+      "y": 655.7397965696498,
+      "config": {},
+      "ports": {
+        "输出": [
+          90.93508455224355,
+          -8.0
+        ]
+      }
+    },
+    {
+      "id": "81d6a0b7-a19d-4f71-b88e-98f22b219eee",
+      "type": "end",
+      "x": 655.8297009198033,
+      "y": 473.80595543489414,
+      "config": {},
+      "ports": {
+        "输入": [
+          -8.0,
+          35.4061402069201
+        ]
+      }
+    },
+    {
+      "id": "400a1b5b-26e6-4377-8b26-94033c23265c",
+      "type": "loop",
+      "x": 383.1363979664262,
+      "y": 389.41316696402976,
+      "config": {
+        "count": 5,
+        "delay": 0,
+        "loop_interval": 0.5,
+        "loop_type": "count",
+        "loop_var": "",
+        "start_value": 0,
+        "step": 1
+      },
+      "ports": {
+        "输入": [
+          58.610966999657705,
+          97.0
+        ],
+        "True": [
+          192.0,
+          32.0
+        ],
+        "False": [
+          192.0,
+          88.0
+        ]
+      }
+    },
+    {
+      "id": "37782bc5-fd5e-4048-9eac-f3c980650a67",
+      "type": "mouse_click",
+      "x": 994.4267607920528,
+      "y": 341.17763913669177,
+      "config": {
+        "click_type": "left_double",
+        "delay": 0,
+        "position_type": "screen",
+        "random_offset": false,
+        "random_range": 5,
+        "x": 107,
+        "y": 216
+      },
+      "ports": {
+        "输入": [
+          -8.0,
+          40.0
+        ],
+        "输出": [
+          192.0,
+          40.0
+        ]
+      }
+    },
+    {
+      "id": "5a21f4b7-527b-4c1e-b924-f8dc6544c632",
+      "type": "keyboard_type",
+      "x": 1527.6775042476793,
+      "y": 334.8716325888388,
+      "config": {
+        "data_source": "excel",
+        "delay": 0,
+        "excel": {
+          "cell_address": "",
+          "column_number": 1,
+          "end_cell": "",
+          "file_path": "E:/A_PycharmProjects/AutoTask/resources/file/Result_1.xlsx",
+          "read_mode": "sequential",
+          "read_range": "column",
+          "row_number": 1,
+          "sheet": "Result 1",
+          "start_cell": "",
+          "var_format": "string"
+        },
+        "human_input": false,
+        "input_method": "clipboard",
+        "interval": 0.05,
+        "random_interval": false,
+        "random_max_interval": 0.15,
+        "random_min_interval": 0.02
+      },
+      "ports": {
+        "输入": [
+          -8.0,
+          42.29692989653995
+        ],
+        "输出": [
+          192.0,
+          40.0
+        ]
+      }
+    },
+    {
+      "id": "31d854ff-3ff5-4a0c-99e0-f8f231bf9e5f",
+      "type": "mouse_click",
+      "x": 655.8570349626605,
+      "y": 344.0342144131556,
+      "config": {
+        "click_type": "left_single",
+        "delay": 0,
+        "position_type": "screen",
+        "random_offset": false,
+        "random_range": 5,
+        "x": 2545,
+        "y": 1451
+      },
+      "ports": {
+        "输入": [
+          -8.0,
+          40.0
+        ],
+        "输出": [
+          192.0,
+          40.0
+        ]
+      }
+    },
+    {
+      "id": "68bf6c18-acb9-48c3-85cc-e191e35b9d91",
+      "type": "mouse_click",
+      "x": 1259.3718854217386,
+      "y": 337.6128192469197,
+      "config": {
+        "click_type": "left_double",
+        "delay": 0,
+        "position_type": "current",
+        "random_offset": false,
+        "random_range": 5
+      },
+      "ports": {
+        "输入": [
+          -8.0,
+          40.0
+        ],
+        "输出": [
+          192.0,
+          40.0
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source_node": "601fc6bf-2114-49a6-b96f-9aee6ce6fc8b",
+      "source_port": "输出",
+      "target_node": "400a1b5b-26e6-4377-8b26-94033c23265c",
+      "target_port": "输入",
+      "cp1": {
+        "x": 0.011964462016831557,
+        "y": -0.07641389047197872
+      },
+      "cp2": {
+        "x": 0.9880355379831683,
+        "y": 0.07641389047197907
+      },
+      "cp_manually_adjusted": false
+    },
+    {
+      "source_node": "5a21f4b7-527b-4c1e-b924-f8dc6544c632",
+      "source_port": "输出",
+      "target_node": "400a1b5b-26e6-4377-8b26-94033c23265c",
+      "target_port": "输入",
+      "cp1": {
+        "x": -0.05318241783190228,
+        "y": 0.35213811274289214
+      },
+      "cp2": {
+        "x": 0.7742890602013643,
+        "y": 0.31091899429186876
+      },
+      "cp_manually_adjusted": true
+    },
+    {
+      "source_node": "400a1b5b-26e6-4377-8b26-94033c23265c",
+      "source_port": "False",
+      "target_node": "81d6a0b7-a19d-4f71-b88e-98f22b219eee",
+      "target_port": "输入",
+      "cp1": {
+        "x": 0.41969074998919254,
+        "y": 0.18358934982211075
+      },
+      "cp2": {
+        "x": 0.5803092500108075,
+        "y": -0.18358934982211075
+      },
+      "cp_manually_adjusted": false
+    },
+    {
+      "source_node": "400a1b5b-26e6-4377-8b26-94033c23265c",
+      "source_port": "True",
+      "target_node": "31d854ff-3ff5-4a0c-99e0-f8f231bf9e5f",
+      "target_port": "输入",
+      "cp1": {
+        "x": 0.3955058805255059,
+        "y": -0.20329298741593993
+      },
+      "cp2": {
+        "x": 0.6044941194744954,
+        "y": 0.20329298741593926
+      },
+      "cp_manually_adjusted": false
+    },
+    {
+      "source_node": "31d854ff-3ff5-4a0c-99e0-f8f231bf9e5f",
+      "source_port": "输出",
+      "target_node": "37782bc5-fd5e-4048-9eac-f3c980650a67",
+      "target_port": "输入",
+      "cp1": {
+        "x": 0.49978760704182434,
+        "y": -0.010302978613932373
+      },
+      "cp2": {
+        "x": 0.5002123929581757,
+        "y": 0.010302978613932373
+      },
+      "cp_manually_adjusted": false
+    },
+    {
+      "source_node": "37782bc5-fd5e-4048-9eac-f3c980650a67",
+      "source_port": "输出",
+      "target_node": "68bf6c18-acb9-48c3-85cc-e191e35b9d91",
+      "target_port": "输入",
+      "cp1": {
+        "x": 0.4984980842584961,
+        "y": -0.027362421673846348
+      },
+      "cp2": {
+        "x": 0.5015019157415039,
+        "y": 0.027362421673846348
+      },
+      "cp_manually_adjusted": false
+    },
+    {
+      "source_node": "68bf6c18-acb9-48c3-85cc-e191e35b9d91",
+      "source_port": "输出",
+      "target_node": "5a21f4b7-527b-4c1e-b924-f8dc6544c632",
+      "target_port": "输入",
+      "cp1": {
+        "x": 0.49997885017073496,
+        "y": -0.00325184060453105
+      },
+      "cp2": {
+        "x": 0.5000211498292652,
+        "y": 0.00325184060453105
+      },
+      "cp_manually_adjusted": false
+    }
+  ],
+  "schedule": {
+    "trigger_type": "interval",
+    "params": {
+      "interval": 3660
+    }
+  }
+}
