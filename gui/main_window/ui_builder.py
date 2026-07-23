@@ -223,6 +223,10 @@ class UIBuilderMixin:
 
         self.start_task_btn.clicked.connect(self.on_run_flow)
         self.stop_task_btn.clicked.connect(self.on_stop_flow)
+        stop_action = QAction("停止任务", self)
+        stop_action.setShortcut("F9")
+        stop_action.triggered.connect(self.on_stop_flow)
+        self.addAction(stop_action)
         self.edit_steps_btn.clicked.connect(self.on_edit_steps)
         self.save_config_btn.clicked.connect(lambda checked: self.on_save_flow())
 
