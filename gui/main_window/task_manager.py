@@ -26,9 +26,12 @@ class TaskManagerMixin:
                     task = {
                         "id": flow_data.get("id", str(uuid.uuid4())[:8]),
                         "name": flow_data.get("name", os.path.splitext(filename)[0]),
+                        "version": flow_data.get("version", "1.0"),
                         "status": "已停止",
                         "nodes": flow_data.get("nodes", []),
                         "edges": flow_data.get("edges", []),
+                        "variables": flow_data.get("variables", {}),
+                        "global_config": flow_data.get("global_config", {}),
                         "schedule": flow_data.get("schedule", {}),
                         "file_path": file_path
                     }
@@ -108,6 +111,7 @@ class TaskManagerMixin:
 
     @Slot()
     def on_new_flow(self):
+        # 点击菜单"新建"或工具栏新建图标都会触发 on_new_flow，创建新的空白流程
         flow_name, ok = QInputDialog.getText(self, "新建任务", "输入任务名称:")
         if ok and flow_name.strip():
             name = flow_name.strip()
@@ -117,8 +121,12 @@ class TaskManagerMixin:
         task = {
             "id": str(uuid.uuid4())[:8],
             "name": name,
+            "version": "1.0",
             "status": "已停止",
-            "steps": [],
+            "nodes": [],
+            "edges": [],
+            "variables": {},
+            "global_config": {},
             "file_path": None
         }
         self.add_task_to_tree(task)
@@ -137,8 +145,12 @@ class TaskManagerMixin:
         new_task = {
             "id": str(uuid.uuid4())[:8],
             "name": task["name"] + " (复制)",
+            "version": task.get("version", "1.0"),
             "status": "已停止",
-            "steps": [dict(s) for s in task.get("steps", [])],
+            "nodes": [dict(n) for n in task.get("nodes", [])],
+            "edges": [dict(e) for e in task.get("edges", [])],
+            "variables": dict(task.get("variables", {})),
+            "global_config": dict(task.get("global_config", {})),
             "file_path": None
         }
         self.add_task_to_tree(new_task)
@@ -195,9 +207,12 @@ class TaskManagerMixin:
                 task = {
                     "id": flow_data.get("id", str(uuid.uuid4())[:8]),
                     "name": flow_name,
+                    "version": flow_data.get("version", "1.0"),
                     "status": "已停止",
                     "nodes": flow_data.get("nodes", []),
                     "edges": flow_data.get("edges", []),
+                    "variables": flow_data.get("variables", {}),
+                    "global_config": flow_data.get("global_config", {}),
                     "schedule": flow_data.get("schedule", {}),
                     "file_path": file_path
                 }
@@ -269,6 +284,8 @@ class TaskManagerMixin:
                     "status": task.get("status", "已停止"),
                     "nodes": nodes,
                     "edges": edges,
+                    "variables": task.get("variables", {}),
+                    "global_config": task.get("global_config", {}),
                     "schedule": self.schedule_panel.get_config()
                 }
 
@@ -277,8 +294,11 @@ class TaskManagerMixin:
 
                 task["file_path"] = file_path
                 task["name"] = save_data["name"]
+                task["version"] = save_data["version"]
                 task["nodes"] = save_data["nodes"]
                 task["edges"] = save_data["edges"]
+                task["variables"] = save_data["variables"]
+                task["global_config"] = save_data["global_config"]
 
                 if current_item:
                     current_item.setText(0, save_data["name"])
@@ -331,6 +351,8 @@ class TaskManagerMixin:
                     "status": "已停止",
                     "nodes": nodes,
                     "edges": edges,
+                    "variables": task.get("variables", {}),
+                    "global_config": task.get("global_config", {}),
                     "schedule": self.schedule_panel.get_config() if hasattr(self, 'schedule_panel') else {}
                 }
 
@@ -340,9 +362,12 @@ class TaskManagerMixin:
                 new_task = {
                     "id": save_data["id"],
                     "name": save_name,
+                    "version": save_data["version"],
                     "status": "已停止",
                     "nodes": save_data["nodes"],
                     "edges": save_data["edges"],
+                    "variables": save_data["variables"],
+                    "global_config": save_data["global_config"],
                     "schedule": save_data["schedule"],
                     "file_path": file_path
                 }
