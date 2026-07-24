@@ -38,10 +38,10 @@ class MainWindow(QMainWindow,
     - NodeHandlerMixin: 节点图处理（编辑步骤、加载节点）
     """
     
-    flow_loaded = Signal(dict)       # 流程加载完成，传递流程数据字典
-    step_selected = Signal(dict)    # 画布中选中了某个步骤节点，传递步骤数据字典
-    flow_started = Signal()         # 流程开始执行
-    flow_stopped = Signal()         # 流程已停止
+    flow_loaded = Signal(dict)       # 未使用 流程加载完成，传递流程数据字典
+    step_selected = Signal(dict)    # 未使用 画布中选中了某个步骤节点，传递步骤数据字典
+    flow_started = Signal()         # 未使用 流程开始执行
+    flow_stopped = Signal()         # 未使用 流程已停止
     log_received = Signal(str)      # 收到引擎日志，传递日志文本
     task_completed = Signal(bool, str)  # 任务执行完成，传递(是否成功, 错误信息)
     

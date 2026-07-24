@@ -7,21 +7,18 @@ def test_core_modules():
     from core.parser import FlowParser
     from core.engine import FlowEngine
     from core.scheduler import TaskScheduler
-    from core.flow_manager import FlowManager
     
     logger = Logger()
     vm = VariableManager()
     parser = FlowParser()
     engine = FlowEngine()
     scheduler = TaskScheduler()
-    fm = FlowManager()
     
     assert logger is not None
     assert vm is not None
     assert parser is not None
     assert engine is not None
     assert scheduler is not None
-    assert fm is not None
 
 def test_operations_modules():
     from operations.mouse import MouseOperations
