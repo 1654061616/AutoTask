@@ -158,13 +158,13 @@
       "x": 597.4112437608995,
       "y": 539.148852227575,
       "config": {
-        "move_type": "random",
+        "delay": 0,
         "duration": 5.0,
+        "move_type": "random",
         "position_type": "screen",
-        "random_waypoints": 3,
         "random_offset": 30,
         "random_time_dist": "equal",
-        "delay": 0,
+        "random_waypoints": 3,
         "x": 464,
         "y": 207
       },
@@ -302,6 +302,17 @@
       "cp_manually_adjusted": false
     }
   ],
+  "variables": {},
+  "global_config": {
+    "wait_before": {
+      "type": "fixed",
+      "value": 0.5
+    },
+    "wait_after": {
+      "type": "fixed",
+      "value": 0.5
+    }
+  },
   "schedule": {
     "trigger_type": "interval",
     "params": {

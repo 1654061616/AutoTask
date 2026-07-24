@@ -3,7 +3,6 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                                QTreeWidget, QTreeWidgetItem,
                                QTextEdit, QLabel,
                                QLineEdit, QGroupBox, QGridLayout, QFormLayout,
-                               QSpinBox, QDoubleSpinBox, QCheckBox,
                                QFileDialog, QMessageBox, QProgressBar,
                                QInputDialog, QHeaderView, QDialog, QApplication)
 from PySide6.QtGui import QIcon, QAction, QFont, QPainter, QPixmap, QColor, QPen, QBrush, QPainterPath
@@ -12,6 +11,7 @@ from PySide6.QtCore import Qt, QSize, Signal, Slot, QPointF, QMetaObject
 import keyboard
 
 from ..node_graph import GraphScene, GraphView, NodeToolbar
+from ..widgets.global_config_dialog import GlobalConfigDialog
 
 from core.engine import FlowEngine
 from utils.resource_path import get_resources_dir, ensure_resources_dir
@@ -61,6 +61,7 @@ class UIBuilderMixin:
         # 从 Iconfont 下载的 SVG 图标，放在 gui/styles/resources/icons/ 目录
         new_icon = ThemeManager.load_icon("新建.svg", "document-new")
         open_icon = ThemeManager.load_icon("打开.svg", "document-open")
+        settings_icon = ThemeManager.load_icon("设置.svg", "preferences-system")
         # save_icon = ThemeManager.load_icon("保存.svg", "document-save")
         # run_icon = ThemeManager.load_icon("运行.svg", "media-play")
         # stop_icon = ThemeManager.load_icon("停止.svg", "media-stop")
@@ -69,6 +70,7 @@ class UIBuilderMixin:
 
         tool_bar.addAction(new_icon, "新建", self.on_new_flow)
         tool_bar.addAction(open_icon, "打开", self.on_open_flow)
+        tool_bar.addAction(settings_icon, "设置", self.on_show_settings)
         # tool_bar.addAction(save_icon, "保存", lambda checked: self.on_save_flow())
         # tool_bar.addSeparator()
         # tool_bar.addAction(run_icon, "运行", self.on_run_flow)
@@ -230,6 +232,18 @@ class UIBuilderMixin:
         self.save_config_btn.clicked.connect(lambda checked: self.on_save_flow())
 
         self.load_default_tasks()
+
+    def on_show_settings(self):
+        dialog = GlobalConfigDialog(self._global_config, self)
+        if dialog.exec() == QDialog.Accepted:
+            self._global_config.update(dialog.get_wait_config())
+
+    def get_wait_config(self):
+        return dict(self._global_config)
+
+    def load_wait_config(self, config: dict):
+        if config:
+            self._global_config.update(config)
 
     def apply_stylesheet(self):
         self.setStyleSheet(Styles.main_window_qss())

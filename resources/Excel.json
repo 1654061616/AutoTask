@@ -278,6 +278,17 @@
       "cp_manually_adjusted": false
     }
   ],
+  "variables": {},
+  "global_config": {
+    "wait_before": {
+      "type": "fixed",
+      "value": 0.2
+    },
+    "wait_after": {
+      "type": "fixed",
+      "value": 0.2
+    }
+  },
   "schedule": {
     "trigger_type": "interval",
     "params": {

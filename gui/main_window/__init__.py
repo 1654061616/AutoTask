@@ -58,6 +58,10 @@ class MainWindow(QMainWindow,
         
         self.flows = []
         self.current_flow = None
+        self._global_config = {
+            "wait_before": {"type": "fixed", "value": 0.5},
+            "wait_after": {"type": "fixed", "value": 0.5},
+        }
         
         self.engine = FlowEngine()
         

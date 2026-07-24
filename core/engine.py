@@ -151,7 +151,7 @@ class FlowEngine:
             self.logger.error("步骤执行器未加载")
             return None
 
-        wait_before = step.get("wait_before")
+        wait_before = step.get("wait_before") or self.flow.get("global_config", {}).get("wait_before")
         if wait_before:
             self._execute_wait(wait_before)
 
@@ -162,7 +162,7 @@ class FlowEngine:
             flow_nodes=self.flow.get("nodes", []),
         )
 
-        wait_after = step.get("wait_after")
+        wait_after = step.get("wait_after") or self.flow.get("global_config", {}).get("wait_after")
         if wait_after:
             self._execute_wait(wait_after)
 

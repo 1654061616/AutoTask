@@ -221,6 +221,7 @@ class TaskManagerMixin:
                 self.task_name_edit.setText(flow_name)
                 self.load_nodes_from_flow(flow_data)
                 self.load_schedule_settings(task)
+                self.load_wait_config(task.get("global_config", {}))
                 self.status_label.setText(f"打开任务: {flow_name}")
                 self.log_panel.append(f"打开任务: {flow_name}")
             except Exception as e:
@@ -277,6 +278,9 @@ class TaskManagerMixin:
                 if not edges:
                     edges = task.get("edges", [])
 
+                global_config = dict(task.get("global_config", {}))
+                global_config.update(self.get_wait_config())
+
                 save_data = {
                     "id": task.get("id", ""),
                     "name": self.task_name_edit.text() or task.get("name", ""),
@@ -285,7 +289,7 @@ class TaskManagerMixin:
                     "nodes": nodes,
                     "edges": edges,
                     "variables": task.get("variables", {}),
-                    "global_config": task.get("global_config", {}),
+                    "global_config": global_config,
                     "schedule": self.schedule_panel.get_config()
                 }
 
@@ -344,6 +348,8 @@ class TaskManagerMixin:
                     edges = task.get("edges", [])
 
                 save_name = os.path.splitext(os.path.basename(file_path))[0]
+                global_config = dict(task.get("global_config", {}))
+                global_config.update(self.get_wait_config())
                 save_data = {
                     "id": str(uuid.uuid4())[:8],
                     "name": save_name,
@@ -352,7 +358,7 @@ class TaskManagerMixin:
                     "nodes": nodes,
                     "edges": edges,
                     "variables": task.get("variables", {}),
-                    "global_config": task.get("global_config", {}),
+                    "global_config": global_config,
                     "schedule": self.schedule_panel.get_config() if hasattr(self, 'schedule_panel') else {}
                 }
 
@@ -410,6 +416,7 @@ class TaskManagerMixin:
 
             self.load_nodes_from_flow(task)
             self.load_schedule_settings(task)
+            self.load_wait_config(task.get("global_config", {}))
             self.log_panel.append(f"选择任务: {task['name']}")
 
     def _update_status_widget(self, item, status):

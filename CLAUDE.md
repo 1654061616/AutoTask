@@ -147,3 +147,4 @@ python setup.py sdist bdist_wheel
 - 提交代码前，不用对比resources/下的所有文件
 - 不允许自动提交代码
 - 注意PowerShell引号问题，用标准引号
+- Git提交时，注意不能使用&& 例如：git -C "E:\A_PycharmProjects\AutoTask" add -A && git -C "E:\A_PycharmProjects\AutoTask" commit -m "feat: 全局等待配置 — 工具栏设置弹窗，engine 回退到 global_config 默认值"
