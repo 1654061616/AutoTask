@@ -27,7 +27,7 @@ class SetVariablePanel(StepConfigPanel):
             "var_name": self.var_name_edit.text(),
             "var_value": self.var_value_edit.text(),
             "value_type": type_map[self.value_type_combo.currentIndex()],
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -37,7 +37,8 @@ class SetVariablePanel(StepConfigPanel):
         type_map = {"string": 0, "number": 1, "boolean": 2, "list": 3, "dict": 4}
         self.value_type_combo.setCurrentIndex(type_map.get(config.get("value_type", "string"), 0))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
 
 class GetVariablePanel(StepConfigPanel):
@@ -60,7 +61,7 @@ class GetVariablePanel(StepConfigPanel):
         return {
             "var_name": self.var_name_edit.text(),
             "output_mode": output_map[self.output_mode_combo.currentIndex()],
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -69,4 +70,5 @@ class GetVariablePanel(StepConfigPanel):
         output_map = {"log": 0, "popup": 1, "clipboard": 2}
         self.output_mode_combo.setCurrentIndex(output_map.get(config.get("output_mode", "log"), 0))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))

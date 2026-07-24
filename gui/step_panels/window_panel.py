@@ -57,7 +57,7 @@ class WindowFindPanel(StepConfigPanel):
             "wait_for_window": self.wait_check.isChecked(),
             "wait_timeout": self.wait_timeout_spin.value(),
             "not_found_action": ["continue", "skip", "error"][self.not_found_combo.currentIndex()],
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -73,7 +73,8 @@ class WindowFindPanel(StepConfigPanel):
         not_found_map = {"continue": 0, "skip": 1, "error": 2}
         self.not_found_combo.setCurrentIndex(not_found_map.get(config.get("not_found_action", "continue"), 0))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_wait_visibility()
 
@@ -158,7 +159,7 @@ class WindowActivatePanel(StepConfigPanel):
             "activate_type": ["title", "handle_var"][activate_type],
             "wait_for_activate": self.wait_check.isChecked(),
             "wait_timeout": self.wait_timeout_spin.value(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         if activate_type == 0:
@@ -179,7 +180,8 @@ class WindowActivatePanel(StepConfigPanel):
         self.wait_check.setChecked(config.get("wait_for_activate", False))
         self.wait_timeout_spin.setValue(config.get("wait_timeout", 30))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_visibility()
 
@@ -248,7 +250,7 @@ class WindowClosePanel(StepConfigPanel):
         config = {
             "close_type": ["title", "handle_var"][close_type],
             "force_close": self.force_close_check.isChecked(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         if close_type == 0:
@@ -267,7 +269,8 @@ class WindowClosePanel(StepConfigPanel):
         self.handle_var_edit.setText(config.get("handle_var", ""))
 
         self.force_close_check.setChecked(config.get("force_close", False))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_visibility()
 
@@ -368,7 +371,7 @@ class WindowPositionPanel(StepConfigPanel):
             "height": self.height_spin.value(),
             "maximize": self.maximize_check.isChecked(),
             "minimize": self.minimize_check.isChecked(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -379,6 +382,7 @@ class WindowPositionPanel(StepConfigPanel):
         self.height_spin.setValue(config.get("height", 600))
         self.maximize_check.setChecked(config.get("maximize", False))
         self.minimize_check.setChecked(config.get("minimize", False))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_size_visibility()

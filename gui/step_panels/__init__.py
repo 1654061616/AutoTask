@@ -1,5 +1,5 @@
 """
-步骤面板模块 — 步骤配置面板基类和坐标截图工具
+步骤面板模块 �?步骤配置面板基类和坐标截图工�?
 """
 import os
 import ctypes
@@ -55,7 +55,7 @@ class StepConfigPanel(QWidget):
         for widget in app.topLevelWidgets():
             if hasattr(widget, 'windowTitle'):
                 title = widget.windowTitle()
-                if "AutoFlow" in title or "节点编辑器" in title:
+                if "AutoFlow" in title or "节点编辑" in title:
                     windows_to_minimize.append(widget)
         
         for w in windows_to_minimize:
@@ -78,7 +78,7 @@ class StepConfigPanel(QWidget):
         for widget in app.topLevelWidgets():
             if hasattr(widget, 'windowTitle'):
                 title = widget.windowTitle()
-                if "AutoFlow" in title or "节点编辑器" in title:
+                if "AutoFlow" in title or "节点编辑" in title:
                     windows_to_minimize.append(widget)
         
         for w in windows_to_minimize:
@@ -101,7 +101,7 @@ class StepConfigPanel(QWidget):
         for widget in app.topLevelWidgets():
             if hasattr(widget, 'windowTitle'):
                 title = widget.windowTitle()
-                if "AutoFlow" in title or "节点编辑器" in title:
+                if "AutoFlow" in title or "节点编辑" in title:
                     windows_to_minimize.append(widget)
         
         for w in windows_to_minimize:
@@ -272,23 +272,113 @@ class StepConfigPanel(QWidget):
         self.main_layout.addLayout(file_layout)
         return line_edit
 
-    def add_delay_section(self, default_delay=0):
-        delay_group = QGroupBox("延时设置")
-        delay_group.setStyleSheet(Styles.delay_group())
-        delay_layout = QFormLayout(delay_group)
-        delay_layout.setSpacing(4)
+    def add_delay_section(self, default_before=None, default_after=None):
+        if default_before is None:
+            default_before = {"type": "fixed", "value": 0.5}
+        if default_after is None:
+            default_after = {"type": "fixed", "value": 0.5}
 
-        self.delay_spin = QSpinBox()
-        self.delay_spin.setRange(0, 3600)
-        self.delay_spin.setValue(default_delay)
-        self.delay_spin.setStyleSheet(Styles.delay_spin())
+        self.wait_before_widgets = self._make_wait_row("步骤前等待", default_before)
+        self.wait_after_widgets = self._make_wait_row("步骤后等待", default_after)
 
-        delay_label = QLabel("执行后延时(秒):")
-        delay_label.setStyleSheet(Styles.delay_label())
-        delay_layout.addRow(delay_label, self.delay_spin)
+    def _make_wait_row(self, label_text, default_config):
+        group = QGroupBox(label_text)
+        group.setStyleSheet(Styles.delay_group())
+        group.setFixedHeight(80)
+        layout = QHBoxLayout(group)
+        layout.setContentsMargins(6, 4, 6, 4)
+        layout.setSpacing(6)
 
-        self.main_layout.addWidget(delay_group)
-        return self.delay_spin
+        type_label = QLabel("类型:")
+        type_label.setStyleSheet(Styles.delay_label())
+        layout.addWidget(type_label)
+
+        type_combo = QComboBox()
+        type_combo.addItems(["固定", "随机"])
+        type_combo.setStyleSheet(Styles.small_combo_box())
+        layout.addWidget(type_combo)
+
+        fixed_spin = QDoubleSpinBox()
+        fixed_spin.setRange(0.0, 3600.0)
+        fixed_spin.setDecimals(1)
+        fixed_spin.setSingleStep(0.1)
+        fixed_spin.setSuffix(" 秒")
+        fixed_spin.setStyleSheet(Styles.delay_spin())
+        layout.addWidget(fixed_spin)
+
+        min_spin = QDoubleSpinBox()
+        min_spin.setRange(0.0, 3600.0)
+        min_spin.setDecimals(1)
+        min_spin.setSingleStep(0.1)
+        min_spin.setSuffix(" 秒")
+        min_spin.setStyleSheet(Styles.delay_spin())
+        min_spin.setVisible(False)
+        layout.addWidget(min_spin)
+
+        max_label = QLabel(" ~ ")
+        max_label.setStyleSheet(Styles.delay_label())
+        max_label.setVisible(False)
+        layout.addWidget(max_label)
+
+        max_spin = QDoubleSpinBox()
+        max_spin.setRange(0.0, 3600.0)
+        max_spin.setDecimals(1)
+        max_spin.setSingleStep(0.1)
+        max_spin.setSuffix(" 秒")
+        max_spin.setStyleSheet(Styles.delay_spin())
+        max_spin.setVisible(False)
+        layout.addWidget(max_spin)
+
+        layout.addStretch()
+
+        def on_type_changed(idx):
+            is_fixed = (idx == 0)
+            fixed_spin.setVisible(is_fixed)
+            min_spin.setVisible(not is_fixed)
+            max_label.setVisible(not is_fixed)
+            max_spin.setVisible(not is_fixed)
+
+        type_combo.currentIndexChanged.connect(on_type_changed)
+
+        if default_config.get("type") == "random":
+            type_combo.setCurrentIndex(1)
+            min_spin.setValue(default_config.get("min", 1.0))
+            max_spin.setValue(default_config.get("max", 3.0))
+        else:
+            type_combo.setCurrentIndex(0)
+            fixed_spin.setValue(default_config.get("value", 0.5))
+
+        self.main_layout.addWidget(group)
+        return (type_combo, fixed_spin, min_spin, max_spin)
+
+    def _get_wait_from_widgets(self, widgets):
+        type_combo, fixed_spin, min_spin, max_spin = widgets
+        if type_combo.currentIndex() == 0:
+            return {"type": "fixed", "value": round(fixed_spin.value(), 1)}
+        else:
+            return {"type": "random", "min": round(min_spin.value(), 1), "max": round(max_spin.value(), 1)}
+
+    def _set_wait_to_widgets(self, widgets, config):
+        type_combo, fixed_spin, min_spin, max_spin = widgets
+        if config.get("type") == "random":
+            type_combo.setCurrentIndex(1)
+            min_spin.setValue(config.get("min", 1.0))
+            max_spin.setValue(config.get("max", 3.0))
+        else:
+            type_combo.setCurrentIndex(0)
+            fixed_spin.setValue(config.get("value", 0.5))
+
+    def get_wait_before(self):
+        return self._get_wait_from_widgets(self.wait_before_widgets)
+
+    def get_wait_after(self):
+        return self._get_wait_from_widgets(self.wait_after_widgets)
+
+    def set_wait_before(self, config):
+        self._set_wait_to_widgets(self.wait_before_widgets, config)
+
+    def set_wait_after(self, config):
+        self._set_wait_to_widgets(self.wait_after_widgets, config)
 
     def add_separator(self):
         separator = QFrame()
@@ -352,7 +442,7 @@ class CoordOverlay(QDialog):
         painter.fillRect(self.rect(), QColor(0, 0, 0, 50))
         painter.setPen(QColor(255, 255, 255))
         painter.setFont(QFont("Microsoft YaHei", 13))
-        painter.drawText(self.rect(), Qt.AlignCenter, "点击鼠标左键确认拾取 | 按 ESC 取消")
+        painter.drawText(self.rect(), Qt.AlignCenter, "点击鼠标左键确认拾取 | �?ESC 取消")
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -429,7 +519,7 @@ class ScreenshotOverlay(QDialog):
 
         painter.setPen(QColor(255, 255, 255))
         painter.setFont(QFont("Microsoft YaHei", 13))
-        painter.drawText(self.rect(), Qt.AlignCenter, "拖拽选择区域 | 松开鼠标完成截图 | 按 ESC 取消")
+        painter.drawText(self.rect(), Qt.AlignCenter, "拖拽选择区域 | 松开鼠标完成截图 | �?ESC 取消")
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -559,7 +649,7 @@ class RegionOverlay(QDialog):
 
         painter.setPen(QColor(255, 255, 255))
         painter.setFont(QFont("Microsoft YaHei", 13))
-        painter.drawText(self.rect(), Qt.AlignCenter, "拖拽选择区域 | 松开鼠标完成 | 按 ESC 取消")
+        painter.drawText(self.rect(), Qt.AlignCenter, "拖拽选择区域 | 松开鼠标完成 | �?ESC 取消")
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

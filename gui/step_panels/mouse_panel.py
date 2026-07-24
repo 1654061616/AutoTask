@@ -147,7 +147,7 @@ class MouseClickPanel(StepConfigPanel):
             "position_type": position_types[position_type],
             "random_offset": self.random_offset_check.isChecked(),
             "random_range": self.random_range_spin.value(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         if position_type == 1:
@@ -170,7 +170,8 @@ class MouseClickPanel(StepConfigPanel):
 
         self.random_offset_check.setChecked(config.get("random_offset", False))
         self.random_range_spin.setValue(config.get("random_range", 5))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self.screen_x_spin.setValue(config.get("x", 0))
         self.screen_y_spin.setValue(config.get("y", 0))
@@ -350,7 +351,7 @@ class MouseMovePanel(StepConfigPanel):
             "random_waypoints": self.random_waypoints_spin.value(),
             "random_offset": self.random_offset_spin.value(),
             "random_time_dist": ["equal", "fast_to_slow", "slow_to_fast"][self.random_time_dist_combo.currentIndex()],
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         if position_type == 0:
@@ -378,7 +379,8 @@ class MouseMovePanel(StepConfigPanel):
         time_dist_map = {"equal": 0, "fast_to_slow": 1, "slow_to_fast": 2}
         self.random_time_dist_combo.setCurrentIndex(time_dist_map.get(config.get("random_time_dist", "equal"), 0))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self.screen_x_spin.setValue(config.get("x", 0))
         self.screen_y_spin.setValue(config.get("y", 0))
@@ -534,7 +536,7 @@ class MouseDragPanel(StepConfigPanel):
             "start_type": "screen",
             "end_type": ["screen", "relative"][end_type],
             "duration": self.drag_duration_spin.value(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         config["start_x"] = self.start_x_spin.value()
@@ -558,7 +560,8 @@ class MouseDragPanel(StepConfigPanel):
         self.end_radios[end_type].setChecked(True)
 
         self.drag_duration_spin.setValue(config.get("duration", 1.0))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self.start_x_spin.setValue(config.get("start_x", 0))
         self.start_y_spin.setValue(config.get("start_y", 0))
@@ -596,7 +599,7 @@ class MouseScrollPanel(StepConfigPanel):
             "count": self.scroll_count_spin.value(),
             "amount": self.scroll_amount_spin.value(),
             "interval": self.scroll_interval_spin.value(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -605,4 +608,5 @@ class MouseScrollPanel(StepConfigPanel):
         self.scroll_count_spin.setValue(config.get("count", 1))
         self.scroll_amount_spin.setValue(config.get("amount", 100))
         self.scroll_interval_spin.setValue(config.get("interval", 0.1))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))

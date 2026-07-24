@@ -107,7 +107,7 @@ class ExcelReadPanel(StepConfigPanel):
             "read_range": read_range_types[read_range_type],
             "output_variable": self.output_var_edit.text(),
             "var_format": ["string", "number", "list"][self.var_format_combo.currentIndex()],
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         if read_range_type == 0:
@@ -141,6 +141,7 @@ class ExcelReadPanel(StepConfigPanel):
         self.start_cell_edit.setText(config.get("start_cell", ""))
         self.end_cell_edit.setText(config.get("end_cell", ""))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_read_range_visibility()

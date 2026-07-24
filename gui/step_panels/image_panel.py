@@ -170,7 +170,7 @@ class ImageFindPanel(StepConfigPanel):
             "wait_find": self.wait_find_check.isChecked(),
             "wait_timeout": self.wait_timeout_spin.value(),
             "find_action": ["continue", "click", "move"][self.find_action_combo.currentIndex()],
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -192,7 +192,8 @@ class ImageFindPanel(StepConfigPanel):
                          "top_to_bottom": "从上到下", "bottom_to_top": "从下到上"}
         self.direction_combo.setCurrentText(direction_map.get(config.get("direction", "default"), "默认"))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
         
         region = config.get("region", {})
         if region:
@@ -403,7 +404,7 @@ class ImageClickPanel(StepConfigPanel):
             "random_range": self.random_range_spin.value(),
             "wait_find": self.wait_find_check.isChecked(),
             "wait_timeout": self.wait_timeout_spin.value(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -435,7 +436,8 @@ class ImageClickPanel(StepConfigPanel):
                          "top_to_bottom": "从上到下", "bottom_to_top": "从下到上"}
         self.direction_combo.setCurrentText(direction_map.get(config.get("direction", "default"), "默认"))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
         
         region = config.get("region", {})
         if region:
@@ -587,7 +589,7 @@ class ImageExistsPanel(StepConfigPanel):
             "exists_action": ["continue", "jump"][self.exists_action_combo.currentIndex()],
             "not_exists_action": ["continue", "jump"][self.not_exists_action_combo.currentIndex()],
             "jump_mark": self.jump_mark_edit.text(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -607,7 +609,8 @@ class ImageExistsPanel(StepConfigPanel):
         self.not_exists_action_combo.setCurrentIndex(not_exists_action_map.get(config.get("not_exists_action", "continue"), 0))
 
         self.jump_mark_edit.setText(config.get("jump_mark", ""))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         direction_map = {"default": "默认", "left_to_right": "从左到右", "right_to_left": "从右到左",
                          "top_to_bottom": "从上到下", "bottom_to_top": "从下到上"}

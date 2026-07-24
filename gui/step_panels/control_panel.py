@@ -142,7 +142,7 @@ class WaitPanel(StepConfigPanel):
         wait_type = ["fixed", "random", "condition"][self.wait_type_combo.currentIndex()]
         config = {
             "wait_type": wait_type,
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         if wait_type == "fixed":
@@ -181,7 +181,8 @@ class WaitPanel(StepConfigPanel):
         self.text_content_edit.setText(config.get("text", ""))
         self.window_title_edit.setText(config.get("window_title", ""))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_wait_visibility()
         self._update_condition_param_visibility()
@@ -326,7 +327,7 @@ class IfElsePanel(StepConfigPanel):
             "condition_type": condition_type,
             "true_action": true_action,
             "false_action": false_action,
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         if condition_type == "value_compare":
@@ -372,7 +373,8 @@ class IfElsePanel(StepConfigPanel):
         self.true_goto_edit.setText(config.get("true_goto", ""))
         self.false_goto_edit.setText(config.get("false_goto", ""))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_condition_visibility()
         self._update_goto_visibility()
@@ -474,7 +476,7 @@ class LoopPanel(StepConfigPanel):
         config = {
             "loop_type": loop_type,
             "loop_interval": self.loop_interval_spin.value(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         if loop_type == "count":
@@ -511,7 +513,8 @@ class LoopPanel(StepConfigPanel):
         self.element_var_edit.setText(config.get("element_var", ""))
 
         self.loop_interval_spin.setValue(config.get("loop_interval", 0.5))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_loop_visibility()
 
@@ -574,7 +577,7 @@ class LogPanel(StepConfigPanel):
             "log_level": log_level,
             "content": self.log_content_edit.toPlainText(),
             "output_to_file": self.output_to_file_check.isChecked(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
         if self.output_to_file_check.isChecked():
@@ -590,7 +593,8 @@ class LogPanel(StepConfigPanel):
         self.output_to_file_check.setChecked(config.get("output_to_file", False))
         self.file_path_edit.setText(config.get("file_path", ""))
 
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_file_visibility()
 
@@ -635,9 +639,10 @@ class GotoPanel(StepConfigPanel):
     def get_config(self):
         return {
             "target_label": self.target_label_edit.text(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
         self.target_label_edit.setText(config.get("target_label", ""))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))

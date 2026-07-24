@@ -269,7 +269,7 @@ class KeyboardTypePanel(StepConfigPanel):
             "random_min_interval": self.random_min_spin.value(),
             "random_max_interval": self.random_max_spin.value(),
             "human_input": self.human_input_check.isChecked(),
-            "delay": self.delay_spin.value(),
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after(),
         }
 
         if config["data_source"] == "manual":
@@ -323,7 +323,8 @@ class KeyboardTypePanel(StepConfigPanel):
         self.random_min_spin.setValue(config.get("random_min_interval", 0.02))
         self.random_max_spin.setValue(config.get("random_max_interval", 0.15))
         self.human_input_check.setChecked(config.get("human_input", False))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_random_interval_visibility()
         self._update_data_source_visibility()
@@ -378,7 +379,7 @@ class KeyboardPressPanel(StepConfigPanel):
             "hold_duration": self.hold_duration_spin.value(),
             "repeat_count": self.repeat_count_spin.value(),
             "repeat_interval": self.repeat_interval_spin.value(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -387,7 +388,8 @@ class KeyboardPressPanel(StepConfigPanel):
         self.hold_duration_spin.setValue(config.get("hold_duration", 0.1))
         self.repeat_count_spin.setValue(config.get("repeat_count", 1))
         self.repeat_interval_spin.setValue(config.get("repeat_interval", 0.5))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
 
 class KeyboardHotkeyPanel(StepConfigPanel):
@@ -481,7 +483,7 @@ class KeyboardHotkeyPanel(StepConfigPanel):
             "modifiers": modifiers,
             "main_key": self.main_key_combo.currentText(),
             "hold_duration": self.hold_duration_spin.value(),
-            "delay": self.delay_spin.value()
+            "wait_before": self.get_wait_before(), "wait_after": self.get_wait_after()
         }
 
     def set_config(self, config):
@@ -492,6 +494,7 @@ class KeyboardHotkeyPanel(StepConfigPanel):
         self.main_key_combo.setCurrentText(main_key)
 
         self.hold_duration_spin.setValue(config.get("hold_duration", 0.1))
-        self.delay_spin.setValue(config.get("delay", 0))
+        self.set_wait_before(config.get("wait_before", {"type": "fixed", "value": 0.5}))
+        self.set_wait_after(config.get("wait_after", {"type": "fixed", "value": 0.5}))
 
         self._update_preview()
